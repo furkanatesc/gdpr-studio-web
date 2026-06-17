@@ -4,29 +4,45 @@ import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-/** Anasayfa bölümlerini (hero hariç) kaydırınca yumuşakça belirtir. */
+/**
+ * WOW.js benzeri scroll-reveal: [data-reveal] öğeleri görünüme girince
+ * fadeInUp + stagger ile belirir. ScrollTrigger.batch ile gruplar halinde.
+ */
 export function ScrollReveals() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     gsap.registerPlugin(ScrollTrigger);
+    const els = gsap.utils.toArray<HTMLElement>("[data-reveal]");
+    if (!els.length) return;
 
-    const sections = Array.from(
-      document.querySelectorAll<HTMLElement>("main section"),
-    ).slice(1); // ilk bölüm (hero) hariç
+    // Başlangıç durumu: gizli + aşağıda
+    gsap.set(els, { opacity: 0, y: 28 });
 
-    const ctx = gsap.context(() => {
-      sections.forEach((s) => {
-        gsap.from(s, {
-          opacity: 0,
-          y: 30,
-          duration: 0.7,
+    const triggers = ScrollTrigger.batch(els, {
+      start: "top 88%",
+      onEnter: (batch) =>
+        gsap.to(batch, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
           ease: "power2.out",
-          scrollTrigger: { trigger: s, start: "top 84%", once: true },
-        });
-      });
+          stagger: 0.1,
+          overwrite: true,
+        }),
     });
 
-    return () => ctx.revert();
+    // Layout/font yüklemesi sonrası konumları yeniden hesapla
+    const refresh = () => ScrollTrigger.refresh();
+    const t = window.setTimeout(refresh, 200);
+    window.addEventListener("load", refresh);
+
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("load", refresh);
+      triggers.forEach((tr) => tr.kill());
+      gsap.set(els, { clearProps: "all" });
+    };
   }, []);
 
   return null;
