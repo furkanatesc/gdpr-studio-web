@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DOC_CATALOG } from "@/lib/catalog";
+import { BookIntro } from "@/components/marketing/book-intro";
 
 const STEPS = [
   {
@@ -49,6 +50,8 @@ const FEATURES = [
 export default function LandingPage() {
   return (
     <>
+      <BookIntro />
+
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div
@@ -104,7 +107,7 @@ export default function LandingPage() {
       {/* Özellikler */}
       <section className="border-t border-border">
         <div className="mx-auto max-w-5xl px-6 py-16">
-          <p className="eyebrow mb-3 text-center">Neden GDPR.Studio</p>
+          <p className="eyebrow mb-3 text-center">Neden KVKK Yönetim</p>
           <h2 className="text-center font-display text-3xl text-ink">
             Hızdan ödün vermeden, hukuki güvenle
           </h2>

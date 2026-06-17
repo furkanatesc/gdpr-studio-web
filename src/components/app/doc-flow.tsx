@@ -117,9 +117,9 @@ export function DocFlow({ type }: { type: DocType }) {
             ))}
 
             {card.fields && (
-              <div className={card.groups ? "mt-5 grid grid-cols-2 gap-4" : "grid grid-cols-2 gap-4"}>
+              <div className={card.groups ? "mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2" : "grid grid-cols-1 gap-4 sm:grid-cols-2"}>
                 {card.fields.map((fd) => (
-                  <div key={fd.key} className={fd.full ? "col-span-2" : ""}>
+                  <div key={fd.key} className={fd.full ? "sm:col-span-2" : ""}>
                     <Field label={fd.label} required={fd.required}>
                       {renderField(fd)}
                     </Field>

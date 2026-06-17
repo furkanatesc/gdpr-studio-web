@@ -10,15 +10,18 @@ function NavItem({
   dot,
   label,
   active,
+  onNavigate,
 }: {
   href: string;
   dot: string;
   label: string;
   active: boolean;
+  onNavigate?: () => void;
 }) {
   return (
     <Link
       href={href}
+      onClick={onNavigate}
       className={cn(
         "mx-2 flex items-center gap-3 rounded-[var(--radius)] border border-transparent px-3 py-2 text-[13px] transition-colors",
         active
@@ -47,14 +50,14 @@ function SectionLabel({ children }: { children: string }) {
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const path = usePathname();
 
   return (
     <aside className="flex h-screen w-[264px] flex-shrink-0 flex-col border-r border-border bg-surface">
-      <Link href="/" className="block border-b border-border px-5 py-6">
+      <Link href="/" onClick={onNavigate} className="block border-b border-border px-5 py-6">
         <div className="font-display text-[19px] leading-tight text-ink">
-          GDPR<span className="text-accent-strong">.Studio</span>
+          KVKK <span className="text-accent-strong">Yönetim</span>
         </div>
         <div className="mt-0.5 text-[11px] tracking-wide text-ink-subtle">
           KVKK & GDPR Doküman Asistanı
@@ -63,7 +66,7 @@ export function Sidebar() {
 
       <nav className="flex-1 overflow-y-auto pb-4">
         <SectionLabel>Sayfa</SectionLabel>
-        <NavItem href="/app" dot="⌂" label="Başlangıç" active={path === "/app"} />
+        <NavItem href="/app" dot="⌂" label="Başlangıç" active={path === "/app"} onNavigate={onNavigate} />
 
         <SectionLabel>Doküman Üret</SectionLabel>
         {DOC_CATALOG.map((d) => (
@@ -73,12 +76,13 @@ export function Sidebar() {
             dot={d.no}
             label={d.title}
             active={path === `/app/${d.type}`}
+            onNavigate={onNavigate}
           />
         ))}
 
         <SectionLabel>Araçlar</SectionLabel>
-        <NavItem href="/app/envanter" dot="❖" label="Envanter Yönetimi" active={path === "/app/envanter"} />
-        <NavItem href="/app/kontrol" dot="✓" label="Uyum Kontrol Listesi" active={path === "/app/kontrol"} />
+        <NavItem href="/app/envanter" dot="❖" label="Envanter Yönetimi" active={path === "/app/envanter"} onNavigate={onNavigate} />
+        <NavItem href="/app/kontrol" dot="✓" label="Uyum Kontrol Listesi" active={path === "/app/kontrol"} onNavigate={onNavigate} />
       </nav>
 
       <div className="border-t border-border px-4 py-3 text-[11px] text-ink-subtle">

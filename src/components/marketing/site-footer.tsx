@@ -34,7 +34,7 @@ export function SiteFooter() {
         <div className="grid gap-10 md:grid-cols-4">
           <div>
             <div className="font-display text-[18px] text-ink">
-              GDPR<span className="text-accent">.Studio</span>
+              KVKK <span className="text-accent">Yönetim</span>
             </div>
             <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-ink-muted">
               KVKK & GDPR uyum dokümanlarını gerçek envantere dayandırarak üreten platform.
@@ -60,7 +60,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-12 border-t border-border pt-6 text-[12px] leading-relaxed text-ink-subtle">
-          © 2026 GDPR.Studio · Üretilen her doküman avukat incelemesine tabi hukuki taslaktır;
+          © 2026 KVKK Yönetim · Üretilen her doküman avukat incelemesine tabi hukuki taslaktır;
           hukuki tavsiye niteliği taşımaz.
         </div>
       </div>

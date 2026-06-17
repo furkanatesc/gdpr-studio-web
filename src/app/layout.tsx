@@ -21,7 +21,7 @@ const jbMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GDPR.Studio — KVKK & GDPR Doküman Platformu",
+  title: "KVKK Yönetim — KVKK & GDPR Doküman Platformu",
   description:
     "KVKK ve GDPR uyum dokümanlarını gerçek veri envanterine dayandırarak, hukuki olarak doğru biçimde üreten platform.",
 };

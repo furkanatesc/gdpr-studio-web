@@ -9,7 +9,7 @@ export default function LoginPage() {
       {/* Sol — form */}
       <div className="flex w-full flex-col justify-between px-10 py-12 md:w-[460px] md:px-14">
         <div className="font-display text-[19px]">
-          GDPR<span className="text-accent">.Studio</span>
+          KVKK <span className="text-accent">Yönetim</span>
         </div>
 
         <div className="max-w-sm">
@@ -56,7 +56,7 @@ export default function LoginPage() {
         />
         <div className="relative flex h-full flex-col items-center justify-center px-12 text-center">
           <div className="font-display text-[120px] leading-none tracking-tight text-ink/90">
-            G<span className="text-accent">.</span>S
+            K<span className="text-accent">.</span>Y
           </div>
           <p className="mt-6 max-w-md font-display text-2xl leading-snug text-ink">
             Hukuki doğruluk,

@@ -13,7 +13,7 @@ export default function IndirPage() {
           Veriniz cihazınızda kalsın
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-ink-muted">
-          GDPR.Studio masaüstü uygulaması, kendi Anthropic API anahtarınızla (BYOK) çalışır.
+          KVKK Yönetim masaüstü uygulaması, kendi Anthropic API anahtarınızla (BYOK) çalışır.
           Tüm doküman üretimi yerelde yapılır; kişisel veriler bizim sunucularımıza hiç gönderilmez.
         </p>
       </div>

@@ -4,7 +4,7 @@ const SECTIONS = [
   {
     eyebrow: "Grounding",
     title: "Uydurmayan yapay zekâ",
-    body: "Geleneksel LLM araçları hukuki sebep ve süreleri uydurur. GDPR.Studio, çıktının her satırını kurumunuzun gerçek veri envanterine bağlar. Envanterde bir değer yoksa model onu icat etmez — alanı 'avukat tarafından doldurulacak' olarak bırakır.",
+    body: "Geleneksel LLM araçları hukuki sebep ve süreleri uydurur. KVKK Yönetim, çıktının her satırını kurumunuzun gerçek veri envanterine bağlar. Envanterde bir değer yoksa model onu icat etmez — alanı 'avukat tarafından doldurulacak' olarak bırakır.",
   },
   {
     eyebrow: "Atıf",

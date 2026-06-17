@@ -13,7 +13,7 @@ export function SiteNav() {
     <header className="sticky top-0 z-50 border-b border-border bg-bg/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="font-display text-[18px] text-ink">
-          GDPR<span className="text-accent">.Studio</span>
+          KVKK <span className="text-accent">Yönetim</span>
         </Link>
 
         <nav className="hidden items-center gap-7 md:flex">
