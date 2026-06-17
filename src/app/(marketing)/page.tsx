@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DOC_CATALOG } from "@/lib/catalog";
-import { BookIntro } from "@/components/marketing/book-intro";
+import { Book3DIntro } from "@/components/marketing/book-3d-intro";
+import { ScrollReveals } from "@/components/marketing/scroll-reveals";
 
 const STEPS = [
   {
@@ -50,7 +51,8 @@ const FEATURES = [
 export default function LandingPage() {
   return (
     <>
-      <BookIntro />
+      <Book3DIntro />
+      <ScrollReveals />
 
       {/* Hero */}
       <section className="relative overflow-hidden">
