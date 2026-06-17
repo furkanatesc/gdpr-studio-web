@@ -1,26 +1,191 @@
 @import "tailwindcss";
 
+/*
+  GDPR.Studio — iki katmanlı sıcak saman sarısı tema.
+  Varsayılan :root  = WORKSPACE (sıcak-açık saman kağıt, belge okunabilirliği)
+  .theme-brand      = MARKA / AUTH (sıcak-koyu espresso + saman-altın, forthetimes draması)
+  Semantik değişkenler katmanlar arası değiştirilir; @theme bunları utility'lere bağlar.
+*/
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Workspace — sıcak-açık */
+  --bg: #f4ecd6;
+  --surface: #fffdf6;
+  --surface-2: #fbf4e2;
+  --border: #e4d8b8;
+  --border-strong: #d6c79b;
+  --ink: #211c12;
+  --ink-muted: #6b6452;
+  --ink-subtle: #9a917b;
+  --accent: #b5912f;
+  --accent-strong: #8a6e1e;
+  --accent-soft: #efe4c2;
+  --accent-contrast: #fffdf6;
+  --danger: #8b2a2a;
+  --danger-soft: #f3e2d8;
+  --ok: #3f6212;
+  --ok-soft: #e8eed6;
+
+  --radius: 0.625rem;
+  --shadow-card: 0 1px 2px rgba(33, 28, 18, 0.04), 0 8px 24px rgba(33, 28, 18, 0.06);
+}
+
+.theme-brand {
+  /* Marka / Auth — sıcak-koyu */
+  --bg: #17130d;
+  --surface: #211a11;
+  --surface-2: #2a2117;
+  --border: rgba(242, 233, 210, 0.1);
+  --border-strong: rgba(242, 233, 210, 0.18);
+  --ink: #f2e9d2;
+  --ink-muted: #a99b7c;
+  --ink-subtle: #756a52;
+  --accent: #d9b85c;
+  --accent-strong: #e8c87a;
+  --accent-soft: rgba(217, 184, 92, 0.12);
+  --accent-contrast: #17130d;
+  --danger: #d98a6a;
+  --danger-soft: rgba(217, 138, 106, 0.12);
+  --ok: #b7c98a;
+  --ok-soft: rgba(183, 201, 138, 0.12);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+
+  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, monospace;
+
+  --radius-pill: 999px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--border);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Üst etiket (eyebrow) — uppercase tracked */
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--ink-subtle);
+}
+
+.hairline-dotted {
+  border-top: 1px dotted var(--border-strong);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+/* Üretilen doküman (markdown render) stilleri — workspace teması */
+.doc-prose {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.doc-prose h1 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+.doc-prose h2 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 22px 0 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--border);
+}
+.doc-prose h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-strong);
+  margin: 16px 0 6px;
+}
+.doc-prose p {
+  margin-bottom: 11px;
+}
+.doc-prose strong {
+  font-weight: 600;
+}
+.doc-prose em {
+  font-style: italic;
+}
+.doc-prose code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--surface-2);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.doc-prose ul,
+.doc-prose ol {
+  margin: 8px 0 11px 22px;
+}
+.doc-prose li {
+  margin-bottom: 4px;
+}
+.doc-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 12.5px;
+}
+.doc-prose th {
+  background: var(--surface-2);
+  text-align: left;
+  font-weight: 600;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+}
+.doc-prose td {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  vertical-align: top;
+}
+.doc-prose hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 18px 0;
+}
+.doc-prose blockquote {
+  margin: 12px 0;
+  padding: 8px 14px;
+  border-left: 3px solid var(--accent);
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
