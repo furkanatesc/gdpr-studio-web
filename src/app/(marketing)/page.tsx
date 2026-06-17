@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { DOC_CATALOG } from "@/lib/catalog";
-import { ScrollReveals } from "@/components/marketing/scroll-reveals";
 
 const STEPS = [
   {
@@ -32,8 +31,6 @@ const FEATURES = [
 export default function LandingPage() {
   return (
     <>
-      <ScrollReveals />
-
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div

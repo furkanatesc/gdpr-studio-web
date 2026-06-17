@@ -63,11 +63,11 @@ export function renderMarkdown(text: string): string {
         i++;
       }
       html +=
-        "<table><thead><tr>" +
+        '<div class="table-wrap"><table><thead><tr>' +
         headers.map((c) => `<th>${inline(c)}</th>`).join("") +
         "</tr></thead><tbody>" +
         body +
-        "</tbody></table>";
+        "</tbody></table></div>";
       continue;
     }
 

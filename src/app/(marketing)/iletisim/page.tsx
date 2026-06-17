@@ -7,7 +7,7 @@ export default function IletisimPage() {
   return (
     <div className="mx-auto max-w-5xl px-6 py-20">
       <div className="grid gap-14 md:grid-cols-2">
-        <div>
+        <div data-reveal>
           <p className="eyebrow mb-3">İletişim</p>
           <h1 className="font-display text-4xl leading-tight text-ink">
             Sorularınız mı var?
@@ -29,7 +29,7 @@ export default function IletisimPage() {
           </div>
         </div>
 
-        <form className="space-y-4">
+        <form data-reveal className="space-y-4">
           <Field label="Ad Soyad">
             <Input placeholder="Adınız" />
           </Field>

@@ -37,7 +37,7 @@ export default function UrunPage() {
 
       <div className="mt-16 space-y-14">
         {SECTIONS.map((s) => (
-          <div key={s.title} className="border-t border-border pt-10">
+          <div key={s.title} data-reveal className="border-t border-border pt-10">
             <p className="eyebrow mb-3">{s.eyebrow}</p>
             <h2 className="font-display text-2xl text-ink">{s.title}</h2>
             <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-ink-muted">{s.body}</p>

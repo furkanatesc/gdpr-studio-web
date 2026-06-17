@@ -64,6 +64,7 @@ export default function FiyatlandirmaPage() {
         {TIERS.map((t) => (
           <div
             key={t.name}
+            data-reveal
             className={cn(
               "flex flex-col rounded-[calc(var(--radius)+6px)] border bg-surface p-7",
               t.popular ? "border-accent" : "border-border",
@@ -100,7 +101,7 @@ export default function FiyatlandirmaPage() {
         ))}
       </div>
 
-      <div className="mt-10 rounded-[var(--radius)] border border-border bg-surface px-6 py-5 text-center text-[13.5px] text-ink-muted">
+      <div data-reveal className="mt-10 rounded-[var(--radius)] border border-border bg-surface px-6 py-5 text-center text-[13.5px] text-ink-muted">
         <strong className="text-ink">Masaüstü (BYOK):</strong> Electron uygulaması ücretsizdir;
         yalnızca kendi Anthropic API kullanımınızı ödersiniz. Veriniz cihazınızdan çıkmaz.{" "}
         <Link href="/indir" className="text-accent hover:text-accent-strong">

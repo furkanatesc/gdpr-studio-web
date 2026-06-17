@@ -2,8 +2,7 @@ import Link from "next/link";
 
 const PLATFORMS = [
   { os: "Windows", icon: "🪟", file: ".exe yükleyici", note: "Windows 10/11 (64-bit)" },
-  { os: "macOS", icon: "", file: ".dmg paketi", note: "macOS 12+ (Apple Silicon & Intel)" },
-  { os: "Linux", icon: "🐧", file: ".AppImage", note: "Ubuntu 22.04+ / çoğu dağıtım" },
+  { os: "macOS", icon: "🍎", file: ".dmg paketi", note: "macOS 12+ (Apple Silicon & Intel)" },
 ];
 
 export default function IndirPage() {
@@ -25,9 +24,9 @@ export default function IndirPage() {
         🔒 İndirme bağlantıları yalnızca giriş yapmış Pro / Kurumsal üyelere açılır.
       </div>
 
-      <div className="mt-10 grid gap-4 md:grid-cols-3">
+      <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
         {PLATFORMS.map((p) => (
-          <div key={p.os} className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-7 text-center">
+          <div key={p.os} data-reveal className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-7 text-center">
             <div className="text-3xl">{p.icon}</div>
             <h2 className="mt-3 font-display text-xl text-ink">{p.os}</h2>
             <p className="mt-1 text-[13px] text-ink-subtle">{p.file}</p>
@@ -55,7 +54,7 @@ export default function IndirPage() {
       </div>
 
       <div className="mt-16 grid gap-6 md:grid-cols-2">
-        <div className="rounded-[var(--radius)] border border-border bg-surface p-6">
+        <div data-reveal className="rounded-[var(--radius)] border border-border bg-surface p-6">
           <h3 className="font-display text-lg text-ink">Sistem gereksinimleri</h3>
           <ul className="mt-3 space-y-1.5 text-[13.5px] text-ink-muted">
             <li>· Aktif Pro / Kurumsal üyelik (lisans masaüstünde doğrulanır)</li>
@@ -64,7 +63,7 @@ export default function IndirPage() {
             <li>· İnternet bağlantısı (model çağrıları ve lisans kontrolü için)</li>
           </ul>
         </div>
-        <div className="rounded-[var(--radius)] border border-border bg-surface p-6">
+        <div data-reveal className="rounded-[var(--radius)] border border-border bg-surface p-6">
           <h3 className="font-display text-lg text-ink">Web mi, masaüstü mü?</h3>
           <p className="mt-3 text-[13.5px] leading-relaxed text-ink-muted">
             <strong className="text-ink">Web:</strong> kurulum yok, ekipçe erişim, faturalama bizde.

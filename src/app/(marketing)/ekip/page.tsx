@@ -1,6 +1,6 @@
 const TEAM = [
-  { name: "[Ad Soyad]", role: "Kurucu · Hukuk", initials: "AS" },
   { name: "[Ad Soyad]", role: "Kurucu · Mühendislik", initials: "AS" },
+  { name: "[Ad Soyad]", role: "Hukukçu · Kurucu", initials: "AS" },
   { name: "[Ad Soyad]", role: "Veri Koruma Danışmanı", initials: "AS" },
 ];
 
@@ -21,6 +21,7 @@ export default function EkipPage() {
         {TEAM.map((m, i) => (
           <div
             key={i}
+            data-reveal
             className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-7 text-center"
           >
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-soft font-display text-xl text-accent">

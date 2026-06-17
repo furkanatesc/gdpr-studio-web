@@ -158,10 +158,14 @@ body {
 .doc-prose li {
   margin-bottom: 4px;
 }
+.doc-prose .table-wrap {
+  margin: 14px 0;
+  overflow-x: auto;
+}
 .doc-prose table {
   width: 100%;
+  min-width: 460px;
   border-collapse: collapse;
-  margin: 14px 0;
   font-size: 12.5px;
 }
 .doc-prose th {
