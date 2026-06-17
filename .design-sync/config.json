@@ -1,0 +1,18 @@
+{
+  "pkg": "web",
+  "globalName": "KvkkUI",
+  "projectId": "29609dce-0efb-4ddb-95cd-3121dd5087f8",
+  "shape": "package",
+  "tsconfig": "tsconfig.json",
+  "cssEntry": ".design-sync/components.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "componentSrcMap": {
+    "Button": "src/components/ui/button.tsx",
+    "Input": "src/components/ui/input.tsx",
+    "Textarea": "src/components/ui/textarea.tsx",
+    "Select": "src/components/ui/select.tsx",
+    "Card": "src/components/ui/card.tsx",
+    "Tag": "src/components/ui/tag.tsx",
+    "Field": "src/components/ui/field.tsx"
+  }
+}
