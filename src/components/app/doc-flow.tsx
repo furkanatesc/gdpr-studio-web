@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { Tag } from "@/components/ui/tag";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { DocumentOutput } from "./document-output";
 import { docByType } from "@/lib/catalog";
 import { SCHEMAS, type FieldDef } from "@/lib/schemas";
@@ -99,7 +100,7 @@ export function DocFlow({ type }: { type: DocType }) {
 
       <div className="mt-8 space-y-5">
         {schema.cards.map((card, ci) => (
-          <Card key={ci} title={card.title} icon={<span>{card.icon}</span>}>
+          <Card key={ci} title={card.title} icon={<Icon name={card.icon} className="text-[18px]" />}>
             {card.groups?.map((g) => (
               <div key={g.key} className="mb-5 last:mb-0">
                 <p className="mb-2.5 text-[13px] font-medium text-ink-muted">{g.label}</p>
@@ -132,7 +133,14 @@ export function DocFlow({ type }: { type: DocType }) {
 
         <div className="flex items-center gap-3">
           <Button onClick={onGenerate} disabled={loading}>
-            {loading ? "Hazırlanıyor…" : `⚡ ${schema.cta}`}
+            {loading ? (
+              "Hazırlanıyor…"
+            ) : (
+              <>
+                <Icon name="bolt" className="text-[16px]" />
+                {schema.cta}
+              </>
+            )}
           </Button>
           <Button variant="secondary" onClick={onClear} disabled={loading}>
             Temizle

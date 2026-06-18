@@ -1,7 +1,7 @@
 import type { GenerateRequest, GenerateResponse, GroundingRecord } from "./types";
 
 const DISCLAIMER =
-  "⚠️ Bu çıktı avukat incelemesine tabi hukuki taslaktır. Hukuki tavsiye niteliği taşımaz. Her resmi belge, konuya hâkim bir hukukçu tarafından incelenmeli ve onaylanmalıdır.";
+  "Bu çıktı avukat incelemesine tabi hukuki taslaktır. Hukuki tavsiye niteliği taşımaz. Her resmi belge, konuya hâkim bir hukukçu tarafından incelenmeli ve onaylanmalıdır.";
 
 // Demo grounding — gerçek backend categories.json / Postgres'ten gelecek.
 const GROUNDING_BY_TAG: Record<string, GroundingRecord> = {

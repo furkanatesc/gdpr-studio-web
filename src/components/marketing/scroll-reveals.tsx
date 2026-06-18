@@ -23,17 +23,30 @@ export function ScrollReveals() {
       if (!els.length) return;
 
       gsap.set(els, { opacity: 0, y: 28 });
+      const reveal = (batch: Element[]) =>
+        gsap.to(batch, {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.out",
+          stagger: 0.08,
+          overwrite: true,
+        });
+      const hide = (batch: Element[]) =>
+        gsap.to(batch, {
+          opacity: 0,
+          y: 28,
+          duration: 0.35,
+          ease: "power2.in",
+          overwrite: true,
+        });
+
       ScrollTrigger.batch(els, {
         start: "top 88%",
-        onEnter: (batch) =>
-          gsap.to(batch, {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out",
-            stagger: 0.1,
-            overwrite: true,
-          }),
+        // Aşağı inerken görünür ol; yukarı çıkıp tekrar inince yeniden oynasın.
+        onEnter: reveal,
+        onEnterBack: reveal,
+        onLeaveBack: hide,
       });
       ScrollTrigger.refresh();
     });

@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button-link";
 import { DocFlow } from "@/components/app/doc-flow";
 import { DOC_CATALOG } from "@/lib/catalog";
 import type { DocType } from "@/lib/types";
@@ -27,12 +27,9 @@ export default async function DocPage({
       </p>
       <div className="mt-8 rounded-[calc(var(--radius)+4px)] border border-dashed border-border-strong bg-surface-2 px-6 py-12 text-center">
         <p className="font-display text-lg text-ink">Doküman üretmek ister misiniz?</p>
-        <Link
-          href="/app/aydinlatma"
-          className="mt-5 inline-flex rounded-pill bg-accent px-5 py-2.5 text-sm font-medium text-accent-contrast hover:bg-accent-strong"
-        >
-          Aydınlatma Metni'ne git →
-        </Link>
+        <ButtonLink href="/app/aydinlatma" size="sm" className="mt-5">
+          Aydınlatma Metni&apos;ne git →
+        </ButtonLink>
       </div>
     </div>
   );

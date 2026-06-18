@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
 import { renderMarkdown } from "@/lib/markdown";
 import type { GenerateResponse } from "@/lib/types";
 
@@ -19,10 +20,11 @@ export function DocumentOutput({ result }: { result: GenerateResponse }) {
     <div className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface shadow-[var(--shadow-card)]">
       <header className="flex items-center justify-between border-b border-border px-5 py-3.5">
         <div className="flex items-center gap-2 text-[13px] font-medium text-ink">
-          <span className="text-[color:var(--ok)]">✅</span> Doküman hazır
+          <Icon name="check-circle" className="text-[16px] text-[color:var(--ok)]" /> Doküman hazır
         </div>
         <Button variant="secondary" size="sm" onClick={copy}>
-          {copied ? "✓ Kopyalandı" : "📋 Kopyala"}
+          <Icon name={copied ? "check" : "copy"} className="text-[15px]" />
+          {copied ? "Kopyalandı" : "Kopyala"}
         </Button>
       </header>
 

@@ -1,22 +1,31 @@
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
-type Variant = "primary" | "secondary" | "ghost";
-type Size = "md" | "sm";
+export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonSize = "md" | "sm";
 
 const base =
   "inline-flex items-center justify-center gap-2 rounded-pill font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-50 disabled:pointer-events-none";
 
-const variants: Record<Variant, string> = {
+const variants: Record<ButtonVariant, string> = {
   primary: "bg-accent text-accent-contrast hover:bg-accent-strong",
   secondary: "border border-border-strong text-ink hover:bg-surface-2",
   ghost: "text-ink-muted hover:text-ink hover:bg-surface-2",
 };
 
-const sizes: Record<Size, string> = {
+const sizes: Record<ButtonSize, string> = {
   md: "h-11 px-5 text-sm",
   sm: "h-9 px-4 text-[13px]",
 };
+
+/** Paylaşılan buton sınıfları — hem <button> (Button) hem <Link> (ButtonLink) kullanır. */
+export function buttonClasses(
+  variant: ButtonVariant = "primary",
+  size: ButtonSize = "md",
+  className?: string,
+) {
+  return cn(base, variants[variant], sizes[size], className);
+}
 
 export function Button({
   variant = "primary",
@@ -24,10 +33,8 @@ export function Button({
   className,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: Variant;
-  size?: Size;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
 }) {
-  return (
-    <button className={cn(base, variants[variant], sizes[size], className)} {...props} />
-  );
+  return <button className={buttonClasses(variant, size, className)} {...props} />;
 }

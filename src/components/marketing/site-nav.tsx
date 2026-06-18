@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button-link";
 
 const LINKS = [
   { href: "/urun", label: "Ürün" },
@@ -15,7 +16,7 @@ export function SiteNav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-bg/80 backdrop-blur-md">
+    <header className="pt-safe px-safe sticky top-0 z-50 border-b border-border bg-bg/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link href="/" onClick={() => setOpen(false)} className="font-display text-[18px] text-ink">
           KVKK <span className="text-accent">Yönetim</span>
@@ -35,9 +36,9 @@ export function SiteNav() {
           <Link href="/login" className="text-[13px] text-ink-muted transition-colors hover:text-ink">
             Giriş
           </Link>
-          <Link href="/login" className="rounded-pill bg-accent px-4 py-2 text-[13px] font-medium text-accent-contrast transition-colors hover:bg-accent-strong">
+          <ButtonLink href="/login" size="sm">
             Ücretsiz Dene
-          </Link>
+          </ButtonLink>
         </div>
 
         {/* Mobil hamburger */}
@@ -68,20 +69,12 @@ export function SiteNav() {
               </Link>
             ))}
             <div className="mt-3 flex flex-col gap-2.5">
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="rounded-pill border border-border-strong px-4 py-2.5 text-center text-[14px] font-medium text-ink"
-              >
+              <ButtonLink href="/login" variant="secondary" onClick={() => setOpen(false)}>
                 Giriş
-              </Link>
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="rounded-pill bg-accent px-4 py-2.5 text-center text-[14px] font-medium text-accent-contrast"
-              >
+              </ButtonLink>
+              <ButtonLink href="/login" onClick={() => setOpen(false)}>
                 Ücretsiz Dene
-              </Link>
+              </ButtonLink>
             </div>
           </nav>
         </div>

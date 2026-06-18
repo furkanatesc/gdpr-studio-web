@@ -1,4 +1,10 @@
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button-link";
+
+export const metadata = {
+  title: "Ürün — KVKK Yönetim",
+  description:
+    "Uydurmayan yapay zekâ, madde-atıflı çıktı, özel nitelikli veri koruması ve MCP entegrasyonu. KVKK Yönetim'in ürün özellikleri.",
+};
 
 const SECTIONS = [
   {
@@ -46,12 +52,7 @@ export default function UrunPage() {
       </div>
 
       <div className="mt-16 text-center">
-        <Link
-          href="/login"
-          className="rounded-pill bg-accent px-7 py-3.5 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent-strong"
-        >
-          Ücretsiz Dene
-        </Link>
+        <ButtonLink href="/login">Ücretsiz Dene</ButtonLink>
       </div>
     </div>
   );

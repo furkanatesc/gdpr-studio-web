@@ -5,7 +5,7 @@ import { ScrollReveals } from "@/components/marketing/scroll-reveals";
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="theme-brand min-h-screen bg-bg text-ink">
+    <div className="theme-brand min-h-dvh bg-bg text-ink">
       <ScrollReveals />
       <SiteNav />
       <main>{children}</main>

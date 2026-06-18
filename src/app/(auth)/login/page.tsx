@@ -3,11 +3,19 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+export const metadata = {
+  title: "Giriş — KVKK Yönetim",
+  description: "Avukat portalına giriş yapın ve KVKK & GDPR dokümanlarınızı kaldığınız yerden sürdürün.",
+};
+
 export default function LoginPage() {
   return (
-    <div className="theme-brand flex min-h-screen bg-bg text-ink">
+    <div className="theme-brand flex min-h-dvh bg-bg text-ink">
       {/* Sol — form */}
-      <div className="flex w-full flex-col justify-between px-10 py-12 md:w-[460px] md:px-14">
+      <div
+        className="flex w-full flex-col justify-between px-10 py-12 md:w-[460px] md:px-14"
+        style={{ paddingTop: "max(3rem, env(safe-area-inset-top))" }}
+      >
         <div className="font-display text-[19px]">
           KVKK <span className="text-accent">Yönetim</span>
         </div>
@@ -33,15 +41,14 @@ export default function LoginPage() {
 
           <p className="mt-5 text-[13px] text-ink-muted">
             Hesabınız yok mu?{" "}
-            <Link href="#" className="text-accent hover:text-accent-strong">
-              Kayıt olun
+            <Link href="/fiyatlandirma" className="text-accent hover:text-accent-strong">
+              Plan seçin
             </Link>
           </p>
         </div>
 
         <p className="text-[11px] text-ink-subtle">
-          Masaüstü sürümünde kendi API anahtarınızla (BYOK), veriniz cihazınızdan çıkmadan
-          çalışabilirsiniz.
+          Masaüstü sürümünde verileriniz cihazınızdan hiç çıkmadan, yerel olarak işlenir.
         </p>
       </div>
 

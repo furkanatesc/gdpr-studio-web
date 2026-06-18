@@ -23,7 +23,7 @@ function NavItem({
       href={href}
       onClick={onNavigate}
       className={cn(
-        "mx-2 flex items-center gap-3 rounded-[var(--radius)] border border-transparent px-3 py-2 text-[13px] transition-colors",
+        "mx-2 my-0.5 flex items-center gap-3 rounded-[var(--radius)] border border-transparent px-3 py-2 text-[13px] transition-colors",
         active
           ? "border-accent-soft bg-accent-soft font-medium text-accent-strong"
           : "text-ink-muted hover:bg-surface-2",

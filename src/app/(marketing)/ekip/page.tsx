@@ -1,3 +1,8 @@
+export const metadata = {
+  title: "Ekip — KVKK Yönetim",
+  description: "Veri koruma hukuku ile modern yazılım mühendisliğini bir araya getiren ekip.",
+};
+
 const TEAM = [
   { name: "[Ad Soyad]", role: "Kurucu · Mühendislik", initials: "AS" },
   { name: "[Ad Soyad]", role: "Hukukçu · Kurucu", initials: "AS" },

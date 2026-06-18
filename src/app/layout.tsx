@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -24,6 +24,14 @@ export const metadata: Metadata = {
   title: "KVKK Yönetim — KVKK & GDPR Doküman Platformu",
   description:
     "KVKK ve GDPR uyum dokümanlarını gerçek veri envanterine dayandırarak, hukuki olarak doğru biçimde üreten platform.",
+};
+
+// viewport-fit=cover: içerik iPhone çentik/kavis (safe-area) bölgesine uzanır;
+// böylece üst barın üstünde beyaz şerit kalmaz. Padding'ler env(safe-area-inset-*) ile.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

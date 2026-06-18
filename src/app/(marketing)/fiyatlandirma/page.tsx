@@ -1,5 +1,13 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { ButtonLink } from "@/components/ui/button-link";
+import { Icon } from "@/components/ui/icon";
+
+export const metadata = {
+  title: "Fiyatlandırma — KVKK Yönetim",
+  description:
+    "Başlangıç, Pro ve Kurumsal planlar. Web sürümünde model maliyetini biz karşılarız; masaüstü uygulaması Pro ve Kurumsal üyeliğe dahildir.",
+};
 
 const TIERS = [
   {
@@ -23,6 +31,7 @@ const TIERS = [
     features: [
       "Sınırsız doküman üretimi",
       "Altı doküman türünün tamamı",
+      "Masaüstü uygulaması (yerel & gizli)",
       "DOCX / PDF dışa aktarım",
       "Envanter & iş kuralları yönetimi",
       "Öncelikli destek",
@@ -55,8 +64,8 @@ export default function FiyatlandirmaPage() {
         <p className="eyebrow mb-3">Fiyatlandırma</p>
         <h1 className="font-display text-4xl leading-tight text-ink">Size uygun planı seçin</h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-ink-muted">
-          Web sürümünde model maliyeti bize ait; masaüstünde kendi anahtarınızla sınırsız ve
-          ücretsiz kullanırsınız.
+          Web sürümünde model maliyetini biz karşılarız; masaüstü uygulaması ise Pro ve
+          Kurumsal üyeliğe dahildir.
         </p>
       </div>
 
@@ -80,30 +89,28 @@ export default function FiyatlandirmaPage() {
             <p className="mt-4 font-display text-3xl text-ink">{t.price}</p>
             <ul className="mt-6 flex-1 space-y-2.5 text-[13.5px] text-ink-muted">
               {t.features.map((f) => (
-                <li key={f} className="flex gap-2">
-                  <span className="text-accent">✓</span>
+                <li key={f} className="flex items-start gap-2">
+                  <Icon name="check" className="mt-0.5 text-[15px] text-accent" />
                   {f}
                 </li>
               ))}
             </ul>
-            <Link
+            <ButtonLink
               href={t.href}
-              className={cn(
-                "mt-7 inline-flex items-center justify-center rounded-pill px-5 py-2.5 text-sm font-medium transition-colors",
-                t.popular
-                  ? "bg-accent text-accent-contrast hover:bg-accent-strong"
-                  : "border border-border-strong text-ink hover:bg-surface-2",
-              )}
+              variant={t.popular ? "primary" : "secondary"}
+              size="sm"
+              className="mt-7 w-full"
             >
               {t.cta}
-            </Link>
+            </ButtonLink>
           </div>
         ))}
       </div>
 
       <div data-reveal className="mt-10 rounded-[var(--radius)] border border-border bg-surface px-6 py-5 text-center text-[13.5px] text-ink-muted">
-        <strong className="text-ink">Masaüstü (BYOK):</strong> Electron uygulaması ücretsizdir;
-        yalnızca kendi Anthropic API kullanımınızı ödersiniz. Veriniz cihazınızdan çıkmaz.{" "}
+        <strong className="text-ink">Masaüstü uygulaması:</strong> Gizlilik açısından hassas
+        çalışmalar için verileriniz cihazınızdan hiç çıkmadan, yerel olarak işlenir. Pro ve
+        Kurumsal üyeliğe dahildir.{" "}
         <Link href="/indir" className="text-accent hover:text-accent-strong">
           İndir →
         </Link>

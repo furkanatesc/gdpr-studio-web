@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button-link";
 import { DOC_CATALOG } from "@/lib/catalog";
 
 const STEPS = [
@@ -23,7 +23,7 @@ const FEATURES = [
   { title: "Uydurmayan yapay zekâ", desc: "Her hukuki sebep, amaç ve süre gerçek envanterinizden gelir. Veri yoksa model uydurmaz, alanı avukata bırakır." },
   { title: "Madde-atıflı çıktı", desc: "Her değerlendirme ilgili KVKK / GDPR maddesine atıf yapar (ör. KVKK m.5/2-ç, GDPR m.6/1-c)." },
   { title: "Özel nitelikli veri koruması", desc: "Sağlık, biyometrik, ceza mahkûmiyeti gibi m.6 verileri tespit edilir; açık rıza ve ek tedbir uyarısı eklenir." },
-  { title: "Masaüstünde tam gizlilik", desc: "Masaüstü uygulamasında kendi API anahtarınızla (BYOK) çalışın — veriniz cihazınızdan hiç çıkmaz." },
+  { title: "Masaüstünde tam gizlilik", desc: "Masaüstü uygulamasında tüm doküman üretimi cihazınızda, yerel olarak gerçekleşir — veriniz cihazınızdan hiç çıkmaz." },
   { title: "Diğer AI araçlarıyla entegre", desc: "MCP server desteğiyle KVKK motorunu Claude Desktop, Cursor ve diğer AI istemcilerinden kullanın." },
   { title: "Avukat-merkezli iş akışı", desc: "Her çıktı 'avukat incelemesine tabi taslak' notuyla gelir. Karar ve sorumluluk her zaman hukukçuda." },
 ];
@@ -49,12 +49,12 @@ export default function LandingPage() {
             uydurmayan yapay zekâ platformu. Madde-atıflı, envantere dayalı, onaya hazır.
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/login" className="w-full rounded-pill bg-accent px-6 py-3 text-center text-sm font-medium text-accent-contrast transition-colors hover:bg-accent-strong sm:w-auto">
+            <ButtonLink href="/login" className="w-full sm:w-auto">
               Ücretsiz Dene
-            </Link>
-            <Link href="/indir" className="w-full rounded-pill border border-border-strong px-6 py-3 text-center text-sm font-medium text-ink transition-colors hover:bg-surface-2 sm:w-auto">
+            </ButtonLink>
+            <ButtonLink href="/indir" variant="secondary" className="w-full sm:w-auto">
               Masaüstü için indir ↗
-            </Link>
+            </ButtonLink>
           </div>
         </div>
       </section>
@@ -115,15 +115,15 @@ export default function LandingPage() {
       <section className="border-t border-border">
         <div className="mx-auto max-w-5xl px-6 py-16">
           <div data-reveal className="rounded-[calc(var(--radius)+8px)] border border-border bg-surface p-8 text-center md:p-10">
-            <p className="eyebrow mb-3">Masaüstü · BYOK · Pro üyelik</p>
+            <p className="eyebrow mb-3">Masaüstü · Pro üyelik</p>
             <h2 className="font-display text-3xl text-ink">Veriniz cihazınızdan çıkmasın</h2>
             <p className="mx-auto mt-3 max-w-lg text-[14px] leading-relaxed text-ink-muted">
-              Gizlilik-hassas dosyalar için masaüstü uygulamasını kendi API anahtarınızla
-              kullanın. Pro ve Kurumsal üyelere özeldir.
+              Gizlilik açısından hassas dosyalar için masaüstü uygulamasını kullanın;
+              verileriniz cihazınızda kalır. Pro ve Kurumsal üyelere özeldir.
             </p>
-            <Link href="/indir" className="mt-6 inline-flex rounded-pill bg-accent px-6 py-3 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent-strong">
+            <ButtonLink href="/indir" className="mt-6">
               İndirme seçenekleri ↗
-            </Link>
+            </ButtonLink>
           </div>
         </div>
       </section>
@@ -133,9 +133,7 @@ export default function LandingPage() {
         <div data-reveal className="mx-auto max-w-3xl px-6 py-20 text-center">
           <h2 className="font-display text-4xl leading-tight text-ink">İlk dokümanınızı bugün üretin</h2>
           <div className="mt-7">
-            <Link href="/login" className="rounded-pill bg-accent px-7 py-3.5 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent-strong">
-              Ücretsiz Dene
-            </Link>
+            <ButtonLink href="/login">Ücretsiz Dene</ButtonLink>
           </div>
         </div>
       </section>

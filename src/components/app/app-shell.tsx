@@ -9,7 +9,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-bg">
+    <div className="flex min-h-dvh bg-bg">
       {/* Masaüstü sidebar */}
       <div className="hidden md:block">
         <Sidebar />
@@ -35,8 +35,15 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Mobil üst bar */}
-        <div className="flex items-center gap-3 border-b border-border bg-surface px-4 py-3 md:hidden">
+        {/* Mobil üst bar — safe-area (çentik) için üst/yan padding max() ile */}
+        <div
+          className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-surface px-4 py-3 md:hidden"
+          style={{
+            paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+            paddingLeft: "max(1rem, env(safe-area-inset-left))",
+            paddingRight: "max(1rem, env(safe-area-inset-right))",
+          }}
+        >
           <button
             onClick={() => setOpen(true)}
             aria-label="Menüyü aç"

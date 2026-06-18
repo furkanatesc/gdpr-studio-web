@@ -1,4 +1,5 @@
 import type { DocType } from "./types";
+import type { IconName } from "@/components/ui/icon";
 import {
   VERI_KATEGORILERI,
   ISLEME_AMACLARI,
@@ -26,7 +27,7 @@ export interface TagGroupDef {
 
 export interface CardDef {
   title: string;
-  icon: string;
+  icon: IconName;
   fields?: FieldDef[];
   groups?: TagGroupDef[];
 }
@@ -67,7 +68,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
     cards: [
       {
         title: "Şirket Bilgileri",
-        icon: "🏛️",
+        icon: "landmark",
         fields: [
           { key: "sirket", label: "Şirket / Kuruluş adı", required: true, placeholder: "Örn: Yaşam Hastaneleri A.Ş." },
           { key: "site", label: "Web sitesi", placeholder: "www.sirket.com" },
@@ -78,7 +79,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
       },
       {
         title: "İşleme Faaliyetleri",
-        icon: "📋",
+        icon: "clipboard",
         groups: [
           { key: "veriler", label: "Hangi kişisel veri kategorilerini işliyorsunuz?", options: VERI_KATEGORILERI },
           { key: "amaclar", label: "İşleme amaçları", options: ISLEME_AMACLARI },
@@ -96,7 +97,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
     cards: [
       {
         title: "Site Bilgileri",
-        icon: "🍪",
+        icon: "cookie",
         fields: [
           { key: "site", label: "Site / uygulama adı", required: true, placeholder: "www.sirket.com" },
           { key: "sirket", label: "Şirket adı", required: true, placeholder: "ABC A.Ş." },
@@ -106,7 +107,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
       },
       {
         title: "Çerez Kategorileri",
-        icon: "🧩",
+        icon: "grid",
         groups: [{ key: "veriler", label: "Hangi çerez kategorilerini kullanıyorsunuz?", options: CEREZ_KATEGORILERI }],
       },
     ],
@@ -117,7 +118,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
     cards: [
       {
         title: "Kuruluş",
-        icon: "📚",
+        icon: "book",
         fields: [
           { key: "sirket", label: "Kuruluş adı", required: true, placeholder: "ABC A.Ş." },
           { key: "dpo", label: "Sorumlu kişi / DPO", placeholder: "Ad Soyad, e-posta" },
@@ -126,7 +127,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
       },
       {
         title: "İşleme Süreçleri",
-        icon: "🔄",
+        icon: "refresh",
         groups: [{ key: "veriler", label: "Hangi iş süreçlerinde kişisel veri işliyorsunuz?", options: KAYIT_SURECLERI }],
       },
     ],
@@ -137,7 +138,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
     cards: [
       {
         title: "Taraflar",
-        icon: "📄",
+        icon: "file",
         fields: [
           { key: "sorumlu", label: "Veri Sorumlusu (Controller)", required: true, placeholder: "Şirket adı, adres" },
           { key: "isleyen", label: "Veri İşleyen (Processor)", required: true, placeholder: "Hizmet sağlayıcı adı" },
@@ -148,7 +149,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
       },
       {
         title: "Veri Kapsamı",
-        icon: "🗂️",
+        icon: "folders",
         groups: [{ key: "veriler", label: "Sözleşme kapsamındaki veri kategorileri", options: VERI_KATEGORILERI }],
       },
     ],
@@ -159,7 +160,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
     cards: [
       {
         title: "Proje",
-        icon: "🔍",
+        icon: "search",
         fields: [
           { key: "proje", label: "Proje / sistem adı", required: true, placeholder: "Örn: Müşteri Profilleme Sistemi" },
           { key: "kapsam", label: "Kapsam / açıklama", type: "textarea", full: true, placeholder: "Sistem ne yapıyor, hangi verileri nasıl işliyor..." },
@@ -169,7 +170,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
       },
       {
         title: "Risk Faktörleri",
-        icon: "⚠️",
+        icon: "warning",
         groups: [{ key: "veriler", label: "Aşağıdakilerden hangileri geçerli?", options: DPIA_RISKLERI }],
       },
     ],
@@ -180,7 +181,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
     cards: [
       {
         title: "İhlal Bilgileri",
-        icon: "🚨",
+        icon: "shield-alert",
         fields: [
           { key: "tarih", label: "İhlalin tespit tarihi", type: "date", required: true },
           { key: "tur", label: "İhlal türü", type: "select", options: ["Yetkisiz erişim", "Veri kaybı", "Yanlış ifşa", "Fidye / şifreleme", "Diğer"] },
@@ -191,7 +192,7 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
       },
       {
         title: "Etkilenen Veriler",
-        icon: "🗂️",
+        icon: "folders",
         groups: [{ key: "veriler", label: "Hangi veri kategorileri etkilendi?", options: VERI_KATEGORILERI }],
       },
     ],

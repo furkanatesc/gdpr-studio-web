@@ -92,6 +92,18 @@ body {
   font-family: var(--font-display);
 }
 
+/* iOS safe-area (çentik/kavis) yardımcıları — viewport-fit=cover ile birlikte çalışır */
+.pt-safe {
+  padding-top: max(var(--pad-top, 0px), env(safe-area-inset-top));
+}
+.px-safe {
+  padding-left: max(var(--pad-x, 0px), env(safe-area-inset-left));
+  padding-right: max(var(--pad-x, 0px), env(safe-area-inset-right));
+}
+.pb-safe {
+  padding-bottom: max(var(--pad-bottom, 0px), env(safe-area-inset-bottom));
+}
+
 /* Üst etiket (eyebrow) — uppercase tracked */
 .eyebrow {
   text-transform: uppercase;
