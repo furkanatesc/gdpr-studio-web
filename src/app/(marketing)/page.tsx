@@ -82,7 +82,7 @@ export default function LandingPage() {
           <h2 className="text-center font-display text-3xl text-ink">Hızdan ödün vermeden, hukuki güvenle</h2>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
             {FEATURES.map((f) => (
-              <div key={f.title} data-reveal className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-6 transition-all duration-300 hover:-translate-y-1 hover:border-border-strong hover:shadow-[var(--shadow-card)]">
+              <div key={f.title} data-reveal className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-6 transition-[box-shadow,border-color] duration-300 hover:border-border-strong hover:shadow-[var(--shadow-card)]">
                 <h3 className="font-display text-[16px] text-ink">{f.title}</h3>
                 <p className="mt-2.5 text-[13.5px] leading-relaxed text-ink-muted">{f.desc}</p>
               </div>
@@ -98,7 +98,7 @@ export default function LandingPage() {
           <h2 className="text-center font-display text-3xl text-ink">Altı temel uyum dokümanı</h2>
           <div className="mt-10 grid gap-3 md:grid-cols-2">
             {DOC_CATALOG.map((d) => (
-              <div key={d.type} data-reveal className="flex items-start gap-3 rounded-[var(--radius)] border border-border bg-surface p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[var(--shadow-card)]">
+              <div key={d.type} data-reveal className="flex items-start gap-3 rounded-[var(--radius)] border border-border bg-surface p-4 transition-[box-shadow,border-color] duration-300 hover:border-border-strong hover:shadow-[var(--shadow-card)]">
                 <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-accent-soft font-mono text-xs text-accent">
                   {d.no}
                 </span>

@@ -33,7 +33,7 @@ export default function IndirPage() {
 
       <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
         {PLATFORMS.map((p) => (
-          <div key={p.os} data-reveal className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-7 text-center transition-all duration-300 hover:-translate-y-1 hover:border-border-strong hover:shadow-[var(--shadow-card)]">
+          <div key={p.os} data-reveal className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-7 text-center transition-[box-shadow,border-color] duration-300 hover:border-border-strong hover:shadow-[var(--shadow-card)]">
             <Icon name={p.icon} className="mx-auto text-[32px] text-ink" />
             <h2 className="mt-3 font-display text-xl text-ink">{p.os}</h2>
             <p className="mt-1 text-[13px] text-ink-subtle">{p.file}</p>

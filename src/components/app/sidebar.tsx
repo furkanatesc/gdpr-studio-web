@@ -23,9 +23,9 @@ function NavItem({
       href={href}
       onClick={onNavigate}
       className={cn(
-        "mx-2 my-0.5 flex items-center gap-3 rounded-[var(--radius)] border border-transparent px-3 py-2 text-[13px] transition-colors",
+        "mx-2 my-1 flex items-center gap-3 rounded-[var(--radius)] px-3 py-2.5 text-[13px] transition-colors",
         active
-          ? "border-accent-soft bg-accent-soft font-medium text-accent-strong"
+          ? "bg-accent-soft font-medium text-accent-strong"
           : "text-ink-muted hover:bg-surface-2",
       )}
     >
@@ -55,7 +55,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <aside className="flex h-screen w-[264px] flex-shrink-0 flex-col border-r border-border bg-surface">
-      <Link href="/" onClick={onNavigate} className="block border-b border-border px-5 py-6">
+      <Link href="/" onClick={onNavigate} className="block px-5 pb-4 pt-6">
         <div className="font-display text-[19px] leading-tight text-ink">
           KVKK <span className="text-accent-strong">Yönetim</span>
         </div>
@@ -85,7 +85,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <NavItem href="/app/kontrol" dot="✓" label="Uyum Kontrol Listesi" active={path === "/app/kontrol"} onNavigate={onNavigate} />
       </nav>
 
-      <div className="border-t border-border px-4 py-3 text-[11px] text-ink-subtle">
+      <div className="px-5 py-4 text-[11px] text-ink-subtle">
         Web sürümü · Managed mod
       </div>
     </aside>

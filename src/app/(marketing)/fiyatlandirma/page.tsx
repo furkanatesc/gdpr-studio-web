@@ -75,7 +75,7 @@ export default function FiyatlandirmaPage() {
             key={t.name}
             data-reveal
             className={cn(
-              "flex flex-col rounded-[calc(var(--radius)+6px)] border bg-surface p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card)]",
+              "flex flex-col rounded-[calc(var(--radius)+6px)] border bg-surface p-7 transition-[box-shadow,border-color] duration-300 hover:shadow-[var(--shadow-card)]",
               t.popular ? "border-accent" : "border-border hover:border-border-strong",
             )}
           >

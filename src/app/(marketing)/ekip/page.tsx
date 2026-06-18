@@ -27,7 +27,7 @@ export default function EkipPage() {
           <div
             key={i}
             data-reveal
-            className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-7 text-center transition-all duration-300 hover:-translate-y-1 hover:border-border-strong hover:shadow-[var(--shadow-card)]"
+            className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-7 text-center transition-[box-shadow,border-color] duration-300 hover:border-border-strong hover:shadow-[var(--shadow-card)]"
           >
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-soft font-display text-xl text-accent">
               {m.initials}
