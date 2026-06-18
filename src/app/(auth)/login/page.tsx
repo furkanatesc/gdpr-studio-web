@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Arrow } from "@/components/ui/icon";
 
 export const metadata = {
   title: "Giriş — KVKK Yönetim",
@@ -35,7 +36,7 @@ export default function LoginPage() {
               <Input type="password" placeholder="••••••••••" />
             </Field>
             <Button type="submit" className="w-full">
-              Giriş Yap →
+              Giriş Yap <Arrow />
             </Button>
           </form>
 

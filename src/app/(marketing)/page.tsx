@@ -1,4 +1,5 @@
 import { ButtonLink } from "@/components/ui/button-link";
+import { Arrow } from "@/components/ui/icon";
 import { DOC_CATALOG } from "@/lib/catalog";
 
 const STEPS = [
@@ -37,7 +38,7 @@ export default function LandingPage() {
           className="pointer-events-none absolute inset-0"
           style={{ background: "radial-gradient(80% 60% at 50% -10%, rgba(217,184,92,0.16), transparent 60%)" }}
         />
-        <div className="relative mx-auto max-w-4xl px-6 pb-20 pt-20 text-center md:pt-24">
+        <div className="relative mx-auto max-w-4xl px-6 pb-24 pt-24 text-center md:pb-28 md:pt-32">
           <p className="eyebrow mb-5">KVKK 6698 · GDPR 2016/679</p>
           <h1 className="font-display text-4xl leading-[1.1] text-ink sm:text-5xl md:text-6xl">
             Hukuki doğruluk,
@@ -53,14 +54,14 @@ export default function LandingPage() {
               Ücretsiz Dene
             </ButtonLink>
             <ButtonLink href="/indir" variant="secondary" className="w-full sm:w-auto">
-              Masaüstü için indir ↗
+              Masaüstü için indir <Arrow char="↗" />
             </ButtonLink>
           </div>
         </div>
       </section>
 
       {/* Nasıl çalışır */}
-      <section className="mx-auto max-w-5xl px-6 py-16">
+      <section className="mx-auto max-w-5xl px-6 py-20 md:py-28">
         <p className="eyebrow mb-3 text-center">Nasıl çalışır</p>
         <h2 className="text-center font-display text-3xl text-ink">Üç adımda uyum dokümanı</h2>
         <div className="mt-12 grid gap-8 md:grid-cols-3">
@@ -76,12 +77,12 @@ export default function LandingPage() {
 
       {/* Özellikler */}
       <section className="border-t border-border">
-        <div className="mx-auto max-w-5xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-6 py-20 md:py-28">
           <p className="eyebrow mb-3 text-center">Neden KVKK Yönetim</p>
           <h2 className="text-center font-display text-3xl text-ink">Hızdan ödün vermeden, hukuki güvenle</h2>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
             {FEATURES.map((f) => (
-              <div key={f.title} data-reveal className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-6">
+              <div key={f.title} data-reveal className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-6 transition-all duration-300 hover:-translate-y-1 hover:border-border-strong hover:shadow-[var(--shadow-card)]">
                 <h3 className="font-display text-[16px] text-ink">{f.title}</h3>
                 <p className="mt-2.5 text-[13.5px] leading-relaxed text-ink-muted">{f.desc}</p>
               </div>
@@ -92,12 +93,12 @@ export default function LandingPage() {
 
       {/* Doküman türleri */}
       <section className="border-t border-border">
-        <div className="mx-auto max-w-5xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-6 py-20 md:py-28">
           <p className="eyebrow mb-3 text-center">Kapsam</p>
           <h2 className="text-center font-display text-3xl text-ink">Altı temel uyum dokümanı</h2>
           <div className="mt-10 grid gap-3 md:grid-cols-2">
             {DOC_CATALOG.map((d) => (
-              <div key={d.type} data-reveal className="flex items-start gap-3 rounded-[var(--radius)] border border-border bg-surface p-4">
+              <div key={d.type} data-reveal className="flex items-start gap-3 rounded-[var(--radius)] border border-border bg-surface p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[var(--shadow-card)]">
                 <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-accent-soft font-mono text-xs text-accent">
                   {d.no}
                 </span>
@@ -113,7 +114,7 @@ export default function LandingPage() {
 
       {/* Masaüstü indirme bandı */}
       <section className="border-t border-border">
-        <div className="mx-auto max-w-5xl px-6 py-16">
+        <div className="mx-auto max-w-5xl px-6 py-20 md:py-28">
           <div data-reveal className="rounded-[calc(var(--radius)+8px)] border border-border bg-surface p-8 text-center md:p-10">
             <p className="eyebrow mb-3">Masaüstü · Pro üyelik</p>
             <h2 className="font-display text-3xl text-ink">Veriniz cihazınızdan çıkmasın</h2>
@@ -122,7 +123,7 @@ export default function LandingPage() {
               verileriniz cihazınızda kalır. Pro ve Kurumsal üyelere özeldir.
             </p>
             <ButtonLink href="/indir" className="mt-6">
-              İndirme seçenekleri ↗
+              İndirme seçenekleri <Arrow char="↗" />
             </ButtonLink>
           </div>
         </div>
@@ -130,7 +131,7 @@ export default function LandingPage() {
 
       {/* Final CTA */}
       <section className="border-t border-border">
-        <div data-reveal className="mx-auto max-w-3xl px-6 py-20 text-center">
+        <div data-reveal className="mx-auto max-w-3xl px-6 py-24 text-center md:py-32">
           <h2 className="font-display text-4xl leading-tight text-ink">İlk dokümanınızı bugün üretin</h2>
           <div className="mt-7">
             <ButtonLink href="/login">Ücretsiz Dene</ButtonLink>

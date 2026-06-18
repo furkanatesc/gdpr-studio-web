@@ -163,6 +163,15 @@ const PATHS: Record<IconName, React.ReactNode> = {
   ),
 };
 
+/** Buton içi tipografik ok — buton hover'ında hafifçe kayar (group/btn). */
+export function Arrow({ char = "→" }: { char?: string }) {
+  return (
+    <span className="inline-block transition-transform duration-200 group-hover/btn:translate-x-1">
+      {char}
+    </span>
+  );
+}
+
 export function Icon({
   name,
   className,

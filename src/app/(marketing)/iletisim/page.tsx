@@ -2,6 +2,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Arrow } from "@/components/ui/icon";
 
 export const metadata = {
   title: "İletişim — KVKK Yönetim",
@@ -49,7 +50,7 @@ export default function IletisimPage() {
             <Textarea placeholder="Nasıl yardımcı olabiliriz?" className="min-h-32" />
           </Field>
           <Button type="submit" className="w-full">
-            Gönder →
+            Gönder <Arrow />
           </Button>
         </form>
       </div>
