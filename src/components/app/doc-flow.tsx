@@ -133,14 +133,7 @@ export function DocFlow({ type }: { type: DocType }) {
 
         <div className="flex items-center gap-3">
           <Button onClick={onGenerate} disabled={loading}>
-            {loading ? (
-              "Hazırlanıyor…"
-            ) : (
-              <>
-                <Icon name="bolt" className="text-[16px]" />
-                {schema.cta}
-              </>
-            )}
+            {loading ? "Hazırlanıyor…" : schema.cta}
           </Button>
           <Button variant="secondary" onClick={onClear} disabled={loading}>
             Temizle
