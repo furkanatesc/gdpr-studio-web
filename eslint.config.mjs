@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Otomatik üretilen API tipleri (openapi-typescript) — düzenlenmez, lint'lenmez.
+    "src/lib/api-types.ts",
   ]),
 ]);
 

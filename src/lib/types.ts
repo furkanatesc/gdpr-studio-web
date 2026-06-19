@@ -1,47 +1,21 @@
 /*
-  DONDURULMUŞ API SÖZLEŞMESİ (frontend ↔ backend)
-  Backend (FastAPI) bu şekilleri birebir implemente eder: POST /api/generate.
-  Frontend mock'u da aynı şekli döndürür; backend gelince yalnızca fetch hedefi değişir.
+  API SÖZLEŞMESİ — TEK KAYNAK: backend OpenAPI → `api-types.ts` (openapi-typescript ile üretilir).
+  Bu dosya yalnızca üretilen şemalara ergonomik takma adlar verir; elle alan TANIMLANMAZ.
+  Kontrat değişince:  backend `python -m app.export_openapi`  →  web `npm run gen:api-types`.
+  (openapi-typescript, `default`'lu alanları zorunlu üretir → diziler hep mevcut, opsiyonel değil.)
 */
 
-export type DocType =
-  | "aydinlatma"
-  | "cerez"
-  | "kayit"
-  | "dpa"
-  | "dpia"
-  | "ihlal";
+import type { components } from "./api-types";
 
-/** Kategori bazlı grounding kaydı (backend: categories.json / Postgres envanter). */
-export interface GroundingRecord {
-  kategori: string;
-  veriTurleri: string[];
-  amaclar: string[];
-  hukukiSebepler: string[];
-  kisiGruplari: string[];
-  saklamaSureleri: string[];
-}
+type Schemas = components["schemas"];
 
-export interface GenerateRequest {
-  type: DocType;
-  /** Doküman türüne göre dolan serbest alanlar (sirket, email, sektor, dpo, ...). */
-  fields: Record<string, string>;
-  /** Seçili kişisel veri kategorileri / etiketleri. */
-  veriler?: string[];
-  /** Seçili işleme amaçları. */
-  amaclar?: string[];
-}
+export type DocType = Schemas["DocType"];
+export type GroundingRecord = Schemas["GroundingRecord"];
+export type GenerateRequest = Schemas["GenerateRequest"];
+export type GenerateResponse = Schemas["GenerateResponse"];
+export type Usage = Schemas["Usage"];
 
-export interface GenerateResponse {
-  /** Üretilen markdown doküman. */
-  text: string;
-  /** Şeffaflık: çıktının dayandığı envanter kayıtları. */
-  grounding: GroundingRecord[];
-  model: string;
-  disclaimer: string;
-  usage?: { inputTokens: number; outputTokens: number };
-}
-
+/** İstemci-tarafı yardımcı — FastAPI hata gövdesi {detail}; üretilen şemada ayrı tip yok. */
 export interface ApiError {
   error: string;
   details?: string;
