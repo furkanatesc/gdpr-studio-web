@@ -30,7 +30,7 @@ export interface paths {
         };
         /**
          * List Categories
-         * @description Tüm KVKK kategori adları (grounding referansı).
+         * @description Tüm KVKK kategori adları (grounding referansı). Redis varsa TTL'li cache'lenir.
          */
         get: operations["list_categories_api_categories_get"];
         put?: never;
