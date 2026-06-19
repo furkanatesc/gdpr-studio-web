@@ -6,7 +6,13 @@ import { Icon } from "@/components/ui/icon";
 import { renderMarkdown } from "@/lib/markdown";
 import type { GenerateResponse } from "@/lib/types";
 
-export function DocumentOutput({ result }: { result: GenerateResponse }) {
+export function DocumentOutput({
+  result,
+  streaming = false,
+}: {
+  result: GenerateResponse;
+  streaming?: boolean;
+}) {
   const [copied, setCopied] = useState(false);
 
   function copy() {
@@ -19,10 +25,16 @@ export function DocumentOutput({ result }: { result: GenerateResponse }) {
   return (
     <div className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface shadow-[var(--shadow-card)]">
       <header className="flex items-center justify-between border-b border-border px-5 py-3.5">
-        <div className="flex items-center gap-2 text-[13px] font-medium text-ink">
-          <Icon name="check-circle" className="text-[16px] text-[color:var(--ok)]" /> Doküman hazır
-        </div>
-        <Button variant="secondary" size="sm" onClick={copy}>
+        {streaming ? (
+          <div className="flex items-center gap-2 text-[13px] font-medium text-ink-muted">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-accent" /> Yazılıyor…
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-[13px] font-medium text-ink">
+            <Icon name="check-circle" className="text-[16px] text-[color:var(--ok)]" /> Doküman hazır
+          </div>
+        )}
+        <Button variant="secondary" size="sm" onClick={copy} disabled={streaming}>
           <Icon name={copied ? "check" : "copy"} className="text-[15px]" />
           {copied ? "Kopyalandı" : "Kopyala"}
         </Button>
@@ -54,9 +66,15 @@ export function DocumentOutput({ result }: { result: GenerateResponse }) {
       />
 
       <footer className="border-t border-border px-5 py-2.5 text-[11px] text-ink-subtle">
-        Model: {result.model}
-        {result.usage &&
-          ` · ${result.usage.inputTokens + result.usage.outputTokens} token`}
+        {streaming ? (
+          "Akış sürüyor…"
+        ) : (
+          <>
+            Model: {result.model}
+            {result.usage &&
+              ` · ${result.usage.inputTokens + result.usage.outputTokens} token`}
+          </>
+        )}
       </footer>
     </div>
   );

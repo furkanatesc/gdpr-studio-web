@@ -12,8 +12,8 @@ import { Icon } from "@/components/ui/icon";
 import { DocumentOutput } from "./document-output";
 import { docByType } from "@/lib/catalog";
 import { SCHEMAS, type FieldDef } from "@/lib/schemas";
-import { generateDoc } from "@/lib/api";
-import type { DocType, GenerateResponse } from "@/lib/types";
+import { generateDocStream } from "@/lib/api";
+import type { DocType, GenerateResponse, GroundingRecord } from "@/lib/types";
 
 function initialFields(type: DocType): Record<string, string> {
   const f: Record<string, string> = {};
@@ -34,6 +34,7 @@ export function DocFlow({ type }: { type: DocType }) {
     amaclar: [],
   });
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const [result, setResult] = useState<GenerateResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,19 +47,48 @@ export function DocFlow({ type }: { type: DocType }) {
 
   async function onGenerate() {
     setLoading(true);
+    setStreaming(true);
     setResult(null);
     setError(null);
+
+    let acc = "";
+    let grounding: GroundingRecord[] = [];
+    let lastFlush = 0;
+    const flush = (force = false) => {
+      const now = Date.now();
+      if (!force && now - lastFlush < 90) return; // ~11 fps; markdown re-parse'ı sınırla
+      lastFlush = now;
+      setResult({ text: acc, grounding, model: "", disclaimer: "" });
+    };
+
     try {
-      const res = await generateDoc({
-        type,
-        fields,
-        veriler: tags.veriler,
-        amaclar: tags.amaclar,
-      });
-      setResult(res);
+      await generateDocStream(
+        { type, fields, veriler: tags.veriler, amaclar: tags.amaclar },
+        {
+          onGrounding: (g) => {
+            grounding = g;
+            flush(true);
+          },
+          onDelta: (t) => {
+            acc += t;
+            flush();
+          },
+          onDone: (meta) => {
+            setResult({
+              text: acc,
+              grounding,
+              model: meta.model,
+              disclaimer: meta.disclaimer,
+              usage: meta.usage,
+            });
+          },
+          onError: (msg) => setError(msg),
+        },
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Beklenmeyen bir hata oluştu.");
     } finally {
+      setStreaming(false);
       setLoading(false);
     }
   }
@@ -145,7 +175,7 @@ export function DocFlow({ type }: { type: DocType }) {
           </Button>
         </div>
 
-        {loading && (
+        {loading && !result && (
           <div className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-8 text-center text-sm text-ink-muted shadow-[var(--shadow-card)]">
             Claude dokümanı envanter kayıtlarına göre hazırlıyor…
           </div>
@@ -157,7 +187,7 @@ export function DocFlow({ type }: { type: DocType }) {
           </div>
         )}
 
-        {result && <DocumentOutput result={result} />}
+        {result && <DocumentOutput result={result} streaming={streaming} />}
       </div>
     </div>
   );
