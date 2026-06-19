@@ -12,7 +12,7 @@ import { Icon } from "@/components/ui/icon";
 import { DocumentOutput } from "./document-output";
 import { docByType } from "@/lib/catalog";
 import { SCHEMAS, type FieldDef } from "@/lib/schemas";
-import { generateDocMock } from "@/lib/mock-api";
+import { generateDoc } from "@/lib/api";
 import type { DocType, GenerateResponse } from "@/lib/types";
 
 function initialFields(type: DocType): Record<string, string> {
@@ -35,6 +35,7 @@ export function DocFlow({ type }: { type: DocType }) {
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<GenerateResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const setField = (k: string, v: string) => setFields((f) => ({ ...f, [k]: v }));
   const toggleTag = (group: "veriler" | "amaclar", v: string) =>
@@ -46,14 +47,17 @@ export function DocFlow({ type }: { type: DocType }) {
   async function onGenerate() {
     setLoading(true);
     setResult(null);
+    setError(null);
     try {
-      const res = await generateDocMock({
+      const res = await generateDoc({
         type,
         fields,
         veriler: tags.veriler,
         amaclar: tags.amaclar,
       });
       setResult(res);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Beklenmeyen bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -63,6 +67,7 @@ export function DocFlow({ type }: { type: DocType }) {
     setFields(initialFields(type));
     setTags({ veriler: [], amaclar: [] });
     setResult(null);
+    setError(null);
   }
 
   function renderField(fd: FieldDef) {
@@ -143,6 +148,12 @@ export function DocFlow({ type }: { type: DocType }) {
         {loading && (
           <div className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-8 text-center text-sm text-ink-muted shadow-[var(--shadow-card)]">
             Claude dokümanı envanter kayıtlarına göre hazırlıyor…
+          </div>
+        )}
+
+        {error && (
+          <div className="rounded-[calc(var(--radius)+4px)] border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
+            <strong className="font-medium">Üretim başarısız.</strong> {error}
           </div>
         )}
 
