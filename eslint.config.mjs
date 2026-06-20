@@ -14,6 +14,10 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Otomatik üretilen API tipleri (openapi-typescript) — düzenlenmez, lint'lenmez.
     "src/lib/api-types.ts",
+    // design-sync scratch/vendor çıktıları (üretilen/araç dosyaları, kaynak değil).
+    ".ds-sync/**",
+    "ds-bundle/**",
+    ".design-sync/**",
   ]),
 ]);
 

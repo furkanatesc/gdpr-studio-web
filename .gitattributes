@@ -1,0 +1,4 @@
+# Üretilen dosyalar daima LF olsun — CI drift guard'ı (git diff --exit-code)
+# Windows'ta CRLF'e dönüşüp yanlış pozitif üretmesin.
+src/lib/api-types.ts text eol=lf
+openapi.json          text eol=lf
