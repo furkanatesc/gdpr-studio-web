@@ -1,5 +1,6 @@
 import type { GenerateRequest, GenerateResponse, GroundingRecord } from "./types";
 import { generateDocMock } from "./mock-api";
+import { supabase } from "./supabase";
 
 /*
   Üretim çağrısı — env-gated + streaming.
@@ -9,6 +10,45 @@ import { generateDocMock } from "./mock-api";
 */
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "");
+
+async function authHeader(): Promise<Record<string, string>> {
+  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export interface IdentityOut {
+  userId: string; email: string; orgId: string; orgName: string; role: string;
+}
+
+export async function bootstrap(orgName: string): Promise<IdentityOut> {
+  return authedJson("/api/auth/bootstrap", { method: "POST", body: JSON.stringify({ orgName }) });
+}
+export async function getMe(): Promise<IdentityOut> {
+  return authedJson("/api/auth/me", { method: "GET" });
+}
+export async function createInvitation(email: string, role: string) {
+  return authedJson("/api/invitations", { method: "POST", body: JSON.stringify({ email, role }) });
+}
+export async function listInvitations() {
+  return authedJson("/api/invitations", { method: "GET" });
+}
+export async function acceptInvitation(token: string): Promise<IdentityOut> {
+  return authedJson(`/api/invitations/${token}/accept`, { method: "POST" });
+}
+
+async function authedJson(path: string, init: RequestInit) {
+  if (!API_BASE) throw new Error("API yapılandırılmamış.");
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...(await authHeader()), ...(init.headers || {}) },
+  });
+  if (!res.ok) {
+    let detail = `Sunucu hatası (HTTP ${res.status})`;
+    try { detail = (await res.json()).detail || detail; } catch { /* */ }
+    throw new Error(detail);
+  }
+  return res.status === 204 ? undefined : res.json();
+}
 export const usingRealApi = Boolean(API_BASE);
 
 export interface StreamHandlers {
@@ -26,7 +66,7 @@ export async function generateDocStream(req: GenerateRequest, h: StreamHandlers)
   try {
     resp = await fetch(`${API_BASE}/api/generate/stream`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(await authHeader()) },
       body: JSON.stringify(req),
     });
   } catch {
@@ -103,7 +143,7 @@ export async function generateDoc(req: GenerateRequest): Promise<GenerateRespons
 
   const res = await fetch(`${API_BASE}/api/generate`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: JSON.stringify(req),
   });
   if (!res.ok) {
