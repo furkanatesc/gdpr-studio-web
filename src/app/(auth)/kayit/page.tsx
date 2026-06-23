@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Arrow } from "@/components/ui/icon";
 import { supabase, usingAuth } from "@/lib/supabase";
+import { bootstrap } from "@/lib/api";
 
-export default function LoginPage() {
+export default function KayitPage() {
   const router = useRouter();
+  const [orgName, setOrgName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,12 +23,27 @@ export default function LoginPage() {
     if (!supabase) return;
     setError(null);
     setLoading(true);
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (authError) {
-      setError("Giriş başarısız: e-posta veya parola hatalı.");
+
+    const { error: signUpError } = await supabase.auth.signUp({ email, password });
+    if (signUpError) {
+      setLoading(false);
+      setError("Kayıt başarısız: " + signUpError.message);
       return;
     }
+
+    try {
+      await bootstrap(orgName);
+    } catch (bootstrapError) {
+      setLoading(false);
+      setError(
+        bootstrapError instanceof Error
+          ? bootstrapError.message
+          : "Kurum oluşturulamadı.",
+      );
+      return;
+    }
+
+    setLoading(false);
     router.push("/app");
   }
 
@@ -43,14 +60,14 @@ export default function LoginPage() {
 
         <div className="max-w-sm">
           <p className="eyebrow mb-3">Avukat Portalı</p>
-          <h1 className="font-display text-4xl leading-tight">Tekrar hoş geldiniz</h1>
+          <h1 className="font-display text-4xl leading-tight">Hesap oluşturun</h1>
           <p className="mt-3 text-[14px] leading-relaxed text-ink-muted">
-            KVKK &amp; GDPR dokümanlarınızı kaldığınız yerden sürdürün.
+            Büronuzu kaydedin ve KVKK &amp; GDPR uyum sürecinizi başlatın.
           </p>
 
           {!usingAuth ? (
             <div className="mt-8 rounded-[var(--radius)] border border-border bg-surface-2 px-5 py-4 text-[13px] text-ink-muted">
-              Giriş yakında — kimlik doğrulama henüz yapılandırılmamış.
+              Kayıt yakında — kimlik doğrulama henüz yapılandırılmamış.
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -59,6 +76,16 @@ export default function LoginPage() {
                   {error}
                 </p>
               )}
+              <Field label="Firma / Büro Adı">
+                <Input
+                  type="text"
+                  placeholder="Hukuk Bürosu A.Ş."
+                  value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  required
+                  autoComplete="organization"
+                />
+              </Field>
               <Field label="E-posta">
                 <Input
                   type="email"
@@ -72,28 +99,24 @@ export default function LoginPage() {
               <Field label="Parola">
                 <Input
                   type="password"
-                  placeholder="••••••••••"
+                  placeholder="En az 8 karakter"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoComplete="current-password"
+                  minLength={8}
+                  autoComplete="new-password"
                 />
               </Field>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Giriş yapılıyor…" : <><span>Giriş Yap</span> <Arrow /></>}
+                {loading ? "Hesap oluşturuluyor…" : <><span>Kayıt Ol</span> <Arrow /></>}
               </Button>
-              <p className="text-right text-[12px] text-ink-muted">
-                <Link href="/sifre-sifirla" className="hover:text-accent">
-                  Parolamı unuttum
-                </Link>
-              </p>
             </form>
           )}
 
           <p className="mt-5 text-[13px] text-ink-muted">
-            Hesabınız yok mu?{" "}
-            <Link href="/kayit" className="text-accent hover:text-accent-strong">
-              Kayıt olun
+            Zaten hesabınız var mı?{" "}
+            <Link href="/login" className="text-accent hover:text-accent-strong">
+              Giriş yapın
             </Link>
           </p>
         </div>

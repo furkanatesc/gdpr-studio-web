@@ -1,19 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Arrow } from "@/components/ui/icon";
+import { Arrow, Icon } from "@/components/ui/icon";
 import { supabase, usingAuth } from "@/lib/supabase";
 
-export default function LoginPage() {
-  const router = useRouter();
+export default function SifreSifirlaPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -21,13 +19,13 @@ export default function LoginPage() {
     if (!supabase) return;
     setError(null);
     setLoading(true);
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email);
     setLoading(false);
-    if (authError) {
-      setError("Giriş başarısız: e-posta veya parola hatalı.");
+    if (resetError) {
+      setError("Sıfırlama başarısız: " + resetError.message);
       return;
     }
-    router.push("/app");
+    setSent(true);
   }
 
   return (
@@ -43,14 +41,25 @@ export default function LoginPage() {
 
         <div className="max-w-sm">
           <p className="eyebrow mb-3">Avukat Portalı</p>
-          <h1 className="font-display text-4xl leading-tight">Tekrar hoş geldiniz</h1>
+          <h1 className="font-display text-4xl leading-tight">Parola sıfırla</h1>
           <p className="mt-3 text-[14px] leading-relaxed text-ink-muted">
-            KVKK &amp; GDPR dokümanlarınızı kaldığınız yerden sürdürün.
+            Kayıtlı e-posta adresinize sıfırlama bağlantısı gönderilecektir.
           </p>
 
           {!usingAuth ? (
             <div className="mt-8 rounded-[var(--radius)] border border-border bg-surface-2 px-5 py-4 text-[13px] text-ink-muted">
-              Giriş yakında — kimlik doğrulama henüz yapılandırılmamış.
+              Parola sıfırlama yakında — kimlik doğrulama henüz yapılandırılmamış.
+            </div>
+          ) : sent ? (
+            <div className="mt-8 flex items-start gap-3 rounded-[var(--radius)] border border-accent/30 bg-accent/10 px-5 py-4">
+              <Icon name="check-circle" className="mt-0.5 h-[18px] w-[18px] flex-shrink-0 text-accent" />
+              <div>
+                <p className="text-[13px] font-medium text-ink">Sıfırlama bağlantısı gönderildi</p>
+                <p className="mt-1 text-[12px] text-ink-muted">
+                  <strong className="text-ink">{email}</strong> adresine gönderilen bağlantıya tıklayın.
+                  Gelen kutunuzu kontrol edin; spam klasörünü de unutmayın.
+                </p>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -69,31 +78,16 @@ export default function LoginPage() {
                   autoComplete="email"
                 />
               </Field>
-              <Field label="Parola">
-                <Input
-                  type="password"
-                  placeholder="••••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                />
-              </Field>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Giriş yapılıyor…" : <><span>Giriş Yap</span> <Arrow /></>}
+                {loading ? "Gönderiliyor…" : <><span>Sıfırlama Bağlantısı Gönder</span> <Arrow /></>}
               </Button>
-              <p className="text-right text-[12px] text-ink-muted">
-                <Link href="/sifre-sifirla" className="hover:text-accent">
-                  Parolamı unuttum
-                </Link>
-              </p>
             </form>
           )}
 
           <p className="mt-5 text-[13px] text-ink-muted">
-            Hesabınız yok mu?{" "}
-            <Link href="/kayit" className="text-accent hover:text-accent-strong">
-              Kayıt olun
+            Parolanızı hatırladınız mı?{" "}
+            <Link href="/login" className="text-accent hover:text-accent-strong">
+              Giriş yapın
             </Link>
           </p>
         </div>
