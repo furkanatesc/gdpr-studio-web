@@ -1,4 +1,5 @@
 import type { GenerateRequest, GenerateResponse, GroundingRecord } from "./types";
+import type { components } from "./api-types";
 import { generateDocMock } from "./mock-api";
 import { supabase } from "./supabase";
 
@@ -16,9 +17,7 @@ async function authHeader(): Promise<Record<string, string>> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export interface IdentityOut {
-  userId: string; email: string; orgId: string; orgName: string; role: string;
-}
+export type IdentityOut = components["schemas"]["IdentityOut"];
 
 export async function bootstrap(orgName: string): Promise<IdentityOut> {
   return authedJson("/api/auth/bootstrap", { method: "POST", body: JSON.stringify({ orgName }) });

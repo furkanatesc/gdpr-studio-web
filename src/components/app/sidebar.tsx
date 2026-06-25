@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { DOC_CATALOG } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth-context";
+import { usingAuth } from "@/lib/supabase";
 
 function NavItem({
   href,
@@ -52,6 +54,8 @@ function SectionLabel({ children }: { children: string }) {
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const path = usePathname();
+  const router = useRouter();
+  const { session, signOut } = useAuth();
 
   return (
     <aside className="flex h-screen w-[264px] flex-shrink-0 flex-col border-r border-border bg-surface">
@@ -86,6 +90,14 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       <div className="px-5 py-4 text-[11px] text-ink-subtle">
+        {usingAuth && session && (
+          <button
+            onClick={async () => { await signOut(); onNavigate?.(); router.push("/login"); }}
+            className="mb-2 w-full rounded-[var(--radius)] px-3 py-1.5 text-left text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
+          >
+            Çıkış yap
+          </button>
+        )}
         Web sürümü · Managed mod
       </div>
     </aside>
