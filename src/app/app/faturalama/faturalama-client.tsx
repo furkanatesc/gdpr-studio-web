@@ -3,16 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { type BillingStatus, createCheckout, createPortal, getBillingStatus } from "@/lib/api";
-
-const PLAN_LABEL: Record<string, string> = {
-  baslangic: "Başlangıç",
-  standart: "Standart",
-  premium: "Premium",
-};
-const PRICE: Record<string, { month: string; year: string }> = {
-  standart: { month: "₺2.600/ay", year: "₺26.000/yıl" },
-  premium: { month: "₺5.000/ay", year: "₺50.000/yıl" },
-};
+import { PLAN_LABEL, PLAN_PRICE } from "@/lib/pricing";
 
 export function FaturalamaClient() {
   const params = useSearchParams();
@@ -49,7 +40,15 @@ export function FaturalamaClient() {
     }
   }
 
-  if (error) return <p className="p-8 text-[14px] text-red-600">{error}</p>;
+  // Full-page fallback only when the initial load fails (status never arrived).
+  if (!status && error)
+    return (
+      <div className="p-8">
+        <div className="rounded-[calc(var(--radius)+4px)] border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
+          {error}
+        </div>
+      </div>
+    );
   if (!status) return <p className="p-8 text-[14px] text-ink-muted">Yükleniyor…</p>;
   if (!status.canManage)
     return (
@@ -69,11 +68,22 @@ export function FaturalamaClient() {
   return (
     <div className="mx-auto max-w-3xl p-8">
       <h1 className="font-display text-2xl text-ink">Plan & Faturalama</h1>
-      {banner && <p className="mt-3 rounded-[var(--radius)] bg-accent-soft px-4 py-2 text-[13px] text-accent-strong">{banner}</p>}
+      {banner && (
+        <p className="mt-3 rounded-[var(--radius)] bg-accent-soft px-4 py-2 text-[13px] text-accent-strong">
+          {banner}
+        </p>
+      )}
+
+      {/* Inline action error — shown without unmounting the page so users can retry. */}
+      {error && (
+        <div className="mt-3 rounded-[calc(var(--radius)+4px)] border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
+          {error}
+        </div>
+      )}
 
       <div className="mt-6 rounded-[var(--radius)] border border-border bg-surface p-6">
         <p className="text-[13px] text-ink-subtle">Mevcut plan</p>
-        <p className="font-display text-xl text-ink">{PLAN_LABEL[status.plan]}</p>
+        <p className="font-display text-xl text-ink">{PLAN_LABEL[status.plan] ?? status.plan}</p>
         {status.usage.quota !== null && (
           <div className="mt-4">
             <p className="text-[13px] text-ink-muted">
@@ -88,7 +98,11 @@ export function FaturalamaClient() {
           </div>
         )}
         {isPaid && (
-          <button onClick={manage} disabled={busy} className="mt-4 rounded-[var(--radius)] border border-border px-4 py-2 text-[13px] hover:bg-surface-2 disabled:opacity-50">
+          <button
+            onClick={manage}
+            disabled={busy}
+            className="mt-4 rounded-[var(--radius)] border border-border px-4 py-2 text-[13px] hover:bg-surface-2 disabled:opacity-50"
+          >
             Planı yönet
           </button>
         )}
@@ -97,16 +111,32 @@ export function FaturalamaClient() {
       {!isPaid && (
         <>
           <div className="mt-6 flex items-center gap-3">
-            <button onClick={() => setIntervalState("month")} className={`rounded-pill px-4 py-1.5 text-[13px] ${interval === "month" ? "bg-accent text-accent-contrast" : "text-ink-muted"}`}>Aylık</button>
-            <button onClick={() => setIntervalState("year")} className={`rounded-pill px-4 py-1.5 text-[13px] ${interval === "year" ? "bg-accent text-accent-contrast" : "text-ink-muted"}`}>Yıllık (2 ay bedava)</button>
+            <button
+              onClick={() => setIntervalState("month")}
+              aria-pressed={interval === "month"}
+              className={`rounded-pill px-4 py-1.5 text-[13px] ${interval === "month" ? "bg-accent text-accent-contrast" : "text-ink-muted"}`}
+            >
+              Aylık
+            </button>
+            <button
+              onClick={() => setIntervalState("year")}
+              aria-pressed={interval === "year"}
+              className={`rounded-pill px-4 py-1.5 text-[13px] ${interval === "year" ? "bg-accent text-accent-contrast" : "text-ink-muted"}`}
+            >
+              Yıllık (2 ay bedava)
+            </button>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {(["standart", "premium"] as const).map((plan) => (
               <div key={plan} className="rounded-[var(--radius)] border border-border bg-surface p-6">
                 <p className="font-display text-lg text-ink">{PLAN_LABEL[plan]}</p>
-                <p className="mt-1 font-display text-2xl text-ink">{PRICE[plan][interval]}</p>
+                <p className="mt-1 font-display text-2xl text-ink">{PLAN_PRICE[plan][interval]}</p>
                 <p className="text-[12px] text-ink-subtle">KDV hariç</p>
-                <button onClick={() => upgrade(plan)} disabled={busy} className="mt-4 w-full rounded-[var(--radius)] bg-accent px-4 py-2 text-[13px] text-accent-contrast hover:bg-accent-strong disabled:opacity-50">
+                <button
+                  onClick={() => upgrade(plan)}
+                  disabled={busy}
+                  className="mt-4 w-full rounded-[var(--radius)] bg-accent px-4 py-2 text-[13px] text-accent-contrast hover:bg-accent-strong disabled:opacity-50"
+                >
                   {PLAN_LABEL[plan]}&apos;a geç
                 </button>
               </div>

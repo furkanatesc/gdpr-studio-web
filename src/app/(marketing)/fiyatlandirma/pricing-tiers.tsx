@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Icon } from "@/components/ui/icon";
+import { PLAN_PRICE } from "@/lib/pricing";
 
 type Interval = "month" | "year";
 
@@ -20,7 +21,7 @@ const TIERS = [
   },
   {
     name: "Standart",
-    price: { month: "₺2.600/ay", year: "₺26.000/yıl" },
+    price: PLAN_PRICE.standart,
     sub: "Bireysel avukatlar",
     features: [
       "Sınırsız doküman üretimi",
@@ -36,7 +37,7 @@ const TIERS = [
   },
   {
     name: "Premium",
-    price: { month: "₺5.000/ay", year: "₺50.000/yıl" },
+    price: PLAN_PRICE.premium,
     sub: "Hukuk büroları & şirketler",
     features: [
       "Çok kullanıcılı çalışma alanı",
@@ -58,6 +59,7 @@ export function PricingTiers() {
       <div className="mt-8 flex items-center justify-center gap-3">
         <button
           onClick={() => setInterval("month")}
+          aria-pressed={interval === "month"}
           className={cn(
             "rounded-pill px-4 py-1.5 text-[13px] transition-colors",
             interval === "month" ? "bg-accent text-accent-contrast" : "text-ink-muted hover:bg-surface-2",
@@ -67,6 +69,7 @@ export function PricingTiers() {
         </button>
         <button
           onClick={() => setInterval("year")}
+          aria-pressed={interval === "year"}
           className={cn(
             "rounded-pill px-4 py-1.5 text-[13px] transition-colors",
             interval === "year" ? "bg-accent text-accent-contrast" : "text-ink-muted hover:bg-surface-2",
