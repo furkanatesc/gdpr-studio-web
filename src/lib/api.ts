@@ -70,6 +70,7 @@ export interface StreamHandlers {
   onDelta?: (text: string) => void;
   onDone?: (meta: { model: string; disclaimer: string; usage?: GenerateResponse["usage"] }) => void;
   onError?: (message: string) => void;
+  onQuotaExceeded?: (info: { used: number; quota: number }) => void;
 }
 
 /** Streaming üretim — gerçek backend'de SSE, mock'ta simüle akış. */
@@ -85,6 +86,16 @@ export async function generateDocStream(req: GenerateRequest, h: StreamHandlers)
     });
   } catch {
     h.onError?.("Sunucuya ulaşılamadı. Backend çalışıyor mu?");
+    return;
+  }
+
+  if (resp.status === 402) {
+    let info = { used: 0, quota: 5 };
+    try {
+      const e = await resp.json();
+      if (e?.detail?.code === "quota_exceeded") info = { used: e.detail.used, quota: e.detail.quota };
+    } catch { /* */ }
+    h.onQuotaExceeded?.(info);
     return;
   }
 
