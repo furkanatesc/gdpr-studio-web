@@ -9,26 +9,26 @@ const PLATFORMS: { os: string; icon: IconName; file: string; note: string }[] = 
 export const metadata = {
   title: "İndir — KVKK Yönetim Masaüstü",
   description:
-    "KVKK Yönetim masaüstü uygulaması; doküman üretimi cihazınızda yerel olarak çalışır. Windows ve macOS. Pro / Kurumsal üyelere özeldir.",
+    "KVKK Yönetim masaüstü uygulaması; doküman üretimi cihazınızda yerel olarak çalışır. Windows ve macOS. Standart / Premium üyelere özeldir.",
 };
 
 export default function IndirPage() {
   return (
     <div className="mx-auto max-w-5xl px-6 py-20">
       <div className="text-center">
-        <p className="eyebrow mb-3">Masaüstü Uygulaması · Pro üyelik</p>
+        <p className="eyebrow mb-3">Masaüstü Uygulaması · Standart üyelik</p>
         <h1 className="font-display text-4xl leading-tight text-ink md:text-5xl">
           Veriniz cihazınızda kalsın
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-ink-muted">
           Masaüstü uygulamasında tüm doküman üretimi cihazınızda, yerel olarak gerçekleşir;
-          bunun için kendi Claude API anahtarınızı kullanırsınız. Pro ve Kurumsal üyelere özeldir.
+          bunun için kendi Claude API anahtarınızı kullanırsınız. Standart ve Premium üyelere özeldir.
         </p>
       </div>
 
       {/* Üyelik kapısı uyarısı */}
       <div className="mx-auto mt-8 flex max-w-2xl items-center justify-center gap-2 rounded-pill border border-accent/40 bg-accent-soft px-5 py-2.5 text-center text-[13px] text-accent">
-        <Icon name="lock" className="text-[15px]" /> İndirme bağlantıları yalnızca giriş yapmış Pro / Kurumsal üyelere açılır.
+        <Icon name="lock" className="text-[15px]" /> İndirme bağlantıları yalnızca giriş yapmış Standart / Premium üyelere açılır.
       </div>
 
       <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
@@ -51,7 +51,7 @@ export default function IndirPage() {
       <div className="mx-auto mt-6 max-w-2xl text-center text-[13px] text-ink-muted">
         Henüz üye değil misiniz?{" "}
         <Link href="/fiyatlandirma" className="text-accent hover:text-accent-strong">
-          Pro&apos;ya geçin
+          Standart&apos;a geçin
         </Link>{" "}
         veya{" "}
         <Link href="/login" className="text-accent hover:text-accent-strong">
@@ -64,7 +64,7 @@ export default function IndirPage() {
         <div data-reveal className="rounded-[var(--radius)] border border-border bg-surface p-6">
           <h3 className="font-display text-lg text-ink">Sistem gereksinimleri</h3>
           <ul className="mt-3 space-y-1.5 text-[13.5px] text-ink-muted">
-            <li>· Aktif Pro / Kurumsal üyelik (lisans masaüstünde doğrulanır)</li>
+            <li>· Aktif Standart / Premium üyelik (lisans masaüstünde doğrulanır)</li>
             <li>· Geçerli bir Claude API anahtarı (doküman üretimi için)</li>
             <li>· 4 GB RAM, 500 MB disk alanı</li>
             <li>· İnternet bağlantısı (model çağrıları ve lisans kontrolü için)</li>
@@ -76,7 +76,7 @@ export default function IndirPage() {
             <strong className="text-ink">Web:</strong> kurulum yok, ekipçe erişim, faturalama bizde.
             <br />
             <strong className="text-ink">Masaüstü:</strong> maksimum gizlilik, kendi anahtarınız,
-            veri yerelde (Pro üyelik gerekir).
+            veri yerelde (Standart üyelik gerekir).
           </p>
         </div>
       </div>

@@ -35,6 +35,21 @@ export async function acceptInvitation(token: string): Promise<IdentityOut> {
   return authedJson(`/api/invitations/${token}/accept`, { method: "POST" });
 }
 
+export type BillingStatus = components["schemas"]["BillingStatusOut"];
+
+export async function getBillingStatus(): Promise<BillingStatus> {
+  return authedJson("/api/billing/status", { method: "GET" });
+}
+export async function createCheckout(plan: string, interval: string): Promise<{ url: string }> {
+  return authedJson("/api/billing/checkout", {
+    method: "POST",
+    body: JSON.stringify({ plan, interval }),
+  });
+}
+export async function createPortal(): Promise<{ url: string }> {
+  return authedJson("/api/billing/portal", { method: "POST" });
+}
+
 async function authedJson(path: string, init: RequestInit) {
   if (!API_BASE) throw new Error("API yapılandırılmamış.");
   const res = await fetch(`${API_BASE}${path}`, {
@@ -55,6 +70,7 @@ export interface StreamHandlers {
   onDelta?: (text: string) => void;
   onDone?: (meta: { model: string; disclaimer: string; usage?: GenerateResponse["usage"] }) => void;
   onError?: (message: string) => void;
+  onQuotaExceeded?: (info: { used: number; quota: number }) => void;
 }
 
 /** Streaming üretim — gerçek backend'de SSE, mock'ta simüle akış. */
@@ -70,6 +86,16 @@ export async function generateDocStream(req: GenerateRequest, h: StreamHandlers)
     });
   } catch {
     h.onError?.("Sunucuya ulaşılamadı. Backend çalışıyor mu?");
+    return;
+  }
+
+  if (resp.status === 402) {
+    let info = { used: 0, quota: 5 };
+    try {
+      const e = await resp.json();
+      if (e?.detail?.code === "quota_exceeded") info = { used: e.detail.used, quota: e.detail.quota };
+    } catch { /* */ }
+    h.onQuotaExceeded?.(info);
     return;
   }
 

@@ -116,11 +116,11 @@ export default function LandingPage() {
       <section className="border-t border-border">
         <div className="mx-auto max-w-5xl px-6 py-20 md:py-28">
           <div data-reveal className="rounded-[calc(var(--radius)+8px)] border border-border bg-surface p-8 text-center md:p-10">
-            <p className="eyebrow mb-3">Masaüstü · Pro üyelik</p>
+            <p className="eyebrow mb-3">Masaüstü · Standart üyelik</p>
             <h2 className="font-display text-3xl text-ink">Veriniz cihazınızdan çıkmasın</h2>
             <p className="mx-auto mt-3 max-w-lg text-[14px] leading-relaxed text-ink-muted">
               Gizlilik açısından hassas dosyalar için masaüstü uygulamasını kullanın;
-              verileriniz cihazınızda kalır. Pro ve Kurumsal üyelere özeldir.
+              verileriniz cihazınızda kalır. Standart ve Premium üyelere özeldir.
             </p>
             <ButtonLink href="/indir" className="mt-6">
               İndirme seçenekleri <Arrow char="↗" />

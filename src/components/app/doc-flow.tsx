@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ export function DocFlow({ type }: { type: DocType }) {
   const [streaming, setStreaming] = useState(false);
   const [result, setResult] = useState<GenerateResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [quotaBlock, setQuotaBlock] = useState<{ used: number; quota: number } | null>(null);
 
   const setField = (k: string, v: string) => setFields((f) => ({ ...f, [k]: v }));
   const toggleTag = (group: "veriler" | "amaclar", v: string) =>
@@ -50,6 +52,7 @@ export function DocFlow({ type }: { type: DocType }) {
     setStreaming(true);
     setResult(null);
     setError(null);
+    setQuotaBlock(null);
 
     let acc = "";
     let grounding: GroundingRecord[] = [];
@@ -82,6 +85,7 @@ export function DocFlow({ type }: { type: DocType }) {
               usage: meta.usage,
             });
           },
+          onQuotaExceeded: (info) => setQuotaBlock(info),
           onError: (msg) => setError(msg),
         },
       );
@@ -98,6 +102,7 @@ export function DocFlow({ type }: { type: DocType }) {
     setTags({ veriler: [], amaclar: [] });
     setResult(null);
     setError(null);
+    setQuotaBlock(null);
   }
 
   function renderField(fd: FieldDef) {
@@ -178,6 +183,20 @@ export function DocFlow({ type }: { type: DocType }) {
         {loading && !result && (
           <div className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-8 text-center text-sm text-ink-muted shadow-[var(--shadow-card)]">
             Claude dokümanı envanter kayıtlarına göre hazırlıyor…
+          </div>
+        )}
+
+        {quotaBlock && (
+          <div className="rounded-[calc(var(--radius)+4px)] border border-accent bg-accent-soft px-5 py-4 text-sm">
+            <strong className="font-medium text-ink">
+              Bu ayki ücretsiz doküman hakkınızı kullandınız ({quotaBlock.used}/{quotaBlock.quota}).
+            </strong>
+            <Link
+              href="/app/faturalama"
+              className="mt-3 inline-block rounded-[var(--radius)] bg-accent px-4 py-2 text-[13px] text-accent-contrast hover:bg-accent-strong"
+            >
+              Planı yükselt →
+            </Link>
           </div>
         )}
 

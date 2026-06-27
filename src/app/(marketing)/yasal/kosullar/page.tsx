@@ -13,7 +13,7 @@ export default function YasalKosullarPage() {
       title="Kullanım Koşulları"
       intro="KVKK Yönetim'i kullanarak aşağıdaki koşulları kabul etmiş olursunuz. Üretilen her doküman avukat incelemesine tabi bir taslaktır; hukuki tavsiye niteliği taşımaz."
       sections={[
-        "Hizmet kapsamı ve üyelik türleri (Başlangıç / Pro / Kurumsal)",
+        "Hizmet kapsamı ve üyelik türleri (Başlangıç / Standart / Premium)",
         "Üretilen dokümanların niteliği ve sorumluluk reddi",
         "Kullanıcı yükümlülükleri ve kabul edilebilir kullanım",
         "Fikri mülkiyet ve lisans hakları",
