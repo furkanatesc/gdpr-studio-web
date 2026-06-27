@@ -87,6 +87,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <SectionLabel>Araçlar</SectionLabel>
         <NavItem href="/app/envanter" dot="❖" label="Envanter Yönetimi" active={path === "/app/envanter"} onNavigate={onNavigate} />
         <NavItem href="/app/kontrol" dot="✓" label="Uyum Kontrol Listesi" active={path === "/app/kontrol"} onNavigate={onNavigate} />
+
+        <SectionLabel>Hesap</SectionLabel>
+        <NavItem href="/app/faturalama" dot="₺" label="Plan & Faturalama" active={path === "/app/faturalama"} onNavigate={onNavigate} />
       </nav>
 
       <div className="px-5 py-4 text-[11px] text-ink-subtle">
