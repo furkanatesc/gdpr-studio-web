@@ -58,7 +58,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { session, signOut } = useAuth();
 
   return (
-    <aside className="flex h-screen w-[264px] flex-shrink-0 flex-col border-r border-border bg-surface">
+    <aside className="flex h-full w-[264px] flex-shrink-0 flex-col border-r border-border bg-surface">
       <Link href="/" onClick={onNavigate} className="block px-5 pb-4 pt-6">
         <div className="font-display text-[19px] leading-tight text-ink">
           KVKK <span className="text-accent-strong">Yönetim</span>
