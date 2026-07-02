@@ -83,7 +83,16 @@ export function DocFlow({ type }: { type: DocType }) {
     return (card.fields ?? []).every((fd) => !fd.required || (fields[fd.key] || "").trim() !== "");
   }
 
+  const reachable = steps.map(
+    (_, i) =>
+      i <= maxReached &&
+      Array.from({ length: Math.min(i, generateStep) }, (_, ci) => ci).every((ci) =>
+        stepValid(ci),
+      ),
+  );
+
   function goTo(i: number) {
+    if (i !== step + 1 && !reachable[i]) return;
     setStep(i);
     setMaxReached((m) => Math.max(m, i));
   }
@@ -313,9 +322,10 @@ export function DocFlow({ type }: { type: DocType }) {
         <StepBar
           steps={steps}
           current={step}
-          maxReached={maxReached}
+          reachable={reachable}
           docColor={`var(--doc-${type})`}
           onSelect={goTo}
+          locked={loading}
         />
       </div>
 

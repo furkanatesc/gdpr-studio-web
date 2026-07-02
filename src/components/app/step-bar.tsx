@@ -11,15 +11,17 @@ import { cn } from "@/lib/utils";
 export function StepBar({
   steps,
   current,
-  maxReached,
+  reachable: reachableProp,
   docColor,
   onSelect,
+  locked = false,
 }: {
   steps: { title: string }[];
   current: number;
-  maxReached: number;
+  reachable: boolean[];
   docColor: string;
   onSelect: (i: number) => void;
+  locked?: boolean;
 }) {
   return (
     <ol className="flex items-center gap-2 overflow-x-auto pb-1" aria-label="Adımlar">
@@ -31,13 +33,13 @@ export function StepBar({
       {steps.map((s, i) => {
         const done = i < current;
         const active = i === current;
-        const reachable = i <= maxReached;
+        const reachable = reachableProp[i];
         return (
           <li key={s.title} className="flex min-w-0 items-center gap-2">
             {i > 0 && <span aria-hidden className="hairline-dotted w-5 flex-shrink-0 sm:w-9" />}
             <button
               type="button"
-              disabled={!reachable || active}
+              disabled={!reachable || active || locked}
               onClick={() => onSelect(i)}
               aria-current={active ? "step" : undefined}
               className={cn(
