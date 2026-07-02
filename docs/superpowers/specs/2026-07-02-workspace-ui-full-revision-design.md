@@ -149,7 +149,27 @@ Erişilebilirlik: bu tonlar yalnız dekoratif/ikincil kullanım; metin olarak ku
 - Klavye erişimi: step bar ve tag'lerde focus-visible halkaları; toast'lar
   `aria-live="polite"`.
 
-## 9. Yaşayan doküman etkisi
+## 9. İmplementasyon notları (2026-07-02, branch feature/workspace-ui-revizyon)
+
+Spec ile nihai implementasyon arasındaki bilinçli sapmalar (plan yönetti, doğru karar):
+
+- §2 "kategorilere `sensitive: true` bayrağı" → **`OZEL_NITELIKLI: Set<string>`** olarak
+  gerçekleşti (eşdeğer mekanizma; seçenekler düz string olduğu için küme daha doğal).
+- §4 "dashboard kartları `interactive` prop'unu kullanır" → dashboard kartları `<Link>`
+  olduğundan lift sınıf dizisi orada doğrudan tekrarlandı; `Card.interactive` şu an
+  tüketicisiz. Fast-follow: ortak `cardLift` sabiti çıkarılıp iki yerde kompoze edilecek.
+- Wizard'a review'da iki sağlamlaştırma eklendi (planın örnek kodunun ötesinde):
+  `locked={loading}` (üretim sırasında step bar kilidi) ve `reachable[]` (geçersizleşen
+  önceki adımda ileri atlama engeli); ayrıca `<DocFlow key={doc}>` (tip değişiminde
+  state sızıntısı düzeltmesi) ve `SensitiveNotice role="status"`.
+
+**Fast-follow listesi (merge sonrası tek kalemde):** ortak lift sabiti; spinner/pulse'a
+`motion-reduce:animate-none`; StepBar noktasının `<ol>` dışına taşınması; adım geçişinde
+focus yönetimi (+ goTo guard yorumu); toast timer cleanup; `.design-sync` snapshot
+yeniden üretimi (Playfair kalıntısı); mid-stream SSE hatasında "Doküman hazır" başlık
+çelişkisinin giderilmesi (result temizle ya da errored durumu).
+
+## 10. Yaşayan doküman etkisi
 
 İmplementasyon kapanışında: `CHANGELOG.md` girdisi + hafızadaki `design-system`
 notu güncellenir (Fraunces, mühür kırmızısı, doküman tipi renkleri, warning token).

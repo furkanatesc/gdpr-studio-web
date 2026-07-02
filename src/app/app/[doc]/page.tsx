@@ -15,7 +15,7 @@ export default async function DocPage({
   const { doc } = await params;
 
   if (VALID.has(doc as DocType)) {
-    return <DocFlow type={doc as DocType} />;
+    return <DocFlow key={doc} type={doc as DocType} />;
   }
 
   // Araçlar / bilinmeyen segment → yakında
