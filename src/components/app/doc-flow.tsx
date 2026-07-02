@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/select";
 import { Tag } from "@/components/ui/tag";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { useToast } from "@/components/ui/toast";
 import { DocumentOutput } from "./document-output";
 import { SensitiveNotice } from "./sensitive-notice";
 import { docByType, docEyebrow, OZEL_NITELIKLI } from "@/lib/catalog";
@@ -30,6 +31,7 @@ function initialFields(type: DocType): Record<string, string> {
 export function DocFlow({ type }: { type: DocType }) {
   const meta = docByType(type);
   const schema = SCHEMAS[type];
+  const toast = useToast();
   const [fields, setFields] = useState<Record<string, string>>(() => initialFields(type));
   const [tags, setTags] = useState<{ veriler: string[]; amaclar: string[] }>({
     veriler: [],
@@ -85,6 +87,7 @@ export function DocFlow({ type }: { type: DocType }) {
               disclaimer: meta.disclaimer,
               usage: meta.usage,
             });
+            toast("Doküman hazır");
           },
           onQuotaExceeded: (info) => setQuotaBlock(info),
           onError: (msg) => setError(msg),

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
+import { useToast } from "@/components/ui/toast";
 import { renderMarkdown } from "@/lib/markdown";
 import type { GenerateResponse } from "@/lib/types";
 
@@ -13,13 +13,10 @@ export function DocumentOutput({
   result: GenerateResponse;
   streaming?: boolean;
 }) {
-  const [copied, setCopied] = useState(false);
+  const toast = useToast();
 
   function copy() {
-    navigator.clipboard.writeText(result.text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    });
+    navigator.clipboard.writeText(result.text).then(() => toast("Panoya kopyalandı"));
   }
 
   return (
@@ -35,8 +32,8 @@ export function DocumentOutput({
           </div>
         )}
         <Button variant="secondary" size="sm" onClick={copy} disabled={streaming}>
-          <Icon name={copied ? "check" : "copy"} className="text-[15px]" />
-          {copied ? "Kopyalandı" : "Kopyala"}
+          <Icon name="copy" className="text-[15px]" />
+          Kopyala
         </Button>
       </header>
 
