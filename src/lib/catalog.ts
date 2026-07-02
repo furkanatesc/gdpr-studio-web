@@ -102,3 +102,14 @@ export const YURTDISI_SECENEKLERI = [
   "Evet — AB Yeterlilik Kararı olan ülkelere",
   "Evet — Açık Rıza ile",
 ];
+
+/**
+ * KVKK m.6 — özel nitelikli kişisel veri seçenekleri. Mevcut seçenek metinlerinin
+ * alt kümesidir; YENİ kategori eklenmez (envanter-gerçekliği ilkesi).
+ * "Özel nitelikli veri" DPIA risk listesinden gelir (schemas.ts).
+ */
+export const OZEL_NITELIKLI = new Set<string>([
+  "Biyometrik veri",
+  "Sağlık verisi",
+  "Özel nitelikli veri",
+]);

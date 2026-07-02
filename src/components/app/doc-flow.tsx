@@ -11,7 +11,8 @@ import { Tag } from "@/components/ui/tag";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { DocumentOutput } from "./document-output";
-import { docByType } from "@/lib/catalog";
+import { SensitiveNotice } from "./sensitive-notice";
+import { docByType, OZEL_NITELIKLI } from "@/lib/catalog";
 import { SCHEMAS, type FieldDef } from "@/lib/schemas";
 import { generateDocStream } from "@/lib/api";
 import type { DocType, GenerateResponse, GroundingRecord } from "@/lib/types";
@@ -141,21 +142,26 @@ export function DocFlow({ type }: { type: DocType }) {
       <div className="mt-8 space-y-5">
         {schema.cards.map((card, ci) => (
           <Card key={ci} title={card.title} icon={<Icon name={card.icon} className="text-[18px]" />}>
-            {card.groups?.map((g) => (
-              <div key={g.key} className="mb-5 last:mb-0">
-                <p className="mb-2.5 text-[13px] font-medium text-ink-muted">{g.label}</p>
-                <div className="flex flex-wrap gap-2">
-                  {g.options.map((o) => (
-                    <Tag
-                      key={o}
-                      label={o}
-                      on={tags[g.key].includes(o)}
-                      onToggle={() => toggleTag(g.key, o)}
-                    />
-                  ))}
+            {card.groups?.map((g) => {
+              const hasSensitive = tags[g.key].some((v) => OZEL_NITELIKLI.has(v));
+              return (
+                <div key={g.key} className="mb-5 last:mb-0">
+                  <p className="mb-2.5 text-[13px] font-medium text-ink-muted">{g.label}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {g.options.map((o) => (
+                      <Tag
+                        key={o}
+                        label={o}
+                        on={tags[g.key].includes(o)}
+                        onToggle={() => toggleTag(g.key, o)}
+                        sensitive={OZEL_NITELIKLI.has(o)}
+                      />
+                    ))}
+                  </div>
+                  {hasSensitive && <SensitiveNotice />}
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {card.fields && (
               <div className={card.groups ? "mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2" : "grid grid-cols-1 gap-4 sm:grid-cols-2"}>
