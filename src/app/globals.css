@@ -21,13 +21,24 @@
   --accent-strong: #8a6e1e;
   --accent-soft: #efe4c2;
   --accent-contrast: #fffdf6;
-  --danger: #8b2a2a;
-  --danger-soft: #f3e2d8;
+  --danger: #7f1f2b; /* mühür kırmızısı — törensel rol: disclaimer vurgusu + ihlal tipi */
+  --danger-soft: #f5e3e2;
   --ok: #3f6212;
   --ok-soft: #e8eed6;
+  --warning: #7a4f1c;
+  --warning-soft: #f5ead8;
+
+  /* Doküman tipi kimlik renkleri — yalnız rozet/nokta düzeyinde (yüzeyler saman kalır) */
+  --doc-aydinlatma: #b5912f;
+  --doc-cerez: #7a4f1c;
+  --doc-kayit: #4a5a3a;
+  --doc-dpa: #3d5a55;
+  --doc-dpia: #634a5d;
+  --doc-ihlal: #7f1f2b;
 
   --radius: 0.625rem;
   --shadow-card: 0 1px 2px rgba(33, 28, 18, 0.04), 0 8px 24px rgba(33, 28, 18, 0.06);
+  --shadow-card-lift: 0 2px 4px rgba(33, 28, 18, 0.05), 0 16px 40px rgba(33, 28, 18, 0.1);
 }
 
 .theme-brand {
@@ -48,7 +59,10 @@
   --danger-soft: rgba(217, 138, 106, 0.12);
   --ok: #b7c98a;
   --ok-soft: rgba(183, 201, 138, 0.12);
+  --warning: #e0b168;
+  --warning-soft: rgba(224, 177, 104, 0.12);
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 40px rgba(0, 0, 0, 0.35);
+  --shadow-card-lift: 0 2px 4px rgba(0, 0, 0, 0.45), 0 20px 56px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
@@ -68,8 +82,10 @@
   --color-danger-soft: var(--danger-soft);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
 
-  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jbmono), ui-monospace, monospace;
 
@@ -222,4 +238,72 @@ html.lenis body {
   background: var(--surface-2);
   color: var(--ink-muted);
   border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* Küçük giriş animasyonları */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in {
+    animation: none;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.animate-toast-in {
+  animation: toast-in 0.2s ease-out;
+}
+.animate-toast-out {
+  animation: toast-out 0.2s ease-in forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-toast-in,
+  .animate-toast-out {
+    animation: none;
+  }
+}
+
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-step-in {
+  animation: step-in 0.25s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-step-in {
+    animation: none;
+  }
 }

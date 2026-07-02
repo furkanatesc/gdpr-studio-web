@@ -1,23 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Inter, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin", "latin-ext"],
   display: "swap",
+  axes: ["opsz"],
 });
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   display: "swap",
 });
 
 const jbMono = JetBrains_Mono({
   variable: "--font-jbmono",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   display: "swap",
 });
 
@@ -43,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="tr"
-      className={`${playfair.variable} ${inter.variable} ${jbMono.variable} h-full`}
+      className={`${fraunces.variable} ${inter.variable} ${jbMono.variable} h-full`}
     >
       <body className="min-h-full"><AuthProvider>{children}</AuthProvider></body>
     </html>

@@ -9,7 +9,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex min-h-dvh bg-bg">
+    <div className="flex h-dvh overflow-hidden bg-bg">
       {/* Masaüstü sidebar */}
       <div className="hidden md:block">
         <Sidebar />

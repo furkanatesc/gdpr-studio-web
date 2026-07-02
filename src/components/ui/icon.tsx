@@ -24,6 +24,7 @@ export type IconName =
   | "copy"
   | "check"
   | "check-circle"
+  | "spinner"
   | "lock"
   | "arrow-right"
   | "arrow-up-right"
@@ -133,6 +134,7 @@ const PATHS: Record<IconName, React.ReactNode> = {
       <path d="m9 12 2 2 4-4" />
     </>
   ),
+  spinner: <path d="M21 12a9 9 0 1 1-6.22-8.56" />,
   lock: (
     <>
       <rect width="18" height="11" x="3" y="11" rx="2" />

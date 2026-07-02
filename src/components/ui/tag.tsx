@@ -1,14 +1,19 @@
 import { cn } from "@/lib/utils";
 
-/** Seçilebilir pill etiket (on/off). Durum üst bileşende tutulur. */
+/**
+ * Seçilebilir pill etiket (on/off). Durum üst bileşende tutulur.
+ * sensitive: KVKK m.6 özel nitelikli kategori — altın nokta + seçilince warning stili.
+ */
 export function Tag({
   label,
   on,
   onToggle,
+  sensitive = false,
 }: {
   label: string;
   on: boolean;
   onToggle: () => void;
+  sensitive?: boolean;
 }) {
   return (
     <button
@@ -16,12 +21,20 @@ export function Tag({
       onClick={onToggle}
       aria-pressed={on}
       className={cn(
-        "rounded-pill border px-3.5 py-1.5 text-[13px] transition-colors",
+        "rounded-pill border px-3.5 py-1.5 text-[13px] transition-[color,background-color,border-color,transform] duration-150 active:scale-[0.96]",
         on
-          ? "border-accent bg-accent-soft text-accent-strong font-medium"
+          ? sensitive
+            ? "border-warning bg-warning-soft font-medium text-warning"
+            : "border-accent bg-accent-soft font-medium text-accent-strong"
           : "border-border text-ink-muted hover:border-border-strong hover:text-ink",
       )}
     >
+      {sensitive && (
+        <span
+          aria-hidden
+          className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-warning align-middle"
+        />
+      )}
       {label}
     </button>
   );
