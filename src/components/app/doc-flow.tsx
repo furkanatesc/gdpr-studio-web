@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { DocumentOutput } from "./document-output";
 import { SensitiveNotice } from "./sensitive-notice";
-import { docByType, OZEL_NITELIKLI } from "@/lib/catalog";
+import { docByType, docEyebrow, OZEL_NITELIKLI } from "@/lib/catalog";
 import { SCHEMAS, type FieldDef } from "@/lib/schemas";
 import { generateDocStream } from "@/lib/api";
 import type { DocType, GenerateResponse, GroundingRecord } from "@/lib/types";
@@ -135,7 +135,7 @@ export function DocFlow({ type }: { type: DocType }) {
 
   return (
     <div>
-      <p className="eyebrow mb-2">{meta.eyebrow}</p>
+      <p className="eyebrow mb-2">{docEyebrow(meta)}</p>
       <h1 className="font-display text-3xl text-ink">{meta.title}</h1>
       <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-ink-muted">{meta.desc}</p>
 

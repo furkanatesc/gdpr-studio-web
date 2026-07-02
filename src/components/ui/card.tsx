@@ -6,16 +6,20 @@ export function Card({
   icon,
   children,
   className,
+  interactive = false,
 }: {
   title?: ReactNode;
   icon?: ReactNode;
   children: ReactNode;
   className?: string;
+  interactive?: boolean;
 }) {
   return (
     <section
       className={cn(
         "rounded-[calc(var(--radius)+4px)] border border-border bg-surface shadow-[var(--shadow-card)]",
+        interactive &&
+          "transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[var(--shadow-card-lift)]",
         className,
       )}
     >

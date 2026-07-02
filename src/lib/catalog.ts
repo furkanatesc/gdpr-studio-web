@@ -3,7 +3,7 @@ import type { DocType } from "./types";
 export interface DocMeta {
   type: DocType;
   no: string;
-  eyebrow: string;
+  mevzuat: string;
   title: string;
   desc: string;
 }
@@ -13,42 +13,42 @@ export const DOC_CATALOG: DocMeta[] = [
   {
     type: "aydinlatma",
     no: "01",
-    eyebrow: "Doküman 01 · KVKK m.10 / GDPR m.13-14",
+    mevzuat: "KVKK m.10 / GDPR m.13-14",
     title: "Aydınlatma Metni",
     desc: "Kişisel verilerin toplanması sırasında veri sahiplerine sunulması zorunlu bilgileri içeren temel uyum belgesi.",
   },
   {
     type: "cerez",
     no: "02",
-    eyebrow: "Doküman 02 · GDPR + ePrivacy",
+    mevzuat: "GDPR + ePrivacy",
     title: "Çerez Politikası",
     desc: "Çerez türleri, amaçları ve kullanıcı tercih mekanizmasını içeren politika belgesi.",
   },
   {
     type: "kayit",
     no: "03",
-    eyebrow: "Doküman 03 · VERBİS / GDPR m.30",
+    mevzuat: "VERBİS / GDPR m.30",
     title: "İşleme Faaliyetleri Kaydı",
     desc: "Veri sorumlusunun tüm işleme faaliyetlerini kayıt altına aldığı zorunlu register (ROPA) belgesi.",
   },
   {
     type: "dpa",
     no: "04",
-    eyebrow: "Doküman 04 · KVKK m.12 / GDPR m.28",
+    mevzuat: "KVKK m.12 / GDPR m.28",
     title: "Veri İşleme Sözleşmesi",
     desc: "Veri sorumlusu ile veri işleyen arasındaki yükümlülükleri tanımlayan sözleşme (DPA / VİS).",
   },
   {
     type: "dpia",
     no: "05",
-    eyebrow: "Doküman 05 · GDPR m.35",
+    mevzuat: "GDPR m.35",
     title: "DPIA / KİA Raporu",
     desc: "Yüksek riskli işlemeler için veri koruma etki değerlendirmesi raporu.",
   },
   {
     type: "ihlal",
     no: "06",
-    eyebrow: "Doküman 06 · KVKK m.12/5 / GDPR m.33-34",
+    mevzuat: "KVKK m.12/5 / GDPR m.33-34",
     title: "İhlal Bildirim Formu",
     desc: "Kişisel veri ihlallerinde Kurul'a ve ilgili kişilere bildirim için form.",
   },
@@ -56,6 +56,9 @@ export const DOC_CATALOG: DocMeta[] = [
 
 export const docByType = (t: DocType) =>
   DOC_CATALOG.find((d) => d.type === t)!;
+
+/** Doküman sayfası eyebrow'u — "Doküman 01 · KVKK m.10 / GDPR m.13-14" */
+export const docEyebrow = (d: DocMeta) => `Doküman ${d.no} · ${d.mevzuat}`;
 
 /* Aydınlatma formu seçenekleri (prototiple birebir). */
 export const VERI_KATEGORILERI = [
