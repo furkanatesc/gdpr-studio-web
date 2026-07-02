@@ -65,6 +65,16 @@ export function DocumentOutput({
         dangerouslySetInnerHTML={{ __html: renderMarkdown(result.text) }}
       />
 
+      {!streaming && result.disclaimer && (
+        <div className="mx-5 mb-4 flex items-start gap-2.5 rounded-[var(--radius)] border border-warning/40 border-l-2 border-l-danger bg-warning-soft px-4 py-3 text-[13px] leading-relaxed text-warning">
+          <Icon
+            name="shield-alert"
+            className="mt-0.5 flex-shrink-0 text-[15px] text-danger"
+          />
+          <span>{result.disclaimer}</span>
+        </div>
+      )}
+
       <footer className="border-t border-border px-5 py-2.5 text-[11px] text-ink-subtle">
         {streaming ? (
           "Akış sürüyor…"
