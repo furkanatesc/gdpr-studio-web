@@ -4,17 +4,14 @@ import { DOC_CATALOG } from "@/lib/catalog";
 
 const STEPS = [
   {
-    no: "01",
     title: "Envanterinizi tanımlayın",
     desc: "Kişisel veri kategorilerinizi, amaçlarınızı ve hukuki dayanaklarınızı bir kez girin. Sistem bunları her dokümanda kullanır.",
   },
   {
-    no: "02",
     title: "Doküman türünü seçin",
     desc: "Aydınlatma metni, çerez politikası, DPIA, DPA, ihlal bildirimi ve işleme kaydı — formu doldurun, üretin.",
   },
   {
-    no: "03",
     title: "Avukat onayına hazır taslak",
     desc: "Madde atıflı, envantere dayalı, uydurmasız bir taslak. İndirin, hukukçunuza iletin.",
   },
@@ -169,28 +166,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Bölüm 01 — Süreç: sol ray + dev numaralı editorial satırlar */}
-      <section className="mx-auto grid max-w-6xl gap-12 px-6 py-20 md:py-28 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-20">
-        <div>
-          <p className="eyebrow">Süreç</p>
-          <h2 className="mt-4 font-display text-4xl font-light leading-[1.12] text-ink">
-            Üç adımda
-            <br />
-            uyum dokümanı.
-          </h2>
-        </div>
-        <div>
-          {STEPS.map((s, i) => (
-            <div
-              key={s.no}
-              data-reveal
-              className={`flex gap-9 py-8 ${i > 0 ? "border-t border-border" : ""}`}
-            >
-              <div className="font-display text-[52px] font-light leading-none text-accent">{s.no}</div>
-              <div className="min-w-0">
-                <h3 className="font-display text-[21px] text-ink">{s.title}</h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-ink-muted">{s.desc}</p>
-              </div>
+      {/* Süreç — referans dili: başlık + yalın öğe listesi (numara/ikon yok) */}
+      <section className="mx-auto max-w-6xl px-6 py-20 md:py-28">
+        <p className="eyebrow">Süreç</p>
+        <h2 className="mt-4 font-display text-4xl font-light leading-[1.12] text-ink">
+          Üç adımda uyum dokümanı.
+        </h2>
+        <div className="mt-12 grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-8">
+          {STEPS.map((s) => (
+            <div key={s.title} data-reveal className="border-t border-border pt-6">
+              <h3 className="font-display text-[21px] text-ink">{s.title}</h3>
+              <p className="mt-2.5 text-[14px] leading-relaxed text-ink-muted">{s.desc}</p>
             </div>
           ))}
         </div>
