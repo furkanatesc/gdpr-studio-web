@@ -32,16 +32,16 @@ function initialFields(type: DocType): Record<string, string> {
 /** Üretim beklerken iskelet çıktı kartı — ilk stream delta'sı gelince yerini gerçek içerik alır. */
 function GenerationSkeleton() {
   return (
-    <div className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface p-6 shadow-[var(--shadow-card)]">
+    <div className=" border border-border bg-surface p-6 shadow-[var(--shadow-card)]">
       <div className="flex items-center gap-2 text-[13px] font-medium text-ink-muted">
         <Icon name="spinner" className="animate-spin text-[15px]" /> Claude dokümanı envanter
         kayıtlarına göre hazırlıyor…
       </div>
       <div aria-hidden className="mt-5 space-y-3">
-        <div className="h-4 w-2/5 animate-pulse rounded bg-surface-2" />
-        <div className="h-3 w-full animate-pulse rounded bg-surface-2" />
-        <div className="h-3 w-11/12 animate-pulse rounded bg-surface-2" />
-        <div className="h-3 w-4/5 animate-pulse rounded bg-surface-2" />
+        <div className="h-4 w-2/5 animate-pulse bg-surface-2" />
+        <div className="h-3 w-full animate-pulse bg-surface-2" />
+        <div className="h-3 w-11/12 animate-pulse bg-surface-2" />
+        <div className="h-3 w-4/5 animate-pulse bg-surface-2" />
       </div>
     </div>
   );
@@ -248,8 +248,8 @@ export function DocFlow({ type }: { type: DocType }) {
                       key={v}
                       className={
                         OZEL_NITELIKLI.has(v)
-                          ? "rounded-pill border border-warning/60 bg-warning-soft px-2.5 py-1 text-[12px] text-warning"
-                          : "rounded-pill border border-border-strong bg-surface-2 px-2.5 py-1 text-[12px] text-ink-muted"
+                          ? " border border-warning/60 bg-warning-soft px-2.5 py-1 text-[12px] text-warning"
+                          : " border border-border-strong bg-surface-2 px-2.5 py-1 text-[12px] text-ink-muted"
                       }
                     >
                       {v}
@@ -282,7 +282,7 @@ export function DocFlow({ type }: { type: DocType }) {
         {loading && !result && <GenerationSkeleton />}
 
         {quotaBlock && (
-          <div className="flex items-start gap-2.5 rounded-[calc(var(--radius)+4px)] border border-warning/40 border-l-2 border-l-warning bg-warning-soft px-5 py-4 text-sm">
+          <div className="flex items-start gap-2.5 border border-warning/40 border-l-2 border-l-warning bg-warning-soft px-5 py-4 text-sm">
             <Icon name="shield-alert" className="mt-0.5 flex-shrink-0 text-[16px] text-warning" />
             <div>
               <strong className="font-medium text-ink">
@@ -290,7 +290,7 @@ export function DocFlow({ type }: { type: DocType }) {
               </strong>
               <Link
                 href="/app/faturalama"
-                className="mt-3 inline-block rounded-[var(--radius)] bg-accent px-4 py-2 text-[13px] text-accent-contrast hover:bg-accent-strong"
+                className="mt-3 inline-block bg-accent px-4 py-2 text-[13px] text-accent-contrast hover:bg-accent-strong"
               >
                 Planı yükselt →
               </Link>
@@ -299,7 +299,7 @@ export function DocFlow({ type }: { type: DocType }) {
         )}
 
         {error && (
-          <div className="flex items-start gap-2.5 rounded-[calc(var(--radius)+4px)] border border-danger/40 border-l-2 border-l-danger bg-danger-soft px-5 py-4 text-sm text-danger">
+          <div className="flex items-start gap-2.5 border border-danger/40 border-l-2 border-l-danger bg-danger-soft px-5 py-4 text-sm text-danger">
             <Icon name="warning" className="mt-0.5 flex-shrink-0 text-[16px]" />
             <span>
               <strong className="font-medium">Üretim başarısız.</strong> {error}

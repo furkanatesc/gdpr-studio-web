@@ -20,11 +20,11 @@ export function DocumentOutput({
   }
 
   return (
-    <div className="rounded-[calc(var(--radius)+4px)] border border-border bg-surface shadow-[var(--shadow-card)]">
+    <div className=" border border-border bg-surface shadow-[var(--shadow-card)]">
       <header className="flex items-center justify-between border-b border-border px-5 py-3.5">
         {streaming ? (
           <div className="flex items-center gap-2 text-[13px] font-medium text-ink-muted">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-accent" /> Yazılıyor…
+            <span className="h-2 w-2 animate-pulse bg-accent" /> Yazılıyor…
           </div>
         ) : (
           <div className="flex items-center gap-2 text-[13px] font-medium text-ink">
@@ -45,7 +45,7 @@ export function DocumentOutput({
             {result.grounding.map((g) => (
               <span
                 key={g.kategori}
-                className="rounded-pill border border-border-strong bg-surface px-2.5 py-1 text-[12px] text-ink-muted"
+                className=" border border-border-strong bg-surface px-2.5 py-1 text-[12px] text-ink-muted"
                 title={g.hukukiSebepler.join(", ")}
               >
                 <strong className="font-medium text-ink">{g.kategori}</strong>
@@ -63,7 +63,7 @@ export function DocumentOutput({
       />
 
       {!streaming && result.disclaimer && (
-        <div className="mx-5 mb-4 flex items-start gap-2.5 rounded-[var(--radius)] border border-warning/40 border-l-2 border-l-danger bg-warning-soft px-4 py-3 text-[13px] leading-relaxed text-warning">
+        <div className="mx-5 mb-4 flex items-start gap-2.5 border border-warning/40 border-l-2 border-l-danger bg-warning-soft px-4 py-3 text-[13px] leading-relaxed text-warning">
           <Icon
             name="shield-alert"
             className="mt-0.5 flex-shrink-0 text-[15px] text-danger"

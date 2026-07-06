@@ -1,23 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Frank_Ruhl_Libre, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin", "latin-ext"],
-  display: "swap",
-  axes: ["opsz"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
+// Tipografi disiplini (2026-07-06): YALNIZ referans sitenin iki ailesi —
+// Frank Ruhl Libre (başlık serif'i) + DM Sans (geri kalan her şey). Üçüncü font yok;
+// kod blokları sistem monospace'ine düşer (ek webfont yüklenmez).
+const frankRuhl = Frank_Ruhl_Libre({
+  variable: "--font-frankruhl",
   subsets: ["latin", "latin-ext"],
   display: "swap",
 });
 
-const jbMono = JetBrains_Mono({
-  variable: "--font-jbmono",
+const dmSans = DM_Sans({
+  variable: "--font-dmsans",
   subsets: ["latin", "latin-ext"],
   display: "swap",
 });
@@ -42,10 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="tr"
-      className={`${fraunces.variable} ${inter.variable} ${jbMono.variable} h-full`}
-    >
+    <html lang="tr" className={`${frankRuhl.variable} ${dmSans.variable} h-full`}>
       <body className="min-h-full"><AuthProvider>{children}</AuthProvider></body>
     </html>
   );

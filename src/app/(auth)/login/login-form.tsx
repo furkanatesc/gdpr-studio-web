@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -49,13 +50,13 @@ export default function LoginForm() {
           </p>
 
           {!usingAuth ? (
-            <div className="mt-8 rounded-[var(--radius)] border border-border bg-surface-2 px-5 py-4 text-[13px] text-ink-muted">
+            <div className="mt-8 border border-border bg-surface-2 px-5 py-4 text-[13px] text-ink-muted">
               Giriş yakında — kimlik doğrulama henüz yapılandırılmamış.
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-8 space-y-4">
               {error && (
-                <p className="rounded-[var(--radius)] border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[13px] text-red-400">
+                <p className=" border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[13px] text-red-400">
                   {error}
                 </p>
               )}
@@ -103,26 +104,32 @@ export default function LoginForm() {
         </p>
       </div>
 
-      {/* Sağ — sinematik görsel */}
-      <div className="relative hidden flex-1 overflow-hidden border-l border-border md:block">
+      {/* Sağ — fotoğraflı lacivert bant (sözleşme §0: gerçek fotoğraf + örtü) */}
+      <div className="theme-band relative hidden flex-1 overflow-hidden border-l border-border text-ink md:block">
+        {/* Lady Justice, Old Bailey — CC BY 2.0 (Wikimedia Commons) */}
+        <Image
+          src="/hero-justice.jpg"
+          alt=""
+          aria-hidden
+          fill
+          sizes="60vw"
+          className="object-cover brightness-[.55] grayscale"
+        />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(120% 90% at 70% 10%, rgba(217,184,92,0.18), transparent 55%), radial-gradient(120% 120% at 30% 100%, rgba(217,184,92,0.08), transparent 50%), #15110b",
+              "linear-gradient(180deg, rgba(18,48,85,0.9) 0%, rgba(12,25,44,0.92) 100%)",
           }}
         />
-        <div className="relative flex h-full flex-col items-center justify-center px-12 text-center">
-          <div className="font-display text-[120px] leading-none tracking-tight text-ink/90">
-            K<span className="text-accent">.</span>Y
-          </div>
-          <p className="mt-6 max-w-md font-display text-2xl leading-snug text-ink">
+        <div className="relative flex h-full flex-col justify-end px-14 pb-16">
+          <p className="max-w-md font-display text-[28px] font-light leading-snug text-ink">
             Hukuki doğruluk,
             <br />
             gerçek envanterden.
           </p>
-          <p className="mt-4 text-[13px] tracking-wide text-ink-muted">
-            Uydurmayan yapay zekâ · madde-atıflı · avukat onayına hazır taslak
+          <p className="mt-4 font-medium text-[11px] uppercase tracking-[0.1em] text-ink-subtle">
+            KVKK 6698 · GDPR 2016/679 — Madde atıflı üretim
           </p>
         </div>
       </div>

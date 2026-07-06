@@ -8,7 +8,7 @@ export function Input({
   return (
     <input
       className={cn(
-        "h-11 w-full rounded-[var(--radius)] border border-border bg-surface px-3.5 text-sm text-ink",
+        "h-11 w-full border border-border bg-surface px-3.5 text-sm text-ink",
         "placeholder:text-ink-subtle outline-none transition-colors",
         "focus:border-accent focus:ring-2 focus:ring-accent/20",
         className,

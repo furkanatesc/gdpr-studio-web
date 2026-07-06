@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ButtonLink } from "@/components/ui/button-link";
-import { Icon } from "@/components/ui/icon";
 import { PLAN_PRICE } from "@/lib/pricing";
 
 type Interval = "month" | "year";
@@ -52,73 +51,103 @@ const TIERS = [
   },
 ];
 
+/** "₺26.000/yıl" → ["₺26.000", "YIL"]; "Ücretsiz" → ["Ücretsiz", null] */
+function splitPrice(p: string): [string, string | null] {
+  const ix = p.indexOf("/");
+  if (ix === -1) return [p, null];
+  return [p.slice(0, ix), p.slice(ix + 1).toUpperCase()];
+}
+
 export function PricingTiers() {
   const [interval, setInterval] = useState<Interval>("year");
   return (
     <>
-      <div className="mt-8 flex items-center justify-center gap-3">
-        <button
-          onClick={() => setInterval("month")}
-          aria-pressed={interval === "month"}
-          className={cn(
-            "rounded-pill px-4 py-1.5 text-[13px] transition-colors",
-            interval === "month" ? "bg-accent text-accent-contrast" : "text-ink-muted hover:bg-surface-2",
-          )}
-        >
-          Aylık
-        </button>
-        <button
-          onClick={() => setInterval("year")}
-          aria-pressed={interval === "year"}
-          className={cn(
-            "rounded-pill px-4 py-1.5 text-[13px] transition-colors",
-            interval === "year" ? "bg-accent text-accent-contrast" : "text-ink-muted hover:bg-surface-2",
-          )}
-        >
-          Yıllık <span className="ml-1 text-[11px] opacity-80">2 ay bedava</span>
-        </button>
+      <div className="mt-8 flex justify-end">
+        <div className="flex items-center gap-1 border border-border-strong p-1">
+          {(
+            [
+              ["month", "AYLIK"],
+              ["year", "YILLIK — 2 AY BEDAVA"],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setInterval(key)}
+              aria-pressed={interval === key}
+              className={cn(
+                " px-4 py-2 font-medium text-[10.5px] uppercase tracking-[0.08em] transition-colors",
+                interval === key ? "bg-accent text-accent-contrast" : "text-ink-muted hover:text-ink",
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="mt-10 grid gap-5 md:grid-cols-3">
-        {TIERS.map((t) => (
-          <div
-            key={t.name}
-            data-reveal
-            className={cn(
-              "flex flex-col rounded-[calc(var(--radius)+6px)] border bg-surface p-7 transition-[box-shadow,border-color] duration-300 hover:shadow-[var(--shadow-card)]",
-              t.popular ? "border-accent" : "border-border hover:border-border-strong",
-            )}
-          >
-            {t.popular && (
-              <span className="mb-3 self-start rounded-pill bg-accent px-3 py-1 text-[11px] font-semibold text-accent-contrast">
-                EN POPÜLER
-              </span>
-            )}
-            <h2 className="font-display text-xl text-ink">{t.name}</h2>
-            <p className="mt-1 text-[12px] text-ink-subtle">{t.sub}</p>
-            <p className="mt-4 font-display text-3xl text-ink">{t.price[interval]}</p>
-            <p className="mt-1 text-[12px] text-ink-subtle">KDV hariç</p>
-            <ul className="mt-6 flex-1 space-y-2.5 text-[13.5px] text-ink-muted">
-              {t.features.map((f) => (
-                <li key={f} className="flex items-start gap-2">
-                  <Icon name="check" className="mt-0.5 text-[15px] text-accent" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            <ButtonLink href={t.href} variant={t.popular ? "primary" : "secondary"} size="sm" className="mt-7 w-full">
-              {t.cta}
-            </ButtonLink>
-          </div>
-        ))}
+        {TIERS.map((t) => {
+          const [amount, unit] = splitPrice(t.price[interval]);
+          return (
+            <div
+              key={t.name}
+              data-reveal
+              className={cn(
+                "flex flex-col border bg-surface p-8 transition-[box-shadow,border-color] duration-300 hover:shadow-[var(--shadow-card)]",
+                t.popular ? "border-accent" : "border-border hover:border-border-strong",
+              )}
+            >
+              <div className="flex h-6 items-center justify-end">
+                {t.popular && (
+                  <span className=" bg-accent px-2.5 py-1 font-medium text-[9.5px] uppercase tracking-[0.1em] text-accent-contrast">
+                    En Popüler
+                  </span>
+                )}
+              </div>
+              <h2 className="mt-3 font-display text-2xl text-ink">{t.name}</h2>
+              <p className="mt-1 text-[12.5px] text-ink-subtle">{t.sub}</p>
+              <p className="mt-6 font-display text-4xl font-light text-ink">{amount}</p>
+              <p className="mt-1.5 font-medium text-[10.5px] uppercase tracking-[0.08em] text-ink-subtle">
+                {unit ? `/ ${unit} · KDV hariç` : "Süresiz"}
+              </p>
+              <div className="mt-6 border-t border-border" />
+              <ul className="mt-5 flex-1 space-y-2.5 text-[13.5px] text-ink-muted">
+                {t.features.map((f) => (
+                  <li key={f} className="flex items-start gap-2.5">
+                    <span aria-hidden className="mt-px font-medium text-[12px] text-accent">
+                      ✓
+                    </span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <ButtonLink
+                href={t.href}
+                variant={t.popular ? "primary" : "secondary"}
+                size="sm"
+                className="mt-7 w-full"
+              >
+                {t.cta}
+              </ButtonLink>
+            </div>
+          );
+        })}
       </div>
 
-      <div data-reveal className="mt-10 rounded-[var(--radius)] border border-border bg-surface px-6 py-5 text-center text-[13.5px] text-ink-muted">
-        <strong className="text-ink">Masaüstü uygulaması:</strong> Gizlilik açısından hassas
-        çalışmalar için verileriniz cihazınızdan hiç çıkmadan, yerel olarak işlenir. Standart ve
-        Premium üyeliğe dahildir.{" "}
-        <Link href="/indir" className="text-accent hover:text-accent-strong">
-          İndir →
+      <div
+        data-reveal
+        className="mt-8 flex flex-col gap-4 border border-border bg-surface px-7 py-6 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p className="max-w-3xl text-[13.5px] leading-relaxed text-ink-muted">
+          <strong className="font-medium text-ink">Masaüstü uygulaması:</strong> gizlilik açısından
+          hassas çalışmalar için verileriniz cihazınızdan hiç çıkmadan, yerel olarak işlenir.
+          Standart ve Premium üyeliğe dahildir.
+        </p>
+        <Link
+          href="/indir"
+          className="whitespace-nowrap font-medium text-[11.5px] uppercase tracking-[0.08em] text-ink underline underline-offset-4 decoration-[1px] transition-colors hover:text-accent"
+        >
+          İndir ↗
         </Link>
       </div>
     </>

@@ -26,7 +26,7 @@ export default async function DocPage({
       <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-ink-muted">
         Bu bölüm (ör. Envanter Yönetimi, Uyum Kontrol Listesi) sıradaki fazda eklenecek.
       </p>
-      <div className="mt-8 rounded-[calc(var(--radius)+4px)] border border-dashed border-border-strong bg-surface-2 px-6 py-12 text-center">
+      <div className="mt-8 border border-dashed border-border-strong bg-surface-2 px-6 py-12 text-center">
         <Icon name="folders" className="mx-auto text-[28px] text-ink-subtle" />
         <p className="mt-4 font-display text-lg text-ink">Doküman üretmek ister misiniz?</p>
         <p className="mx-auto mt-2 max-w-sm text-[13px] leading-relaxed text-ink-muted">

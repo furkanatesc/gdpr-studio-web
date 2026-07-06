@@ -77,18 +77,18 @@ export default function KayitForm() {
           </p>
 
           {!usingAuth ? (
-            <div className="mt-8 rounded-[var(--radius)] border border-border bg-surface-2 px-5 py-4 text-[13px] text-ink-muted">
+            <div className="mt-8 border border-border bg-surface-2 px-5 py-4 text-[13px] text-ink-muted">
               Kayıt yakında — kimlik doğrulama henüz yapılandırılmamış.
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="mt-8 space-y-4">
               {error && (
-                <p className="rounded-[var(--radius)] border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[13px] text-red-400">
+                <p className=" border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-[13px] text-red-400">
                   {error}
                 </p>
               )}
               {info && (
-                <p className="rounded-[var(--radius)] border border-accent/30 bg-accent/10 px-4 py-2.5 text-[13px] text-ink">
+                <p className=" border border-accent/30 bg-accent/10 px-4 py-2.5 text-[13px] text-ink">
                   {info}
                 </p>
               )}

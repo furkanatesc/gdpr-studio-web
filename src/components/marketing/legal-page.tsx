@@ -22,7 +22,7 @@ export function LegalPage({
       <h1 className="font-display text-4xl leading-tight text-ink">{title}</h1>
       <p className="mt-4 text-[15px] leading-relaxed text-ink-muted">{intro}</p>
 
-      <div className="mt-8 rounded-[calc(var(--radius)+4px)] border border-dashed border-border-strong bg-surface-2 px-6 py-8">
+      <div className="mt-8 border border-dashed border-border-strong bg-surface-2 px-6 py-8">
         <p className="text-[14px] leading-relaxed text-ink">
           Bu belgenin nihai metni hukuk danışmanımızla birlikte hazırlanıyor. Yürürlüğe
           girdiğinde bu sayfada yayımlanacak ve aşağıdaki başlıkları kapsayacaktır:
@@ -30,7 +30,7 @@ export function LegalPage({
         <ul className="mt-4 space-y-2 text-[13.5px] text-ink-muted">
           {sections.map((s) => (
             <li key={s} className="flex items-start gap-2.5">
-              <span className="mt-2 h-1 w-1 flex-shrink-0 rounded-full bg-accent" />
+              <span className="mt-2 h-1 w-1 flex-shrink-0 bg-accent" />
               {s}
             </li>
           ))}

@@ -44,7 +44,7 @@ export function FaturalamaClient() {
   if (!status && error)
     return (
       <div className="p-8">
-        <div className="rounded-[calc(var(--radius)+4px)] border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
+        <div className=" border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
           {error}
         </div>
       </div>
@@ -69,19 +69,19 @@ export function FaturalamaClient() {
     <div className="mx-auto max-w-3xl p-8">
       <h1 className="font-display text-2xl text-ink">Plan & Faturalama</h1>
       {banner && (
-        <p className="mt-3 rounded-[var(--radius)] bg-accent-soft px-4 py-2 text-[13px] text-accent-strong">
+        <p className="mt-3 border border-border bg-surface px-4 py-2 text-[13px] text-ink">
           {banner}
         </p>
       )}
 
       {/* Inline action error — shown without unmounting the page so users can retry. */}
       {error && (
-        <div className="mt-3 rounded-[calc(var(--radius)+4px)] border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
+        <div className="mt-3 border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
           {error}
         </div>
       )}
 
-      <div className="mt-6 rounded-[var(--radius)] border border-border bg-surface p-6">
+      <div className="mt-6 border border-border bg-surface p-6">
         <p className="text-[13px] text-ink-subtle">Mevcut plan</p>
         <p className="font-display text-xl text-ink">{PLAN_LABEL[status.plan] ?? status.plan}</p>
         {status.usage.quota !== null && (
@@ -89,7 +89,7 @@ export function FaturalamaClient() {
             <p className="text-[13px] text-ink-muted">
               Bu ay: {status.usage.used}/{status.usage.quota} doküman
             </p>
-            <div className="mt-1 h-2 w-full overflow-hidden rounded-pill bg-surface-2">
+            <div className="mt-1 h-2 w-full overflow-hidden bg-surface-2">
               <div
                 className="h-full bg-accent"
                 style={{ width: `${Math.min(100, (status.usage.used / status.usage.quota!) * 100)}%` }}
@@ -101,7 +101,7 @@ export function FaturalamaClient() {
           <button
             onClick={manage}
             disabled={busy}
-            className="mt-4 rounded-[var(--radius)] border border-border px-4 py-2 text-[13px] hover:bg-surface-2 disabled:opacity-50"
+            className="mt-4 border border-border px-4 py-2 text-[13px] hover:bg-surface-2 disabled:opacity-50"
           >
             Planı yönet
           </button>
@@ -114,28 +114,28 @@ export function FaturalamaClient() {
             <button
               onClick={() => setIntervalState("month")}
               aria-pressed={interval === "month"}
-              className={`rounded-pill px-4 py-1.5 text-[13px] ${interval === "month" ? "bg-accent text-accent-contrast" : "text-ink-muted"}`}
+              className={` px-4 py-1.5 text-[13px] ${interval === "month" ? "bg-accent text-accent-contrast" : "text-ink-muted"}`}
             >
               Aylık
             </button>
             <button
               onClick={() => setIntervalState("year")}
               aria-pressed={interval === "year"}
-              className={`rounded-pill px-4 py-1.5 text-[13px] ${interval === "year" ? "bg-accent text-accent-contrast" : "text-ink-muted"}`}
+              className={` px-4 py-1.5 text-[13px] ${interval === "year" ? "bg-accent text-accent-contrast" : "text-ink-muted"}`}
             >
               Yıllık (2 ay bedava)
             </button>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {(["standart", "premium"] as const).map((plan) => (
-              <div key={plan} className="rounded-[var(--radius)] border border-border bg-surface p-6">
+              <div key={plan} className=" border border-border bg-surface p-6">
                 <p className="font-display text-lg text-ink">{PLAN_LABEL[plan]}</p>
                 <p className="mt-1 font-display text-2xl text-ink">{PLAN_PRICE[plan][interval]}</p>
                 <p className="text-[12px] text-ink-subtle">KDV hariç</p>
                 <button
                   onClick={() => upgrade(plan)}
                   disabled={busy}
-                  className="mt-4 w-full rounded-[var(--radius)] bg-accent px-4 py-2 text-[13px] text-accent-contrast hover:bg-accent-strong disabled:opacity-50"
+                  className="mt-4 w-full bg-accent px-4 py-2 text-[13px] text-accent-contrast hover:bg-accent-strong disabled:opacity-50"
                 >
                   {PLAN_LABEL[plan]}&apos;a geç
                 </button>

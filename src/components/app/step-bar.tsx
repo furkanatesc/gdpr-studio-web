@@ -27,7 +27,7 @@ export function StepBar({
     <ol className="flex items-center gap-2 overflow-x-auto pb-1" aria-label="Adımlar">
       <span
         aria-hidden
-        className="h-2 w-2 flex-shrink-0 rounded-full"
+        className="h-2 w-2 flex-shrink-0"
         style={{ backgroundColor: docColor }}
       />
       {steps.map((s, i) => {
@@ -43,9 +43,9 @@ export function StepBar({
               onClick={() => onSelect(i)}
               aria-current={active ? "step" : undefined}
               className={cn(
-                "flex items-center gap-2 rounded-pill border px-3 py-1.5 text-[13px] transition-[color,background-color,border-color,box-shadow] duration-300 focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:outline-none",
-                done && "border-accent bg-accent text-accent-contrast shadow-[0_0_0_3px_var(--accent-soft)]",
-                active && "border-accent bg-accent-soft font-medium text-accent-strong",
+                "flex items-center gap-2 border px-3 py-1.5 text-[13px] transition-[color,background-color,border-color,box-shadow] duration-300 focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:outline-none",
+                done && "border-accent bg-accent text-accent-contrast",
+                active && "border-accent bg-surface font-medium text-accent",
                 !done &&
                   !active &&
                   (reachable
@@ -55,7 +55,7 @@ export function StepBar({
             >
               <span
                 className={cn(
-                  "flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full font-mono text-[11px]",
+                  "flex h-5 w-5 flex-shrink-0 items-center justify-center text-[11px]",
                   done
                     ? "bg-accent-contrast/20"
                     : active

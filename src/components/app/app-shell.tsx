@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Sidebar } from "./sidebar";
+import { TopBar } from "./top-bar";
 import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -47,7 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <button
             onClick={() => setOpen(true)}
             aria-label="Menüyü aç"
-            className="flex h-9 w-9 items-center justify-center rounded-[var(--radius)] border border-border text-ink"
+            className="flex h-9 w-9 items-center justify-center border border-border text-ink"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 6h18M3 12h18M3 18h18" />
@@ -59,7 +60,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-3xl px-5 py-8 md:px-10 md:py-12">{children}</div>
+          {/* Masaüstü üst barı (sözleşme §2.2) — mobil kendi barını yukarıda kullanıyor */}
+          <TopBar />
+          <div className="mx-auto max-w-5xl px-5 py-8 md:px-9 md:py-10">{children}</div>
         </main>
       </div>
     </div>
