@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import { StepBar } from "./step-bar";
+import { PageHeader } from "./page-header";
 import { SensitiveNotice } from "./sensitive-notice";
 import { DocumentOutput } from "./document-output";
 import { docByType, docEyebrow, OZEL_NITELIKLI } from "@/lib/catalog";
@@ -314,11 +315,10 @@ export function DocFlow({ type }: { type: DocType }) {
 
   return (
     <div>
-      <p className="eyebrow mb-2">{docEyebrow(meta)}</p>
-      <h1 className="font-display text-3xl text-ink">{meta.title}</h1>
-      <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-ink-muted">{meta.desc}</p>
+      {/* Sayfa başlığı grameri (sözleşme §2.1) */}
+      <PageHeader eyebrow={docEyebrow(meta)} title={meta.title} description={meta.desc} />
 
-      <div className="mt-8">
+      <div className="mt-7">
         <StepBar
           steps={steps}
           current={step}

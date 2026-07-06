@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { type BillingStatus, createCheckout, createPortal, getBillingStatus } from "@/lib/api";
 import { PLAN_LABEL, PLAN_PRICE } from "@/lib/pricing";
+import { PageHeader } from "@/components/app/page-header";
+import { StatusBadge } from "@/components/app/status-badge";
+import { cn } from "@/lib/utils";
 
+/*
+  Plan & Faturalama — sözleşme §2.1 başlık grameri + §3 durum sözlüğü (StatusBadge).
+  Kabuk konteyneri app-shell'den gelir; sayfa kendi max-width sarmalayıcısını kullanmaz.
+*/
 export function FaturalamaClient() {
   const params = useSearchParams();
   const [status, setStatus] = useState<BillingStatus | null>(null);
@@ -40,24 +47,37 @@ export function FaturalamaClient() {
     }
   }
 
+  const header = <PageHeader eyebrow="Hesap / Faturalama" title="Plan & Faturalama" />;
+
   // Full-page fallback only when the initial load fails (status never arrived).
   if (!status && error)
     return (
-      <div className="p-8">
-        <div className=" border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
+      <div>
+        {header}
+        <div className="mt-6 border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
           {error}
         </div>
       </div>
     );
-  if (!status) return <p className="p-8 text-[14px] text-ink-muted">Yükleniyor…</p>;
+  if (!status)
+    return (
+      <div>
+        {header}
+        <p className="mt-6 text-[14px] text-ink-muted">Yükleniyor…</p>
+      </div>
+    );
   if (!status.canManage)
     return (
-      <p className="p-8 text-[14px] text-ink-muted">
-        Faturalandırmayı yalnızca kurum yöneticisi yönetebilir.
-      </p>
+      <div>
+        {header}
+        <p className="mt-6 text-[14px] text-ink-muted">
+          Faturalandırmayı yalnızca kurum yöneticisi yönetebilir.
+        </p>
+      </div>
     );
 
   const isPaid = status.plan !== "baslangic";
+  const active = status.status === "active";
   const banner =
     params.get("billing") === "success"
       ? "Ödeme alındı, planınız güncelleniyor."
@@ -66,76 +86,118 @@ export function FaturalamaClient() {
         : null;
 
   return (
-    <div className="mx-auto max-w-3xl p-8">
-      <h1 className="font-display text-2xl text-ink">Plan & Faturalama</h1>
+    <div>
+      <PageHeader
+        eyebrow="Hesap / Faturalama"
+        title="Plan & Faturalama"
+        action={
+          <StatusBadge tone={active ? "ok" : "warning"}>
+            {active ? "Abonelik aktif" : status.status}
+          </StatusBadge>
+        }
+      />
+
       {banner && (
-        <p className="mt-3 border border-border bg-surface px-4 py-2 text-[13px] text-ink">
+        <p className="mt-6 border border-border bg-surface px-4 py-2.5 text-[13px] text-ink">
           {banner}
         </p>
       )}
 
       {/* Inline action error — shown without unmounting the page so users can retry. */}
       {error && (
-        <div className="mt-3 border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
+        <div className="mt-6 border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
           {error}
         </div>
       )}
 
-      <div className="mt-6 border border-border bg-surface p-6">
-        <p className="text-[13px] text-ink-subtle">Mevcut plan</p>
-        <p className="font-display text-xl text-ink">{PLAN_LABEL[status.plan] ?? status.plan}</p>
-        {status.usage.quota !== null && (
-          <div className="mt-4">
-            <p className="text-[13px] text-ink-muted">
-              Bu ay: {status.usage.used}/{status.usage.quota} doküman
+      {/* Mevcut plan kartı */}
+      <div className="mt-7 border border-border bg-surface p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-medium text-[10px] uppercase tracking-[0.12em] text-ink-subtle">
+              Mevcut plan
             </p>
-            <div className="mt-1 h-2 w-full overflow-hidden bg-surface-2">
+            <p className="mt-1 font-display text-2xl font-light text-ink">
+              {PLAN_LABEL[status.plan] ?? status.plan}
+            </p>
+          </div>
+          {isPaid && (
+            <button
+              onClick={manage}
+              disabled={busy}
+              className="border border-border-strong px-4 py-2 text-[13px] text-ink transition-colors hover:bg-surface-2 disabled:opacity-50"
+            >
+              Planı yönet
+            </button>
+          )}
+        </div>
+        {status.usage.quota !== null && (
+          <div className="mt-5 border-t border-border pt-4">
+            <div className="flex items-center justify-between">
+              <p className="text-[13px] text-ink-muted">
+                Bu ay:{" "}
+                <span className="font-medium text-ink">
+                  {status.usage.used}/{status.usage.quota}
+                </span>{" "}
+                doküman
+              </p>
+              <span className="font-medium text-[10px] text-ink-subtle">
+                %{Math.min(100, Math.round((status.usage.used / status.usage.quota) * 100))}
+              </span>
+            </div>
+            <div className="mt-2 h-[5px] w-full overflow-hidden bg-surface-2">
               <div
                 className="h-full bg-accent"
-                style={{ width: `${Math.min(100, (status.usage.used / status.usage.quota!) * 100)}%` }}
+                style={{
+                  width: `${Math.min(100, (status.usage.used / status.usage.quota!) * 100)}%`,
+                }}
               />
             </div>
           </div>
-        )}
-        {isPaid && (
-          <button
-            onClick={manage}
-            disabled={busy}
-            className="mt-4 border border-border px-4 py-2 text-[13px] hover:bg-surface-2 disabled:opacity-50"
-          >
-            Planı yönet
-          </button>
         )}
       </div>
 
       {!isPaid && (
         <>
-          <div className="mt-6 flex items-center gap-3">
-            <button
-              onClick={() => setIntervalState("month")}
-              aria-pressed={interval === "month"}
-              className={` px-4 py-1.5 text-[13px] ${interval === "month" ? "bg-accent text-accent-contrast" : "text-ink-muted"}`}
-            >
-              Aylık
-            </button>
-            <button
-              onClick={() => setIntervalState("year")}
-              aria-pressed={interval === "year"}
-              className={` px-4 py-1.5 text-[13px] ${interval === "year" ? "bg-accent text-accent-contrast" : "text-ink-muted"}`}
-            >
-              Yıllık (2 ay bedava)
-            </button>
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="font-display text-[18px] text-ink">Planı yükselt</h2>
+            <div className="flex items-center gap-1 border border-border-strong p-1">
+              {(
+                [
+                  ["month", "Aylık"],
+                  ["year", "Yıllık — 2 ay bedava"],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setIntervalState(key)}
+                  aria-pressed={interval === key}
+                  className={cn(
+                    "px-3.5 py-1.5 text-[12px] font-medium transition-colors",
+                    interval === key
+                      ? "bg-accent text-accent-contrast"
+                      : "text-ink-muted hover:text-ink",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {(["standart", "premium"] as const).map((plan) => (
-              <div key={plan} className=" border border-border bg-surface p-6">
+              <div key={plan} className="border border-border bg-surface p-6">
                 <p className="font-display text-lg text-ink">{PLAN_LABEL[plan]}</p>
-                <p className="mt-1 font-display text-2xl text-ink">{PLAN_PRICE[plan][interval]}</p>
-                <p className="text-[12px] text-ink-subtle">KDV hariç</p>
+                <p className="mt-2 font-display text-3xl font-light text-ink">
+                  {PLAN_PRICE[plan][interval]}
+                </p>
+                <p className="mt-1 font-medium text-[10px] uppercase tracking-[0.08em] text-ink-subtle">
+                  KDV hariç
+                </p>
                 <button
                   onClick={() => upgrade(plan)}
                   disabled={busy}
-                  className="mt-4 w-full bg-accent px-4 py-2 text-[13px] text-accent-contrast hover:bg-accent-strong disabled:opacity-50"
+                  className="mt-5 w-full bg-accent px-4 py-2.5 text-[13px] font-medium text-accent-contrast transition-colors hover:bg-accent-strong disabled:opacity-50"
                 >
                   {PLAN_LABEL[plan]}&apos;a geç
                 </button>

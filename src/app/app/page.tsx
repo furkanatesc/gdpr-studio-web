@@ -54,7 +54,7 @@ export default function Dashboard() {
       )}
 
       {/* Katalog başlığı + hızlı işlemler */}
-      <div className="mt-9 flex items-center justify-between">
+      <div className="mt-9 flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-[18px] text-ink">Doküman kataloğu</h2>
         <div className="flex items-center gap-5">
           <Link
