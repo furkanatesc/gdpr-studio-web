@@ -1,9 +1,9 @@
 # Tasarım Dili Sözleşmesi — Marketing ↔ Workspace Uyumu
 
-**Tarih:** 2026-07-04 · **Durum:** Faz A UYGULANDI (2026-07-06; build+lint yeşil).
-Kalan Faz A borçları: §7.4 iç sayfa migrasyonu (`[doc]` ve `faturalama` sayfaları henüz
-PageHeader gramerine + StatusBadge sözlüğüne geçmedi; StatusBadge bileşeni hazır, bekliyor),
-tarayıcıda görsel doğrulama turu.
+**Tarih:** 2026-07-04 · **Durum:** Faz A TAMAMLANDI (2026-07-06; commit bedff7a → main,
+Vercel auto-deploy). §7'nin tüm adımları uygulandı; `[doc]` ve `faturalama` dahil tüm
+workspace sayfaları PageHeader gramerinde, faturalama StatusBadge sözlüğünde.
+Sırada: Faz B (uyum kontrol listesi + skor, belgeler arşivi — ROADMAP).
 **Tetikleyici:** Kullanıcı geri bildirimi — "login sonrası ekran web sitesiyle uyumlu değil;
 hover lift yok, underline yok, tam bir AI işi." + Figma Make referansı ("KVKK PRO" kontrol paneli).
 **Karar (kullanıcı onaylı):** Figma referansının **yapısı ve mikro-dili** alınır, **kimlik bizden**
