@@ -117,9 +117,14 @@ export function DocFlow({ type }: { type: DocType }) {
       setResult({ text: acc, grounding, model: "", disclaimer: "" });
     };
 
+    // Payload temizliği: yazılıp silinmiş/boş alanlar sözlükte kalmasın — yalnız dolu değerler gider.
+    const filledFields = Object.fromEntries(
+      Object.entries(fields).filter(([, v]) => v.trim() !== ""),
+    );
+
     try {
       await generateDocStream(
-        { type, fields, veriler: tags.veriler, amaclar: tags.amaclar },
+        { type, fields: filledFields, veriler: tags.veriler, amaclar: tags.amaclar },
         {
           onGrounding: (g) => {
             grounding = g;

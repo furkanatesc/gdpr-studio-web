@@ -2,26 +2,30 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { type BillingStatus, createCheckout, createPortal, getBillingStatus } from "@/lib/api";
+import { createCheckout, createPortal, usingRealApi } from "@/lib/api";
 import { PLAN_LABEL, PLAN_PRICE } from "@/lib/pricing";
 import { PageHeader } from "@/components/app/page-header";
 import { StatusBadge } from "@/components/app/status-badge";
+import { refreshWorkspaceInfo, useWorkspaceInfo } from "@/components/app/use-workspace-info";
 import { cn } from "@/lib/utils";
 
 /*
   Plan & Faturalama — sözleşme §2.1 başlık grameri + §3 durum sözlüğü (StatusBadge).
   Kabuk konteyneri app-shell'den gelir; sayfa kendi max-width sarmalayıcısını kullanmaz.
+  Veri kaynağı = useWorkspaceInfo cache'i (sidebar/topbar ile AYNI istek — duplicate yok);
+  checkout dönüşünde cache tazelenir ki yeni plan/kota anında yansısın.
 */
 export function FaturalamaClient() {
   const params = useSearchParams();
-  const [status, setStatus] = useState<BillingStatus | null>(null);
+  const { billing: status, ready } = useWorkspaceInfo();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [interval, setIntervalState] = useState<"month" | "year">("year");
 
+  const billingResult = params.get("billing");
   useEffect(() => {
-    getBillingStatus().then(setStatus).catch((e) => setError(e.message));
-  }, []);
+    if (billingResult === "success") refreshWorkspaceInfo();
+  }, [billingResult]);
 
   async function upgrade(plan: string) {
     setBusy(true);
@@ -49,21 +53,30 @@ export function FaturalamaClient() {
 
   const header = <PageHeader eyebrow="Hesap / Faturalama" title="Plan & Faturalama" />;
 
-  // Full-page fallback only when the initial load fails (status never arrived).
-  if (!status && error)
+  if (!usingRealApi)
     return (
       <div>
         {header}
-        <div className="mt-6 border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
-          {error}
-        </div>
+        <p className="mt-6 text-[14px] text-ink-muted">
+          Faturalama gerçek API bağlantısı gerektirir; bu ortamda devre dışı.
+        </p>
       </div>
     );
-  if (!status)
+  if (!ready)
     return (
       <div>
         {header}
         <p className="mt-6 text-[14px] text-ink-muted">Yükleniyor…</p>
+      </div>
+    );
+  // Cache yüklendi ama billing gelmedi → ilk yükleme hatası.
+  if (!status)
+    return (
+      <div>
+        {header}
+        <div className="mt-6 border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
+          Faturalama durumu alınamadı. Sayfayı yenileyip tekrar deneyin.
+        </div>
       </div>
     );
   if (!status.canManage)

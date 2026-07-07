@@ -12,9 +12,12 @@ export type WorkspaceInfo = {
 /*
   Kabuk verisi (kurum adı, plan, kullanım) — sözleşme §2.3/§4: veri gerçek API'den gelir;
   mock modda (API yok) hiçbir sahte rakam gösterilmez, tüketen bileşenler kendini gizler.
-  Modül seviyesi cache: Sidebar + TopBar + dashboard aynı isteği tekrarlamasın.
+  Modül seviyesi cache: Sidebar + TopBar + dashboard + faturalama aynı isteği tekrarlamasın.
+  refreshWorkspaceInfo(): cache'i tazeler ve abone tüm bileşenleri yeniden besler
+  (ör. checkout dönüşünde plan/kota değişmiştir).
 */
 let cache: Promise<WorkspaceInfo> | null = null;
+const listeners = new Set<() => void>();
 
 function load(): Promise<WorkspaceInfo> {
   if (!cache) {
@@ -26,6 +29,12 @@ function load(): Promise<WorkspaceInfo> {
   return cache;
 }
 
+export function refreshWorkspaceInfo(): void {
+  if (!usingRealApi) return;
+  cache = null;
+  load().then(() => listeners.forEach((notify) => notify()));
+}
+
 export function useWorkspaceInfo(): WorkspaceInfo & { ready: boolean } {
   const { session } = useAuth();
   const [info, setInfo] = useState<WorkspaceInfo | null>(null);
@@ -33,11 +42,16 @@ export function useWorkspaceInfo(): WorkspaceInfo & { ready: boolean } {
   useEffect(() => {
     if (!usingRealApi || !session) return;
     let alive = true;
-    load().then((v) => {
-      if (alive) setInfo(v);
-    });
+    const pull = () => {
+      load().then((v) => {
+        if (alive) setInfo(v);
+      });
+    };
+    pull();
+    listeners.add(pull);
     return () => {
       alive = false;
+      listeners.delete(pull);
     };
   }, [session]);
 

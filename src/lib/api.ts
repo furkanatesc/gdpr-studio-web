@@ -12,9 +12,34 @@ import { supabase } from "./supabase";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "");
 
-async function authHeader(): Promise<Record<string, string>> {
+/*
+  Tek istek çekirdeği (interceptor): auth header + Content-Type burada eklenir,
+  hata gövdesi tek yerden okunur. authedJson / generateDoc / generateDocStream
+  kendi kopyalarını tutmaz.
+*/
+async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  if (!API_BASE) throw new Error("API yapılandırılmamış.");
   const token = (await supabase?.auth.getSession())?.data.session?.access_token;
-  return token ? { Authorization: `Bearer ${token}` } : {};
+  return fetch(`${API_BASE}${path}`, {
+    ...init,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(init.headers || {}),
+    },
+  });
+}
+
+/** FastAPI hata gövdesi ({detail} | {error}) → okunur mesaj; JSON değilse HTTP kodu. */
+async function errorDetail(res: Response): Promise<string> {
+  const fallback = `Sunucu hatası (HTTP ${res.status})`;
+  try {
+    const e = await res.json();
+    const d = e?.detail ?? e?.error;
+    return typeof d === "string" && d ? d : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 export type IdentityOut = components["schemas"]["IdentityOut"];
@@ -51,16 +76,8 @@ export async function createPortal(): Promise<{ url: string }> {
 }
 
 async function authedJson(path: string, init: RequestInit) {
-  if (!API_BASE) throw new Error("API yapılandırılmamış.");
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: { "Content-Type": "application/json", ...(await authHeader()), ...(init.headers || {}) },
-  });
-  if (!res.ok) {
-    let detail = `Sunucu hatası (HTTP ${res.status})`;
-    try { detail = (await res.json()).detail || detail; } catch { /* */ }
-    throw new Error(detail);
-  }
+  const res = await apiFetch(path, init);
+  if (!res.ok) throw new Error(await errorDetail(res));
   return res.status === 204 ? undefined : res.json();
 }
 export const usingRealApi = Boolean(API_BASE);
@@ -79,11 +96,7 @@ export async function generateDocStream(req: GenerateRequest, h: StreamHandlers)
 
   let resp: Response;
   try {
-    resp = await fetch(`${API_BASE}/api/generate/stream`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...(await authHeader()) },
-      body: JSON.stringify(req),
-    });
+    resp = await apiFetch("/api/generate/stream", { method: "POST", body: JSON.stringify(req) });
   } catch {
     h.onError?.("Sunucuya ulaşılamadı. Backend çalışıyor mu?");
     return;
@@ -100,14 +113,7 @@ export async function generateDocStream(req: GenerateRequest, h: StreamHandlers)
   }
 
   if (!resp.ok || !resp.body) {
-    let detail = `Sunucu hatası (HTTP ${resp.status})`;
-    try {
-      const e = await resp.json();
-      detail = e.detail || e.error || detail;
-    } catch {
-      /* gövde JSON değil */
-    }
-    h.onError?.(detail);
+    h.onError?.(await errorDetail(resp));
     return;
   }
 
@@ -165,21 +171,8 @@ async function mockStream(req: GenerateRequest, h: StreamHandlers): Promise<void
 /** Non-streaming üretim (yedek / programatik kullanım). */
 export async function generateDoc(req: GenerateRequest): Promise<GenerateResponse> {
   if (!API_BASE) return generateDocMock(req);
-
-  const res = await fetch(`${API_BASE}/api/generate`, {
+  return (await authedJson("/api/generate", {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...(await authHeader()) },
     body: JSON.stringify(req),
-  });
-  if (!res.ok) {
-    let detail = `Sunucu hatası (HTTP ${res.status})`;
-    try {
-      const e = await res.json();
-      detail = e.detail || e.error || detail;
-    } catch {
-      /* gövde JSON değil */
-    }
-    throw new Error(detail);
-  }
-  return (await res.json()) as GenerateResponse;
+  })) as GenerateResponse;
 }
