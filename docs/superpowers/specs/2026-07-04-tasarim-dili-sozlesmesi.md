@@ -60,6 +60,18 @@ Figma kaynak: yerel MCP (127.0.0.1:3845), dosya `dWd4B3oYhzWKjug3KPvbwv` (Figma 
   köşeli** (radius 0). Yuvarlaklık yalnız pill buton, rozet, çip ve avatar gibi hap/tam-yuvarlak
   öğelerde kalır. Eski `--radius: 0.625rem` kart kuralı GEÇERSİZ.
 - Dil: yalnız Türkçe (Figma'daki EN alt-etiketler alınmaz).
+- **Bağlam fotoğrafı deseni (2026-07-07 eki, kullanıcı talebi "makul yerlere mini görseller,
+  abartmadan"):** `ContextPhoto` bileşeni (`components/marketing/context-photo.tsx`) — gerçek
+  fotoğraf, TAM grayscale + düz lacivert örtü `rgba(18,48,85,.42)`; fotoğraf kendi rengini
+  getirmez, üç renk kuralı korunur. Kullanım: landing 3 İLKE kartının üst şeridi (h-36) +
+  ürün sayfası 4 ilke satırının sağ sütunu (yalnız lg, h-36). Konu, karttaki metinle bağlamsal
+  eşleşir (kasa=özel nitelikli, rack=entegrasyon, sözleşme+kalem=avukat-merkezli, arşiv
+  çekmecesi=grounding, kanun ciltleri=atıf). Kaynaklar Wikimedia PD/CC0/CC BY —
+  atıf listesi bileşenin dosya başı yorumunda; varlıklar `public/photos/`.
+- **Auth kabuğu (2026-07-07 eki):** tüm (auth) sayfaları `components/auth/auth-shell.tsx`
+  (`AuthShell` + `AuthError` + `AuthInfo`) kullanır — sol beyaz form kolonu + sağda lacivert
+  bantlı hero-justice fotoğrafı. `red-500` gibi palet dışı tonlar ve accent/10 tint kutuları
+  YASAK; form hatası = mühür kırmızısı danger tokenları.
 
 ## 1. Figma'dan alınan mikro-dil (çeviri kuralları)
 
