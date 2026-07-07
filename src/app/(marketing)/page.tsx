@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ButtonLink } from "@/components/ui/button-link";
+import { ContextPhoto } from "@/components/marketing/context-photo";
 import { DOC_CATALOG } from "@/lib/catalog";
 
 const STEPS = [
@@ -21,14 +22,17 @@ const PRINCIPLES = [
   {
     title: "Özel nitelikli veri koruması",
     desc: "Sağlık, biyometrik, ceza mahkûmiyeti gibi m.6 verileri tespit edilir; açık rıza ve ek tedbir uyarısı eklenir.",
+    img: "/photos/foto-kasa.png",
   },
   {
     title: "Diğer AI araçlarıyla entegre",
     desc: "MCP server desteğiyle KVKK motorunu Claude Desktop, Cursor ve diğer AI istemcilerinden kullanın.",
+    img: "/photos/foto-kablo.jpg",
   },
   {
     title: "Avukat-merkezli iş akışı",
     desc: "Her çıktı 'avukat incelemesine tabi taslak' notuyla gelir. Karar ve sorumluluk her zaman hukukçuda.",
+    img: "/photos/foto-imza.jpg",
   },
 ];
 
@@ -272,10 +276,14 @@ export default function LandingPage() {
             <div
               key={p.title}
               data-reveal
-              className="border border-border bg-surface p-7 transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[var(--shadow-card-lift)]"
+              className="border border-border bg-surface transition-[transform,box-shadow,border-color] duration-200 hover:-translate-y-0.5 hover:border-border-strong hover:shadow-[var(--shadow-card-lift)]"
             >
-              <h3 className="font-display text-[19px] text-ink">{p.title}</h3>
-              <p className="mt-2.5 text-[13.5px] leading-relaxed text-ink-muted">{p.desc}</p>
+              {/* Kart metniyle bağlamsal gerçek fotoğraf (kasa/altyapı/imza) */}
+              <ContextPhoto src={p.img} className="h-36 w-full" />
+              <div className="p-7">
+                <h3 className="font-display text-[19px] text-ink">{p.title}</h3>
+                <p className="mt-2.5 text-[13.5px] leading-relaxed text-ink-muted">{p.desc}</p>
+              </div>
             </div>
           ))}
         </div>
