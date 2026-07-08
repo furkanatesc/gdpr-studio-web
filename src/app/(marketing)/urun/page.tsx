@@ -24,7 +24,7 @@ const SECTIONS = [
     no: "Özel nitelikli veri",
     title: "KVKK m.6 farkındalığı",
     body: "Sağlık, biyometrik, genetik veya ceza mahkûmiyeti gibi özel nitelikli veriler otomatik tespit edilir. Bu verilerin yalnızca açık rıza veya sınırlı istisnalarla işlenebileceği ve ek güvenlik tedbirleri açıkça belirtilir.",
-    img: "/photos/foto-kasa.png",
+    img: "/photos/foto-biyometri.jpg",
   },
   {
     no: "Entegrasyon",

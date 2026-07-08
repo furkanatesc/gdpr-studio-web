@@ -7,7 +7,7 @@ import Image from "next/image";
   Kaynaklar (Wikimedia Commons):
   - /photos/foto-arsiv.jpg  — "Copyright Card Catalog Files", Michael Holley (Public Domain)
   - /photos/foto-kitap.jpg  — "Old books on bookshelf", Clem Onojeghuo / Unsplash (CC0)
-  - /photos/foto-kasa.png   — "Porta caveau banca, 1967", Aldo Moisio (Public Domain)
+  - /photos/foto-biyometri.jpg — "Macro Fingerprints", D. Sharon Pruitt (CC BY 2.0)
   - /photos/foto-kablo.jpg  — "Rear of rack at NERSC data center", Derrick Coetzee (CC0)
   - /photos/foto-imza.jpg   — "Legal Contract & Signature", Blogtrepreneur (CC BY 2.0)
 */
