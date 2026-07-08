@@ -52,7 +52,7 @@ export function SiteNav() {
         </Link>
 
         {/* Masaüstü linkler */}
-        <nav className="hidden h-full items-stretch gap-8 md:flex">
+        <nav className="hidden h-full items-stretch gap-8 lg:flex">
           {LINKS.map((l) =>
             "items" in l ? (
               <div
@@ -110,7 +110,7 @@ export function SiteNav() {
         </nav>
 
         {/* Masaüstü aksiyonlar */}
-        <div className="hidden items-center gap-5 md:flex">
+        <div className="hidden items-center gap-5 lg:flex">
           <Link
             href="/login"
             className="font-display text-[12px] tracking-[0.12em] text-ink transition-colors hover:text-accent"
@@ -127,7 +127,7 @@ export function SiteNav() {
           onClick={() => setOpen((v) => !v)}
           aria-label="Menü"
           aria-expanded={open}
-          className="flex h-9 w-9 items-center justify-center border border-border text-ink md:hidden"
+          className="flex h-9 w-9 items-center justify-center border border-border text-ink lg:hidden"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M3 6h18M3 12h18M3 18h18" />}
@@ -137,7 +137,7 @@ export function SiteNav() {
 
       {/* Mobil açılır menü */}
       {open && (
-        <div className="theme-band border-t border-border bg-[#0c192c] md:hidden">
+        <div className="theme-band border-t border-border bg-[#0c192c] lg:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col px-6 py-3">
             {LINKS.map((l) => (
               <Link
