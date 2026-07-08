@@ -22,7 +22,7 @@ const PRINCIPLES = [
   {
     title: "Özel nitelikli veri koruması",
     desc: "Sağlık, biyometrik, ceza mahkûmiyeti gibi m.6 verileri tespit edilir; açık rıza ve ek tedbir uyarısı eklenir.",
-    img: "/photos/foto-kasa.png",
+    img: "/photos/foto-biyometri.jpg",
   },
   {
     title: "Diğer AI araçlarıyla entegre",

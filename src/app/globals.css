@@ -49,10 +49,26 @@
 }
 
 .theme-brand {
-  /* Marketing / Auth — beyaz zemin, açık gri kart */
+  /* Marketing / Auth — beyaz zemin, açık gri kart.
+     TAM token seti: theme-band İÇİNDE sarıldığında (ör. hero'daki belge kartı)
+     açık-tema mürekkep/kenarlık/danger değerlerinin koyu banttan miras alınıp
+     solmaması için kendine-yeterli olmalı. */
   --bg: #ffffff;
   --surface: #f4f6f8;
   --surface-2: #eceff3;
+  --border: #e3e8ee;
+  --border-strong: #cfd7e0;
+  --ink: #123055;
+  --ink-muted: #5a6b82;
+  --ink-subtle: #8795a8;
+  --accent-strong: #98431a;
+  --accent-soft: #f8ebe3;
+  --danger: #7f1f2b;
+  --danger-soft: #f7e5e6;
+  --ok: #4e7d3a;
+  --ok-soft: #e9f0e3;
+  --warning: #b45309;
+  --warning-soft: #fbeee0;
 }
 
 .theme-band {

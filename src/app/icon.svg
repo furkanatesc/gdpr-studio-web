@@ -1,0 +1,8 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- KVKK Yönetim marka simgesi: keskin köşeli lacivert kare (radius 0),
+       krem "K" monogramı, terracotta alt bacak (3 renk: lacivert+krem+terracotta). -->
+  <rect width="32" height="32" fill="#123055"/>
+  <rect x="10" y="7" width="3.4" height="18" fill="#f4ece0"/>
+  <path d="M12 16 L21 7" stroke="#f4ece0" stroke-width="3.4" stroke-linecap="butt"/>
+  <path d="M12 16 L21 25" stroke="#be5827" stroke-width="3.4" stroke-linecap="butt"/>
+</svg>
