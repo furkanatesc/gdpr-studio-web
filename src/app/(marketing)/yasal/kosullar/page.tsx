@@ -1,9 +1,10 @@
 import { LegalPage } from "@/components/marketing/legal-page";
 
 export const metadata = {
-  title: "Kullanım Koşulları — KVKK Yönetim",
+  title: "Kullanım Koşulları",
   description:
     "KVKK Yönetim platformunu kullanırken geçerli olan koşullar, sorumluluk sınırları ve üyelik şartları.",
+  alternates: { canonical: "/yasal/kosullar" },
 };
 
 export default function YasalKosullarPage() {

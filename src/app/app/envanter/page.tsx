@@ -1,7 +1,7 @@
 import { PageHeader } from "@/components/app/page-header";
 
 export const metadata = {
-  title: "Envanter Yönetimi — KVKK Yönetim",
+  title: "Envanter Yönetimi",
 };
 
 /*

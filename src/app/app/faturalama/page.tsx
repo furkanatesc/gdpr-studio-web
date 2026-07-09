@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { FaturalamaClient } from "./faturalama-client";
 
-export const metadata = { title: "Plan & Faturalama — KVKK Yönetim" };
+export const metadata = { title: "Plan & Faturalama" };
 
 export default function FaturalamaPage() {
   return (

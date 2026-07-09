@@ -7,9 +7,10 @@ const PLATFORMS: { os: string; icon: IconName; file: string; note: string }[] = 
 ];
 
 export const metadata = {
-  title: "İndir — KVKK Yönetim Masaüstü",
+  title: "İndir — Masaüstü Uygulaması",
   description:
     "KVKK Yönetim masaüstü uygulaması; doküman üretimi cihazınızda yerel olarak çalışır. Windows ve macOS. Standart / Premium üyelere özeldir.",
+  alternates: { canonical: "/indir" },
 };
 
 export default function IndirPage() {

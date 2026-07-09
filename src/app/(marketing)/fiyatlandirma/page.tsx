@@ -1,9 +1,10 @@
 import { PricingTiers } from "./pricing-tiers";
 
 export const metadata = {
-  title: "Fiyatlandırma — KVKK Yönetim",
+  title: "Fiyatlandırma",
   description:
     "Başlangıç, Standart ve Premium planlar. Web sürümünde model maliyetini biz karşılarız; masaüstü uygulaması Standart ve Premium üyeliğe dahildir.",
+  alternates: { canonical: "/fiyatlandirma" },
 };
 
 export default function FiyatlandirmaPage() {
