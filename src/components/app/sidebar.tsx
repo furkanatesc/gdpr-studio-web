@@ -158,7 +158,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           active={path === "/app/envanter"}
           onNavigate={onNavigate}
         />
-        <NavItem href="/app/kontrol" label="Uyum Kontrol Listesi" active={false} soon />
+        <NavItem
+          href="/app/kontrol"
+          label="Uyum Kontrol Listesi"
+          active={path === "/app/kontrol"}
+          onNavigate={onNavigate}
+        />
 
         <SectionLabel>Hesap</SectionLabel>
         <NavItem
