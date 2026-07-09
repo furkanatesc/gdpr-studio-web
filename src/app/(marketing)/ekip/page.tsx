@@ -1,6 +1,7 @@
 export const metadata = {
-  title: "Ekip — KVKK Yönetim",
+  title: "Ekip",
   description: "Veri koruma hukuku ile modern yazılım mühendisliğini bir araya getiren ekip.",
+  alternates: { canonical: "/ekip" },
 };
 
 const TEAM = [

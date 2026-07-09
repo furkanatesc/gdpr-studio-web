@@ -1,9 +1,10 @@
 import { LegalPage } from "@/components/marketing/legal-page";
 
 export const metadata = {
-  title: "Aydınlatma Metni — KVKK Yönetim",
+  title: "Aydınlatma Metni",
   description:
     "KVKK Yönetim'in veri sorumlusu sıfatıyla kişisel verilerinizi nasıl işlediğine dair aydınlatma metni.",
+  alternates: { canonical: "/yasal/aydinlatma" },
 };
 
 export default function YasalAydinlatmaPage() {

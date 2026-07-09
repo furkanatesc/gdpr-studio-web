@@ -2,9 +2,10 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { ContextPhoto } from "@/components/marketing/context-photo";
 
 export const metadata = {
-  title: "Ürün — KVKK Yönetim",
+  title: "Ürün",
   description:
     "Uydurmayan yapay zekâ, madde-atıflı çıktı, özel nitelikli veri koruması ve MCP entegrasyonu. KVKK Yönetim'in ürün özellikleri.",
+  alternates: { canonical: "/urun" },
 };
 
 const SECTIONS = [

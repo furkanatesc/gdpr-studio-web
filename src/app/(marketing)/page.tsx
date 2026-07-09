@@ -3,6 +3,12 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { ContextPhoto } from "@/components/marketing/context-photo";
 import { DOC_CATALOG } from "@/lib/catalog";
 
+// Başlık kasıtlı olarak override edilmiyor — root layout'un title.default'u
+// ("KVKK Yönetim — KVKK & GDPR Doküman Platformu") ana sayfa için zaten doğru.
+export const metadata = {
+  alternates: { canonical: "/" },
+};
+
 const STEPS = [
   {
     title: "Envanterinizi tanımlayın",

@@ -1,9 +1,10 @@
 import { LegalPage } from "@/components/marketing/legal-page";
 
 export const metadata = {
-  title: "Gizlilik Politikası — KVKK Yönetim",
+  title: "Gizlilik Politikası",
   description:
     "KVKK Yönetim'in verilerinizi nasıl topladığı, sakladığı ve koruduğuna dair gizlilik politikası.",
+  alternates: { canonical: "/yasal/gizlilik" },
 };
 
 export default function YasalGizlilikPage() {

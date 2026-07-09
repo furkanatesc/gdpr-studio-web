@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Arrow } from "@/components/ui/icon";
 
 export const metadata = {
-  title: "İletişim — KVKK Yönetim",
+  title: "İletişim",
   description:
     "Demo talebi, kurumsal kullanım veya iş birliği için KVKK Yönetim ekibiyle iletişime geçin.",
+  alternates: { canonical: "/iletisim" },
 };
 
 export default function IletisimPage() {
