@@ -143,6 +143,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/compliance/checklist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Checklist */
+        get: operations["get_checklist_api_compliance_checklist_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/compliance/status/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Status */
+        put: operations["put_status_api_compliance_status__key__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/generate": {
         parameters: {
             query?: never;
@@ -289,6 +323,45 @@ export interface components {
             /** Orgname */
             orgName: string;
         };
+        /** ChecklistGroup */
+        ChecklistGroup: {
+            /** Group */
+            group: string;
+            /** Items */
+            items: components["schemas"]["ChecklistItem"][];
+        };
+        /** ChecklistItem */
+        ChecklistItem: {
+            /** Description */
+            description: string;
+            /** Key */
+            key: string;
+            /** Madderef */
+            maddeRef: string;
+            /** Note */
+            note?: string | null;
+            /** Source */
+            source?: string | null;
+            /** Sourcetype */
+            sourceType: string;
+            /** Status */
+            status?: string | null;
+            /** Suggestion */
+            suggestion?: string | null;
+            /** Title */
+            title: string;
+        };
+        /** ChecklistOut */
+        ChecklistOut: {
+            /** Groupscores */
+            groupScores: {
+                [key: string]: number | null;
+            };
+            /** Groups */
+            groups: components["schemas"]["ChecklistGroup"][];
+            /** Score */
+            score: number | null;
+        };
         /** CheckoutRequest */
         CheckoutRequest: {
             /** Interval */
@@ -410,6 +483,16 @@ export interface components {
             email: string;
             /** Role */
             role: string;
+        };
+        /** StatusUpdate */
+        StatusUpdate: {
+            /** Note */
+            note?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "yapildi" | "eksik" | "uygulanmaz";
         };
         /** UrlOut */
         UrlOut: {
@@ -640,6 +723,61 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+        };
+    };
+    get_checklist_api_compliance_checklist_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChecklistOut"];
+                };
+            };
+        };
+    };
+    put_status_api_compliance_status__key__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChecklistItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

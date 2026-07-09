@@ -15,6 +15,12 @@ export type GenerateRequest = Schemas["GenerateRequest"];
 export type GenerateResponse = Schemas["GenerateResponse"];
 export type Usage = Schemas["Usage"];
 
+/** Uyum kontrol listesi (Faz B) — bkz. spec §2/§6. */
+export type ComplianceStatusValue = Schemas["StatusUpdate"]["status"];
+export type ChecklistItem = Schemas["ChecklistItem"];
+export type ChecklistGroup = Schemas["ChecklistGroup"];
+export type ComplianceChecklist = Schemas["ChecklistOut"];
+
 /** İstemci-tarafı yardımcı — FastAPI hata gövdesi {detail}; üretilen şemada ayrı tip yok. */
 export interface ApiError {
   error: string;
