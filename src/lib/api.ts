@@ -1,4 +1,11 @@
-import type { GenerateRequest, GenerateResponse, GroundingRecord } from "./types";
+import type {
+  ChecklistItem,
+  ComplianceChecklist,
+  ComplianceStatusValue,
+  GenerateRequest,
+  GenerateResponse,
+  GroundingRecord,
+} from "./types";
 import type { components } from "./api-types";
 import { generateDocMock } from "./mock-api";
 import { supabase } from "./supabase";
@@ -73,6 +80,28 @@ export async function createCheckout(plan: string, interval: string): Promise<{ 
 }
 export async function createPortal(): Promise<{ url: string }> {
   return authedJson("/api/billing/portal", { method: "POST" });
+}
+
+/*
+  Uyum kontrol listesi (Faz B) — spec §6: mock modda (API yok) boş liste döner,
+  skor null (UI "—") — sahte gereksinim/skor uydurulmaz.
+*/
+const EMPTY_CHECKLIST: ComplianceChecklist = { groups: [], score: null, groupScores: {} };
+
+export async function getComplianceChecklist(): Promise<ComplianceChecklist> {
+  if (!API_BASE) return EMPTY_CHECKLIST;
+  return authedJson("/api/compliance/checklist", { method: "GET" });
+}
+
+export async function setComplianceStatus(
+  key: string,
+  status: ComplianceStatusValue,
+  note?: string | null,
+): Promise<ChecklistItem> {
+  return authedJson(`/api/compliance/status/${key}`, {
+    method: "PUT",
+    body: JSON.stringify({ status, note: note ?? null }),
+  });
 }
 
 async function authedJson(path: string, init: RequestInit) {

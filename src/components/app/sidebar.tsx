@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { usingAuth } from "@/lib/supabase";
 import { useWorkspaceInfo } from "./use-workspace-info";
+import { ComplianceMeter } from "./compliance-meter";
 
 /*
   Sidebar (sözleşme §2.3, 2026-07-06 revizyonu): koyu lacivert bant (theme-band),
@@ -158,7 +159,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           active={path === "/app/envanter"}
           onNavigate={onNavigate}
         />
-        <NavItem href="/app/kontrol" label="Uyum Kontrol Listesi" active={false} soon />
+        <NavItem
+          href="/app/kontrol"
+          label="Uyum Kontrol Listesi"
+          active={path === "/app/kontrol"}
+          onNavigate={onNavigate}
+        />
 
         <SectionLabel>Hesap</SectionLabel>
         <NavItem
@@ -176,6 +182,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       <UsageMeter />
+      <ComplianceMeter />
       <OrgFooter onNavigate={onNavigate} />
     </aside>
   );

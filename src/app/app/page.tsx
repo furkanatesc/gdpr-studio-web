@@ -4,6 +4,8 @@ import Link from "next/link";
 import { DOC_CATALOG } from "@/lib/catalog";
 import { PLAN_LABEL } from "@/lib/pricing";
 import { PageHeader } from "@/components/app/page-header";
+import { ScoreRing } from "@/components/app/score-ring";
+import { useComplianceChecklist } from "@/components/app/use-compliance-checklist";
 import { useWorkspaceInfo } from "@/components/app/use-workspace-info";
 
 /*
@@ -28,6 +30,7 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub: st
 
 export default function Dashboard() {
   const { billing } = useWorkspaceInfo();
+  const { checklist } = useComplianceChecklist();
 
   return (
     <div>
@@ -52,6 +55,18 @@ export default function Dashboard() {
           />
         </div>
       )}
+
+      {/* Uyum skoru halkası — /app/kontrol'e gider (Faz B); score null → "—" (uydurulmuş sayı yok) */}
+      <div className="mt-4 flex items-center gap-5 border border-border bg-surface px-6 py-5">
+        <ScoreRing score={checklist?.score ?? null} />
+        <div>
+          <p className="font-medium text-[9.5px] uppercase tracking-[0.12em] text-ink-subtle">
+            Uyum skoru
+          </p>
+          <p className="mt-1 font-display text-xl text-ink">Kontrol listesi</p>
+          <p className="mt-1 text-[12.5px] text-ink-muted">KVKK/GDPR yükümlülük durumunuz</p>
+        </div>
+      </div>
 
       {/* Katalog başlığı + hızlı işlemler */}
       <div className="mt-9 flex flex-wrap items-center justify-between gap-3">
