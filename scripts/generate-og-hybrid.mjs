@@ -66,7 +66,7 @@ async function loadFonts() {
 }
 
 function buildTree(bgDataUri) {
-  const PAD = 64;
+  const PAD = 46; // sol iç boşluk — metin biraz daha sola yaslı (kullanıcı isteği)
   return h(
     "div",
     { style: { width: "1200px", height: "630px", display: "flex", position: "relative", background: NAVY_BAND, fontFamily: "DM Sans" } },
