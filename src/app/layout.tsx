@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Frank_Ruhl_Libre, DM_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
-import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { PLAUSIBLE_DOMAIN, SITE_NAME, SITE_URL } from "@/lib/site";
 
 // Tipografi disiplini (2026-07-06): YALNIZ referans sitenin iki ailesi —
 // Frank Ruhl Libre (başlık serif'i) + DM Sans (geri kalan her şey). Üçüncü font yok;
@@ -59,9 +60,23 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Plausible yalnız Vercel PRODUCTION dağıtımında yüklenir — preview/localhost
+  // istatistikleri kirletmez. Gizlilik-dostu, çerezsiz; rıza banner'ı gerekmez.
+  const analyticsEnabled = process.env.VERCEL_ENV === "production";
+
   return (
     <html lang="tr" className={`${frankRuhl.variable} ${dmSans.variable} h-full`}>
-      <body className="min-h-full"><AuthProvider>{children}</AuthProvider></body>
+      <body className="min-h-full">
+        <AuthProvider>{children}</AuthProvider>
+        {analyticsEnabled && (
+          <Script
+            defer
+            data-domain={PLAUSIBLE_DOMAIN}
+            src="https://plausible.io/js/script.js"
+            strategy="afterInteractive"
+          />
+        )}
+      </body>
     </html>
   );
 }
