@@ -86,10 +86,10 @@ function buildTree(bgDataUri) {
         width: "1200px",
         height: "630px",
         display: "flex",
-        // Yumuşak ve UZUN geçiş: fotonun kendi siyah-sol/aydınlık-sağ dikişini örtmek için
-        // koyuluk ~%52'ye kadar yüksek tutulur, sonra kademeli sıfırlanır (dikey kenar görünmez).
+        // Metin ~%53'e kadar TAM koyu zeminde kalır (taşma yok); sonra HIZLI sıfırlanır
+        // ki heykel/terazi (~%63+) net görünsün. Dikey dikiş de bu güçlü bölgede örtülür.
         backgroundImage:
-          "linear-gradient(100deg, rgba(12,25,44,0.97) 0%, rgba(12,25,44,0.93) 34%, rgba(12,25,44,0.80) 52%, rgba(18,48,85,0.42) 66%, rgba(18,48,85,0.14) 80%, rgba(18,48,85,0) 100%)",
+          "linear-gradient(100deg, rgba(12,25,44,0.97) 0%, rgba(12,25,44,0.94) 42%, rgba(12,25,44,0.86) 55%, rgba(18,48,85,0.30) 64%, rgba(18,48,85,0.08) 74%, rgba(18,48,85,0) 84%)",
       },
     }),
     // İçerik sütunu (sol)
@@ -100,7 +100,7 @@ function buildTree(bgDataUri) {
           position: "absolute",
           top: `${PAD}px`,
           left: `${PAD}px`,
-          width: "660px",
+          width: "600px",
           height: `${630 - PAD * 2}px`,
           display: "flex",
           flexDirection: "column",
@@ -109,7 +109,7 @@ function buildTree(bgDataUri) {
       },
       h(
         "div",
-        { style: { display: "flex", flexWrap: "wrap", fontFamily: "Frank Ruhl Libre", fontWeight: 700, fontSize: "84px", lineHeight: 1.05, color: INK } },
+        { style: { display: "flex", flexWrap: "wrap", fontFamily: "Frank Ruhl Libre", fontWeight: 700, fontSize: "72px", lineHeight: 1.06, color: INK } },
         h("span", { style: { display: "flex", marginRight: "22px" } }, "KVKK"),
         h("span", { style: { display: "flex", color: TERRACOTTA } }, "YÖNETİM"),
       ),
