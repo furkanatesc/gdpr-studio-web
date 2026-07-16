@@ -67,7 +67,10 @@ async function errorDetail(res: Response): Promise<string> {
   try {
     const e = await res.json();
     const d = e?.detail ?? e?.error;
-    return typeof d === "string" && d ? d : fallback;
+    if (typeof d === "string" && d) return d;
+    // detail nesne olabilir (ör. {code, message}) — okunur mesajı çıkar.
+    if (d && typeof d === "object" && typeof d.message === "string") return d.message;
+    return fallback;
   } catch {
     return fallback;
   }
@@ -81,14 +84,33 @@ export async function bootstrap(orgName: string): Promise<IdentityOut> {
 export async function getMe(): Promise<IdentityOut> {
   return authedJson("/api/auth/me", { method: "GET" });
 }
-export async function createInvitation(email: string, role: string) {
+export type InviteOut = components["schemas"]["InviteOut"];
+export type MemberOut = components["schemas"]["MemberOut"];
+
+export async function createInvitation(email: string, role: string): Promise<InviteOut> {
   return authedJson("/api/invitations", { method: "POST", body: JSON.stringify({ email, role }) });
 }
-export async function listInvitations() {
+export async function listInvitations(): Promise<InviteOut[]> {
   return authedJson("/api/invitations", { method: "GET" });
+}
+export async function revokeInvitation(invId: string): Promise<void> {
+  return authedJson(`/api/invitations/${invId}`, { method: "DELETE" });
 }
 export async function acceptInvitation(token: string): Promise<IdentityOut> {
   return authedJson(`/api/invitations/${token}/accept`, { method: "POST" });
+}
+
+export async function listMembers(): Promise<MemberOut[]> {
+  return authedJson("/api/memberships", { method: "GET" });
+}
+export async function updateMemberRole(userId: string, role: string): Promise<MemberOut> {
+  return authedJson(`/api/memberships/${userId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
+}
+export async function removeMember(userId: string): Promise<void> {
+  return authedJson(`/api/memberships/${userId}`, { method: "DELETE" });
 }
 
 export type BillingStatus = components["schemas"]["BillingStatusOut"];
