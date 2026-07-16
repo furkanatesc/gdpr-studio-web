@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/app/page-header";
+import { TeamSection } from "@/components/app/team-section";
 import { useWorkspaceInfo } from "@/components/app/use-workspace-info";
 import { useAuth } from "@/lib/auth-context";
 import { PLAN_LABEL } from "@/lib/pricing";
@@ -65,6 +66,8 @@ export default function AyarlarPage() {
             </p>
           )}
         </section>
+
+        <TeamSection selfRole={identity?.role} />
       </div>
     </div>
   );
