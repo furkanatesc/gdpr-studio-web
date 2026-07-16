@@ -37,6 +37,30 @@ async function apiFetch(path: string, init: RequestInit = {}): Promise<Response>
   });
 }
 
+/*
+  Idempotency: istek başına bir UUID. Backend (org, key) üzerinde kısa-TTL kilit tutar →
+  aynı isteğin ağ/proxy yeniden-iletimi veya çift-çağrı (ör. React StrictMode) çift üretim
+  + çift faturaya yol açmaz (ikinci ulaşım 409 duplicate_request). Kullanıcı çift-tıklaması
+  ayrıca UI'da `loading` ile kilitli. crypto.randomUUID tüm modern tarayıcılarda + Node 19+'ta var.
+*/
+function newIdempotencyKey(): string {
+  return crypto.randomUUID();
+}
+
+const DUPLICATE_MESSAGE =
+  "Bu üretim isteği zaten işleniyor. Lütfen mevcut üretimin tamamlanmasını bekleyin.";
+
+/** 409 duplicate_request mı? (backend: {detail:{code:"duplicate_request"}}) */
+async function isDuplicateRequest(res: Response): Promise<boolean> {
+  if (res.status !== 409) return false;
+  try {
+    const e = await res.clone().json();
+    return e?.detail?.code === "duplicate_request";
+  } catch {
+    return true; // 409 ama gövde okunamadı → yine de çift istek say
+  }
+}
+
 /** FastAPI hata gövdesi ({detail} | {error}) → okunur mesaj; JSON değilse HTTP kodu. */
 async function errorDetail(res: Response): Promise<string> {
   const fallback = `Sunucu hatası (HTTP ${res.status})`;
@@ -125,9 +149,18 @@ export async function generateDocStream(req: GenerateRequest, h: StreamHandlers)
 
   let resp: Response;
   try {
-    resp = await apiFetch("/api/generate/stream", { method: "POST", body: JSON.stringify(req) });
+    resp = await apiFetch("/api/generate/stream", {
+      method: "POST",
+      body: JSON.stringify(req),
+      headers: { "Idempotency-Key": newIdempotencyKey() },
+    });
   } catch {
     h.onError?.("Sunucuya ulaşılamadı. Backend çalışıyor mu?");
+    return;
+  }
+
+  if (await isDuplicateRequest(resp)) {
+    h.onError?.(DUPLICATE_MESSAGE);
     return;
   }
 
@@ -200,8 +233,12 @@ async function mockStream(req: GenerateRequest, h: StreamHandlers): Promise<void
 /** Non-streaming üretim (yedek / programatik kullanım). */
 export async function generateDoc(req: GenerateRequest): Promise<GenerateResponse> {
   if (!API_BASE) return generateDocMock(req);
-  return (await authedJson("/api/generate", {
+  const res = await apiFetch("/api/generate", {
     method: "POST",
     body: JSON.stringify(req),
-  })) as GenerateResponse;
+    headers: { "Idempotency-Key": newIdempotencyKey() },
+  });
+  if (await isDuplicateRequest(res)) throw new Error(DUPLICATE_MESSAGE);
+  if (!res.ok) throw new Error(await errorDetail(res));
+  return (await res.json()) as GenerateResponse;
 }
