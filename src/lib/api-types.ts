@@ -55,6 +55,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/org": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update Org
+         * @description Kurum profili — sektör (süreç şablonu ekseni). Yalnız yönetici.
+         */
+        patch: operations["update_org_api_auth_org_patch"];
+        trace?: never;
+    };
     "/api/billing/checkout": {
         parameters: {
             query?: never;
@@ -301,6 +321,26 @@ export interface paths {
         patch: operations["update_member_role_api_memberships__user_id__patch"];
         trace?: never;
     };
+    "/api/processes/person-groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Person Groups
+         * @description Org'un sektöründeki kişi grupları. Sektör yoksa boş liste (sahte seçenek üretilmez).
+         */
+        get: operations["person_groups_api_processes_person_groups_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -423,6 +463,8 @@ export interface components {
             fields: {
                 [key: string]: string;
             };
+            /** Kisigrubu */
+            kisiGrubu?: string | null;
             type: components["schemas"]["DocType"];
             /**
              * Veriler
@@ -493,6 +535,8 @@ export interface components {
             orgName: string;
             /** Role */
             role: string;
+            /** Sector */
+            sector?: string | null;
             /** Userid */
             userId: string;
         };
@@ -529,6 +573,11 @@ export interface components {
             role: string;
             /** Userid */
             userId: string;
+        };
+        /** OrgUpdate */
+        OrgUpdate: {
+            /** Sector */
+            sector: string;
         };
         /** RoleUpdate */
         RoleUpdate: {
@@ -657,6 +706,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IdentityOut"];
+                };
+            };
+        };
+    };
+    update_org_api_auth_org_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentityOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1100,6 +1182,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    person_groups_api_processes_person_groups_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
                 };
             };
         };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
@@ -17,7 +17,7 @@ import { SensitiveNotice } from "./sensitive-notice";
 import { DocumentOutput } from "./document-output";
 import { docByType, docEyebrow, OZEL_NITELIKLI } from "@/lib/catalog";
 import { SCHEMAS, type CardDef, type FieldDef } from "@/lib/schemas";
-import { generateDocStream } from "@/lib/api";
+import { generateDocStream, listPersonGroups, usingRealApi } from "@/lib/api";
 import type { DocType, GenerateResponse, GroundingRecord } from "@/lib/types";
 
 function initialFields(type: DocType): Record<string, string> {
@@ -69,6 +69,15 @@ export function DocFlow({ type }: { type: DocType }) {
   const [result, setResult] = useState<GenerateResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [quotaBlock, setQuotaBlock] = useState<{ used: number; quota: number } | null>(null);
+  const [personGroups, setPersonGroups] = useState<string[]>([]);
+  const [kisiGrubu, setKisiGrubu] = useState("");
+
+  useEffect(() => {
+    if (!usingRealApi) return;
+    listPersonGroups()
+      .then(setPersonGroups)
+      .catch(() => setPersonGroups([])); // sektör yok/hata → adım gizlenir, akış bozulmaz
+  }, []);
 
   const setField = (k: string, v: string) => setFields((f) => ({ ...f, [k]: v }));
   const toggleTag = (group: "veriler" | "amaclar", v: string) =>
@@ -124,7 +133,13 @@ export function DocFlow({ type }: { type: DocType }) {
 
     try {
       await generateDocStream(
-        { type, fields: filledFields, veriler: tags.veriler, amaclar: tags.amaclar },
+        {
+          type,
+          fields: filledFields,
+          veriler: tags.veriler,
+          amaclar: tags.amaclar,
+          kisiGrubu: kisiGrubu || null,
+        },
         {
           onGrounding: (g) => {
             grounding = g;
@@ -243,6 +258,17 @@ export function DocFlow({ type }: { type: DocType }) {
     const groups = schema.cards.flatMap((c) => c.groups ?? []);
     return (
       <div className="space-y-5">
+        {personGroups.length > 0 && (
+          <Field label="İlgili kişi grubu">
+            <Select value={kisiGrubu} onChange={(e) => setKisiGrubu(e.target.value)} aria-label="İlgili kişi grubu">
+              <option value="">Seçilmedi (genel)</option>
+              {personGroups.map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </Select>
+          </Field>
+        )}
+
         <Card title="Özet" icon={<Icon name="clipboard" className="text-[18px]" />}>
           {groups.map((g) => (
             <div key={g.key} className="mb-4 last:mb-0">

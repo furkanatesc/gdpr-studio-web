@@ -84,6 +84,25 @@ export async function bootstrap(orgName: string): Promise<IdentityOut> {
 export async function getMe(): Promise<IdentityOut> {
   return authedJson("/api/auth/me", { method: "GET" });
 }
+
+/* Sektör, süreç şablonu grounding'inin eksenidir (spec §4) — bkz. sector-section.tsx. */
+export const SECTOR_LABELS: Record<string, string> = {
+  dis_klinigi: "Diş Kliniği",
+  e_ticaret: "E-Ticaret",
+  otel: "Otel / Konaklama",
+  sirket: "Genel Şirket",
+  psikoloji: "Psikoloji / Danışmanlık",
+  meslek_orgutu: "Meslek Örgütü",
+};
+
+export async function listPersonGroups(): Promise<string[]> {
+  if (!API_BASE) return [];
+  return authedJson("/api/processes/person-groups", { method: "GET" });
+}
+
+export async function updateOrgSector(sector: string): Promise<IdentityOut> {
+  return authedJson("/api/auth/org", { method: "PATCH", body: JSON.stringify({ sector }) });
+}
 export type InviteOut = components["schemas"]["InviteOut"];
 export type MemberOut = components["schemas"]["MemberOut"];
 
