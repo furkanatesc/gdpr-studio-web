@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/app/page-header";
+import { SectorSection } from "@/components/app/sector-section";
 import { TeamSection } from "@/components/app/team-section";
 import { useWorkspaceInfo } from "@/components/app/use-workspace-info";
 import { useAuth } from "@/lib/auth-context";
@@ -43,6 +44,7 @@ export default function AyarlarPage() {
                   value={PLAN_LABEL[billing.plan as keyof typeof PLAN_LABEL] ?? billing.plan}
                 />
               )}
+              <SectorSection sector={identity?.sector} isAdmin={identity?.role === "yonetici"} />
             </div>
           ) : (
             <p className="mt-4 text-[13px] leading-relaxed text-ink-muted">
