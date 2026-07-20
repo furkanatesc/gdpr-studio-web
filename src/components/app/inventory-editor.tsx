@@ -6,14 +6,12 @@ import { useToast } from "@/components/ui/toast";
 import { ComboCell } from "@/components/app/inventory-grid-cell";
 import {
   getClientInventory,
-  getClientInventorySummary,
   getGroundingOptions,
   importClientInventory,
   inventoryTemplateUrl,
   replaceClientInventory,
   type GroundingOptions,
   type InventoryRow,
-  type InventorySummary,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -26,22 +24,6 @@ import { cn } from "@/lib/utils";
   kimlik kolonları (departman/iş süreci/alt süreç/kişi grubu) yatayda sabit
   (position: sticky) — VERBİS/RoPA tarzı geniş tablo, kart değil.
 */
-
-function SummaryTags({ label, items }: { label: string; items: string[] }) {
-  if (items.length === 0) return null;
-  return (
-    <div className="mt-3">
-      <p className="font-medium text-[10px] uppercase tracking-[0.1em] text-ink-subtle">{label}</p>
-      <div className="mt-2 flex flex-wrap gap-1.5">
-        {items.map((it) => (
-          <span key={it} className="border border-border px-2.5 py-1 text-[11.5px] text-ink-muted">
-            {it}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 type EditableRow = InventoryRow & { _id: string };
 
@@ -232,7 +214,6 @@ const GridRow = memo(function GridRow({
 
 export function InventoryEditor({ clientId }: { clientId: string }) {
   const toast = useToast();
-  const [summary, setSummary] = useState<InventorySummary | null>(null);
   const [rows, setRows] = useState<EditableRow[] | null>(null);
   const [groundingOptions, setGroundingOptions] = useState<GroundingOptions>({
     kategoriler: [],
@@ -243,9 +224,6 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    getClientInventorySummary(clientId)
-      .then(setSummary)
-      .catch((e) => toast(e instanceof Error ? e.message : "Envanter özeti alınamadı."));
     getClientInventory(clientId)
       .then((d) => setRows(d.rows.map(withId)))
       .catch((e) => toast(e instanceof Error ? e.message : "Envanter yüklenemedi."));
@@ -260,7 +238,6 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
     setImporting(true);
     importClientInventory(clientId, file)
       .then((s) => {
-        setSummary(s);
         toast(`${s.count} kayıt yüklendi.`);
         return getClientInventory(clientId);
       })
@@ -298,11 +275,21 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
     setSaving(true);
     const payload = rows.map(toInventoryRow);
     replaceClientInventory(clientId, payload)
-      .then((s) => {
-        setSummary(s);
-        toast(`Envanter kaydedildi (${s.count} kayıt).`);
-      })
+      .then((s) => toast(`Envanter kaydedildi (${s.count} kayıt).`))
       .catch((e) => toast(e instanceof Error ? e.message : "Kaydedilemedi."))
+      .finally(() => setSaving(false));
+  }
+
+  function onClearInventory() {
+    if (!rows || rows.length === 0) return;
+    if (!window.confirm("Bu müvekkilin tüm envanter kayıtları silinecek. Emin misiniz?")) return;
+    setSaving(true);
+    replaceClientInventory(clientId, [])
+      .then(() => {
+        setRows([]);
+        toast("Envanter silindi.");
+      })
+      .catch((e) => toast(e instanceof Error ? e.message : "Silinemedi."))
       .finally(() => setSaving(false));
   }
 
@@ -321,24 +308,25 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
         Dosya yükleme mevcut envanterin tamamının yerini alır; elle yaptığınız düzenlemelerin üzerine yazar.
       </p>
 
-      {summary && (
-        <div className="mt-4 border-t border-border pt-4">
-          <p className="text-[13px] text-ink">
-            <span className="font-medium">{summary.count}</span> süreç kaydı
-          </p>
-          <SummaryTags label="Kişi grupları" items={summary.kisiGruplari} />
-          <SummaryTags label="Departmanlar" items={summary.departmanlar} />
-        </div>
-      )}
-
       <div className="mt-6 border-t border-border pt-5">
         <div className="flex items-center justify-between gap-3">
-          <h3 className="font-display text-[15px] text-ink">Envanter kayıtları</h3>
+          <h3 className="font-display text-[15px] text-ink">
+            Envanter kayıtları
+            {rows !== null && <span className="ml-2 text-[12px] font-normal text-ink-subtle">({rows.length})</span>}
+          </h3>
           <div className="flex items-center gap-3">
             {importing && <span className="text-[12px] text-ink-subtle">İçe aktarılıyor…</span>}
             <Button type="button" variant="secondary" size="sm" onClick={addRow} disabled={rows === null || importing}>
               Satır ekle
             </Button>
+            <button
+              type="button"
+              onClick={onClearInventory}
+              disabled={!rows || rows.length === 0 || importing || saving}
+              className="text-[12.5px] text-danger transition-colors hover:underline disabled:opacity-40"
+            >
+              Envanteri sil
+            </button>
           </div>
         </div>
 
