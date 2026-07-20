@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button, buttonClasses, Field, Input, MultiSelect } from "@/components/ui";
+import { Button, buttonClasses } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
+import { ComboCell } from "@/components/app/inventory-grid-cell";
 import {
   getClientInventory,
   getClientInventorySummary,
@@ -20,6 +21,10 @@ import { cn } from "@/lib/utils";
   Envanter elle düzenleme — /app/envanter (müvekkil seçici) ve müvekkil sayfasının
   ortak düzenleme motoru. clientId'ye göre yükler/kaydeder; çağıran taraf müvekkil
   değişiminde key={clientId} ile remount ederek eski/yeni istek yarışını önler.
+
+  Datagrid düzeni: satır = süreç, sütun = 15 alan. Başlık satırı dikeyde,
+  kimlik kolonları (departman/iş süreci/alt süreç/kişi grubu) yatayda sabit
+  (position: sticky) — VERBİS/RoPA tarzı geniş tablo, kart değil.
 */
 
 function SummaryTags({ label, items }: { label: string; items: string[] }) {
@@ -40,8 +45,11 @@ function SummaryTags({ label, items }: { label: string; items: string[] }) {
 
 type EditableRow = InventoryRow & { _id: string };
 
-type ListFieldKey =
+type IdentityKey = "departman" | "is_sureci" | "alt_surec" | "kisi_grubu";
+type ListKey =
+  | "kategoriler"
   | "veri_turleri"
+  | "amaclar"
   | "hukuki_sebepler"
   | "dayanaklar"
   | "saklama_sureleri"
@@ -51,17 +59,48 @@ type ListFieldKey =
   | "idari_tedbirler"
   | "teknik_tedbirler";
 
-const DETAIL_FIELDS: readonly [ListFieldKey, string][] = [
-  ["veri_turleri", "Veri türleri"],
-  ["hukuki_sebepler", "Hukuki sebepler"],
-  ["dayanaklar", "Dayanaklar"],
-  ["saklama_sureleri", "Saklama süreleri"],
-  ["islem", "İşlem"],
-  ["ortam_format", "Ortam / format"],
-  ["konum", "Konum"],
-  ["idari_tedbirler", "İdari tedbirler"],
-  ["teknik_tedbirler", "Teknik tedbirler"],
+const IDENTITY_COLUMNS: { key: IdentityKey; label: string; width: number; required?: boolean }[] = [
+  { key: "departman", label: "Departman", width: 160 },
+  { key: "is_sureci", label: "İş süreci", width: 160 },
+  { key: "alt_surec", label: "Alt süreç", width: 160 },
+  { key: "kisi_grubu", label: "Kişi grubu", width: 160, required: true },
 ];
+
+const LIST_COLUMNS: { key: ListKey; label: string; width: number; groundingKey?: "kategoriler" | "amaclar" }[] = [
+  { key: "kategoriler", label: "Kategoriler", width: 200, groundingKey: "kategoriler" },
+  { key: "veri_turleri", label: "Veri türleri", width: 200 },
+  { key: "amaclar", label: "Amaçlar", width: 200, groundingKey: "amaclar" },
+  { key: "hukuki_sebepler", label: "Hukuki sebepler", width: 190 },
+  { key: "dayanaklar", label: "Dayanaklar", width: 190 },
+  { key: "saklama_sureleri", label: "Saklama süreleri", width: 190 },
+  { key: "islem", label: "İşlem", width: 170 },
+  { key: "ortam_format", label: "Ortam / format", width: 190 },
+  { key: "konum", label: "Konum", width: 170 },
+  { key: "idari_tedbirler", label: "İdari tedbirler", width: 190 },
+  { key: "teknik_tedbirler", label: "Teknik tedbirler", width: 190 },
+];
+
+const ACTION_WIDTH = 40;
+// Sabit (frozen) sol kolonlar: aksiyon + 4 kimlik kolonu. Her birinin sticky left ofseti
+// kendinden önceki tüm frozen kolonların toplam genişliği.
+const FROZEN_WIDTHS = [ACTION_WIDTH, ...IDENTITY_COLUMNS.map((c) => c.width)];
+const FROZEN_OFFSETS = FROZEN_WIDTHS.map((_, i) => FROZEN_WIDTHS.slice(0, i).reduce((a, b) => a + b, 0));
+const GRID_TEMPLATE = [...FROZEN_WIDTHS, ...LIST_COLUMNS.map((c) => c.width)].map((w) => `${w}px`).join(" ");
+
+function headerCellClass(frozen: boolean) {
+  return cn(
+    "sticky top-0 flex items-center border-b border-r border-border bg-surface-2 px-2.5 py-2 text-[11px] font-medium uppercase tracking-[0.06em] text-ink-muted",
+    frozen ? "z-30" : "z-20",
+  );
+}
+
+function bodyCellClass(frozen: boolean, zebra: boolean, warn: boolean) {
+  return cn(
+    "flex items-center border-b border-r border-border px-0.5",
+    frozen ? "sticky z-10" : "z-0",
+    warn ? "bg-warning-soft" : zebra ? "bg-bg" : "bg-surface",
+  );
+}
 
 function emptyRow(): InventoryRow {
   return {
@@ -107,159 +146,87 @@ function toInventoryRow(row: EditableRow): InventoryRow {
   };
 }
 
-function ChipListInput({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string[];
-  onChange: (v: string[]) => void;
-}) {
-  const [draft, setDraft] = useState("");
-
-  function commit(raw: string) {
-    const parts = raw.split(",").map((p) => p.trim()).filter(Boolean);
-    if (parts.length === 0) return;
-    const next = [...value];
-    for (const p of parts) if (!next.includes(p)) next.push(p);
-    onChange(next);
-  }
-
+function GridHeader() {
   return (
-    <Field label={label}>
-      <div className="flex flex-wrap items-center gap-1.5 border border-border bg-surface px-2.5 py-1.5">
-        {value.map((v) => (
-          <span key={v} className="flex items-center gap-1 border border-accent px-2 py-0.5 text-[12px] text-accent-strong">
-            {v}
-            <button
-              type="button"
-              onClick={() => onChange(value.filter((x) => x !== v))}
-              aria-label={`${v} kaldır`}
-              className="text-accent-strong hover:text-warning"
-            >
-              ×
-            </button>
-          </span>
-        ))}
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === ",") {
-              e.preventDefault();
-              commit(draft);
-              setDraft("");
-            } else if (e.key === "Backspace" && draft === "" && value.length > 0) {
-              onChange(value.slice(0, -1));
-            }
-          }}
-          onBlur={() => {
-            if (draft.trim()) {
-              commit(draft);
-              setDraft("");
-            }
-          }}
-          placeholder="Ekle, virgül veya Enter…"
-          className="min-w-[140px] flex-1 border-0 bg-transparent p-1 text-[13px] text-ink outline-none placeholder:text-ink-subtle"
-        />
-      </div>
-    </Field>
+    <>
+      <div className={headerCellClass(true)} style={{ left: FROZEN_OFFSETS[0] }} />
+      {IDENTITY_COLUMNS.map((col, i) => (
+        <div key={col.key} className={headerCellClass(true)} style={{ left: FROZEN_OFFSETS[i + 1] }}>
+          {col.label}
+          {col.required && <span className="text-accent-strong"> *</span>}
+        </div>
+      ))}
+      {LIST_COLUMNS.map((col) => (
+        <div key={col.key} className={headerCellClass(false)}>
+          {col.label}
+        </div>
+      ))}
+    </>
   );
 }
 
-function InventoryRowEditor({
+function GridRow({
   row,
-  index,
+  idx,
   groundingOptions,
-  onPatch,
+  onPatchIdentity,
+  onPatchList,
   onRemove,
 }: {
   row: EditableRow;
-  index: number;
+  idx: number;
   groundingOptions: GroundingOptions;
-  onPatch: (patch: Partial<InventoryRow>) => void;
+  onPatchIdentity: (key: IdentityKey, v: string) => void;
+  onPatchList: (key: ListKey, v: string[]) => void;
   onRemove: () => void;
 }) {
-  const [detailsOpen, setDetailsOpen] = useState(
-    () => DETAIL_FIELDS.some(([key]) => row[key].length > 0),
-  );
+  const zebra = idx % 2 === 1;
 
   return (
-    <div className="border-t border-border py-5 first:border-t-0">
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-medium text-[10px] uppercase tracking-[0.1em] text-ink-subtle">
-          Kayıt {index + 1}
-        </span>
+    <>
+      <div className={bodyCellClass(true, zebra, false)} style={{ left: FROZEN_OFFSETS[0] }}>
         <button
           type="button"
           onClick={onRemove}
-          className="text-[12px] text-ink-subtle transition-colors hover:text-warning"
+          aria-label={`Kayıt ${idx + 1} satırını sil`}
+          className="mx-auto flex h-7 w-7 flex-shrink-0 items-center justify-center text-[15px] text-ink-subtle transition-colors hover:text-warning"
         >
-          Satırı sil
+          ×
         </button>
       </div>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Field label="Departman">
-          <Input value={row.departman} onChange={(e) => onPatch({ departman: e.target.value })} />
-        </Field>
-        <Field label="İş süreci">
-          <Input value={row.is_sureci} onChange={(e) => onPatch({ is_sureci: e.target.value })} />
-        </Field>
-        <Field label="Alt süreç">
-          <Input value={row.alt_surec} onChange={(e) => onPatch({ alt_surec: e.target.value })} />
-        </Field>
-        <Field label="Kişi grubu" required>
-          <Input
-            value={row.kisi_grubu}
-            onChange={(e) => onPatch({ kisi_grubu: e.target.value })}
-            className={cn(!row.kisi_grubu.trim() && "border-warning")}
-          />
-        </Field>
-      </div>
-
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-        <Field label="Kategoriler">
-          <MultiSelect
-            options={groundingOptions.kategoriler}
-            value={row.kategoriler}
-            onChange={(v) => onPatch({ kategoriler: v })}
-            ariaLabel="Kategoriler"
-            isSensitive={(o) => groundingOptions.ozelNitelikli.includes(o)}
-          />
-        </Field>
-        <Field label="Amaçlar">
-          <MultiSelect
-            options={groundingOptions.amaclar}
-            value={row.amaclar}
-            onChange={(v) => onPatch({ amaclar: v })}
-            ariaLabel="Amaçlar"
-          />
-        </Field>
-      </div>
-
-      <button
-        type="button"
-        onClick={() => setDetailsOpen((o) => !o)}
-        className="mt-3 text-[12px] font-medium text-accent-strong hover:underline"
-      >
-        {detailsOpen ? "Detayları gizle" : "Detayları göster"}
-      </button>
-
-      {detailsOpen && (
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {DETAIL_FIELDS.map(([key, label]) => (
-            <ChipListInput
-              key={key}
-              label={label}
-              value={row[key]}
-              onChange={(v) => onPatch({ [key]: v })}
+      {IDENTITY_COLUMNS.map((col, i) => {
+        const warn = !!col.required && !row[col.key].trim();
+        return (
+          <div
+            key={col.key}
+            className={bodyCellClass(true, zebra, warn)}
+            style={{ left: FROZEN_OFFSETS[i + 1] }}
+          >
+            <input
+              value={row[col.key]}
+              onChange={(e) => onPatchIdentity(col.key, e.target.value)}
+              aria-label={`${col.label} — kayıt ${idx + 1}`}
+              aria-invalid={warn || undefined}
+              className="h-8 w-full min-w-0 border-0 bg-transparent px-2 text-[12.5px] text-ink outline-none placeholder:text-ink-subtle"
             />
-          ))}
+          </div>
+        );
+      })}
+
+      {LIST_COLUMNS.map((col) => (
+        <div key={col.key} className={bodyCellClass(false, zebra, false)}>
+          <ComboCell
+            value={row[col.key]}
+            onChange={(v) => onPatchList(col.key, v)}
+            mode={col.groundingKey ? "options" : "free"}
+            options={col.groundingKey ? groundingOptions[col.groundingKey] : undefined}
+            isSensitive={col.groundingKey ? (o) => groundingOptions.ozelNitelikli.includes(o) : undefined}
+            ariaLabel={`${col.label} — kayıt ${idx + 1}`}
+          />
         </div>
-      )}
-    </div>
+      ))}
+    </>
   );
 }
 
@@ -313,8 +280,12 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
     setRows((rs) => rs?.filter((r) => r._id !== id) ?? rs);
   }
 
-  function patchRow(id: string, patch: Partial<InventoryRow>) {
-    setRows((rs) => rs?.map((r) => (r._id === id ? { ...r, ...patch } : r)) ?? rs);
+  function patchIdentity(id: string, key: IdentityKey, v: string) {
+    setRows((rs) => rs?.map((r) => (r._id === id ? { ...r, [key]: v } : r)) ?? rs);
+  }
+
+  function patchList(id: string, key: ListKey, v: string[]) {
+    setRows((rs) => rs?.map((r) => (r._id === id ? { ...r, [key]: v } : r)) ?? rs);
   }
 
   function onSave() {
@@ -376,17 +347,26 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
         ) : rows.length === 0 ? (
           <p className="mt-4 text-[13px] text-ink-muted">Henüz envanter kaydı yok.</p>
         ) : (
-          <div className={cn(importing && "pointer-events-none opacity-50")}>
-            {rows.map((row, i) => (
-              <InventoryRowEditor
-                key={row._id}
-                row={row}
-                index={i}
-                groundingOptions={groundingOptions}
-                onPatch={(patch) => patchRow(row._id, patch)}
-                onRemove={() => removeRow(row._id)}
-              />
-            ))}
+          <div
+            className={cn(
+              "mt-4 max-h-[65vh] overflow-auto border border-border-strong",
+              importing && "pointer-events-none opacity-50",
+            )}
+          >
+            <div style={{ display: "grid", gridTemplateColumns: GRID_TEMPLATE }}>
+              <GridHeader />
+              {rows.map((row, i) => (
+                <GridRow
+                  key={row._id}
+                  row={row}
+                  idx={i}
+                  groundingOptions={groundingOptions}
+                  onPatchIdentity={(key, v) => patchIdentity(row._id, key, v)}
+                  onPatchList={(key, v) => patchList(row._id, key, v)}
+                  onRemove={() => removeRow(row._id)}
+                />
+              ))}
+            </div>
           </div>
         )}
 
