@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { AppShell } from "@/components/app/app-shell";
+import { OrgGate } from "@/components/app/org-gate";
 import { SessionGate } from "@/components/app/session-gate";
 import { ToastProvider } from "@/components/ui/toast";
 
@@ -14,7 +15,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <AppShell>
       <SessionGate>
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          <OrgGate>{children}</OrgGate>
+        </ToastProvider>
       </SessionGate>
     </AppShell>
   );
