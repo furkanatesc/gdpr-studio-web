@@ -11,7 +11,7 @@ import { usingAuth } from "@/lib/supabase";
 */
 const SECTION_LABELS: Record<string, string> = {
   "/app": "Başlangıç",
-  "/app/envanter": "Envanter Yönetimi",
+  "/app/muvekkiller": "Müvekkil Yönetimi",
   "/app/kontrol": "Uyum Kontrol Listesi",
   "/app/faturalama": "Plan & Faturalama",
   "/app/ayarlar": "Ayarlar",
