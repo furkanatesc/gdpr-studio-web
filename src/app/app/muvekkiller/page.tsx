@@ -1,29 +1,27 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { PageHeader } from "@/components/app/page-header";
 import { useWorkspaceInfo } from "@/components/app/use-workspace-info";
-import { Button, buttonClasses, Field, Input, Select } from "@/components/ui";
+import { Button, Field, Input, Select } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
 import {
   createClient,
-  getClientInventorySummary,
-  importClientInventory,
-  inventoryTemplateUrl,
   listClients,
   SECTOR_LABELS,
   updateClient,
   usingRealApi,
   type Client,
-  type InventorySummary,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /*
   Müvekkil yönetimi (Faz 2.1 envanter-müvekkil): kurum = hukuk bürosu, her müvekkilin
-  kendi sektörü + envanteri + veri sorumlusu profili var. Sol: liste + ekleme formu.
-  Sağ: seçili müvekkilin profili (yalnız yönetici düzenler — backend 409/403 ile korur)
-  ve envanter yükleme/özet. usingRealApi guard — mock modda sayfa devre dışı mesajı verir.
+  kendi sektörü + veri sorumlusu profili var. Sol: liste + ekleme formu. Sağ: seçili
+  müvekkilin profili (yalnız yönetici düzenler — backend 409/403 ile korur). Envanter
+  Araçlar → Envanter Yönetimi'nde (/app/envanter) yönetilir. usingRealApi guard —
+  mock modda sayfa devre dışı mesajı verir.
 */
 
 type ProfileKey = "legal_name" | "mersis" | "kep" | "adres" | "eposta" | "telefon" | "vergi_dairesi" | "vergi_no";
@@ -153,74 +151,6 @@ function ProfileForm({
   );
 }
 
-function SummaryTags({ label, items }: { label: string; items: string[] }) {
-  if (items.length === 0) return null;
-  return (
-    <div className="mt-3">
-      <p className="font-medium text-[10px] uppercase tracking-[0.1em] text-ink-subtle">{label}</p>
-      <div className="mt-2 flex flex-wrap gap-1.5">
-        {items.map((it) => (
-          <span key={it} className="border border-border px-2.5 py-1 text-[11.5px] text-ink-muted">
-            {it}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function InventorySection({ client }: { client: Client }) {
-  const toast = useToast();
-  const [summary, setSummary] = useState<InventorySummary | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    getClientInventorySummary(client.id)
-      .then(setSummary)
-      .catch((e) => toast(e instanceof Error ? e.message : "Envanter özeti alınamadı."));
-  }, [client.id, toast]);
-
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setBusy(true);
-    importClientInventory(client.id, file)
-      .then((s) => {
-        setSummary(s);
-        toast(`${s.count} kayıt yüklendi.`);
-      })
-      .catch((err) => toast(err instanceof Error ? err.message : "Yükleme başarısız."))
-      .finally(() => {
-        setBusy(false);
-        e.target.value = "";
-      });
-  }
-
-  return (
-    <div className="mt-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className={cn(buttonClasses("secondary", "sm"), "cursor-pointer", busy && "pointer-events-none opacity-50")}>
-          Envanter dosyası yükle (.xlsx)
-          <input type="file" accept=".xlsx" className="hidden" onChange={onFileChange} disabled={busy} />
-        </label>
-        <a href={inventoryTemplateUrl()} className="text-[12.5px] text-accent-strong hover:underline">
-          Boş şablonu indir
-        </a>
-      </div>
-
-      {summary && (
-        <div className="mt-4 border-t border-border pt-4">
-          <p className="text-[13px] text-ink">
-            <span className="font-medium">{summary.count}</span> süreç kaydı
-          </p>
-          <SummaryTags label="Kişi grupları" items={summary.kisiGruplari} />
-          <SummaryTags label="Departmanlar" items={summary.departmanlar} />
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function MuvekkillerPage() {
   const { identity } = useWorkspaceInfo();
   const toast = useToast();
@@ -257,7 +187,7 @@ export default function MuvekkillerPage() {
     <PageHeader
       eyebrow="Müvekkiller"
       title="Müvekkil Yönetimi"
-      description="Her müvekkilin kendi sektörü, veri envanteri ve veri sorumlusu profili vardır."
+      description="Her müvekkilin kendi sektörü ve veri sorumlusu profili vardır. Veri envanteri Araçlar → Envanter Yönetimi'nde düzenlenir."
     />
   );
 
@@ -311,24 +241,25 @@ export default function MuvekkillerPage() {
 
         <div className="flex flex-col gap-5">
           {selected ? (
-            <>
-              <section className="border border-border bg-surface p-6">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="font-display text-[17px] text-ink">{selected.name}</h2>
-                  {selected.sector && (
-                    <span className="font-medium text-[10px] uppercase tracking-[0.08em] text-accent">
-                      {SECTOR_LABELS[selected.sector] ?? selected.sector}
-                    </span>
-                  )}
-                </div>
-                <ProfileForm key={selected.id} client={selected} isAdmin={isAdmin} onSaved={onProfileSaved} />
-              </section>
-
-              <section className="border border-border bg-surface p-6">
-                <h2 className="font-display text-[17px] text-ink">Veri envanteri</h2>
-                <InventorySection key={selected.id} client={selected} />
-              </section>
-            </>
+            <section className="border border-border bg-surface p-6">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display text-[17px] text-ink">{selected.name}</h2>
+                {selected.sector && (
+                  <span className="font-medium text-[10px] uppercase tracking-[0.08em] text-accent">
+                    {SECTOR_LABELS[selected.sector] ?? selected.sector}
+                  </span>
+                )}
+              </div>
+              <ProfileForm key={selected.id} client={selected} isAdmin={isAdmin} onSaved={onProfileSaved} />
+              <div className="mt-5 border-t border-border pt-4">
+                <Link
+                  href={`/app/envanter?client=${selected.id}`}
+                  className="font-medium text-[12.5px] uppercase tracking-[0.08em] text-accent-strong hover:underline"
+                >
+                  Veri envanterini düzenle ↗
+                </Link>
+              </div>
+            </section>
           ) : (
             <section className="border border-dashed border-border-strong bg-surface px-8 py-12 text-center">
               <p className="text-[13.5px] text-ink-muted">Bir müvekkil seçin veya yeni ekleyin.</p>

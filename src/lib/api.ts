@@ -222,6 +222,31 @@ export async function importClientInventory(id: string, file: File): Promise<Inv
 export async function getClientInventorySummary(id: string): Promise<InventorySummary> {
   return authedJson(`/api/clients/${id}/inventory/summary`, { method: "GET" });
 }
+
+export type InventoryRow = {
+  departman: string;
+  is_sureci: string;
+  alt_surec: string;
+  kisi_grubu: string;
+  kategoriler: string[];
+  veri_turleri: string[];
+  amaclar: string[];
+  hukuki_sebepler: string[];
+  dayanaklar: string[];
+  saklama_sureleri: string[];
+  islem: string[];
+  ortam_format: string[];
+  konum: string[];
+  idari_tedbirler: string[];
+  teknik_tedbirler: string[];
+};
+
+export async function getClientInventory(id: string): Promise<{ rows: InventoryRow[] }> {
+  return authedJson(`/api/clients/${id}/inventory`, { method: "GET" });
+}
+export async function replaceClientInventory(id: string, rows: InventoryRow[]): Promise<InventorySummary> {
+  return authedJson(`/api/clients/${id}/inventory`, { method: "PUT", body: JSON.stringify({ rows }) });
+}
 export const inventoryTemplateUrl = () => `${API_BASE}/api/inventory/template`;
 export type GroundingOptions = { kategoriler: string[]; amaclar: string[]; ozelNitelikli: string[] };
 

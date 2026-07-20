@@ -199,6 +199,24 @@ export interface paths {
         patch: operations["update_client_api_clients__client_id__patch"];
         trace?: never;
     };
+    "/api/clients/{client_id}/inventory": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Inventory */
+        get: operations["get_inventory_api_clients__client_id__inventory_get"];
+        /** Replace Inventory */
+        put: operations["replace_inventory_api_clients__client_id__inventory_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clients/{client_id}/inventory/import": {
         parameters: {
             query?: never;
@@ -707,6 +725,53 @@ export interface components {
             /** Userid */
             userId: string;
         };
+        /** InventoryReplace */
+        InventoryReplace: {
+            /** Rows */
+            rows: components["schemas"]["InventoryRow"][];
+        };
+        /** InventoryRow */
+        InventoryRow: {
+            /**
+             * Alt Surec
+             * @default
+             */
+            alt_surec: string;
+            /** Amaclar */
+            amaclar?: string[];
+            /** Dayanaklar */
+            dayanaklar?: string[];
+            /**
+             * Departman
+             * @default
+             */
+            departman: string;
+            /** Hukuki Sebepler */
+            hukuki_sebepler?: string[];
+            /** Idari Tedbirler */
+            idari_tedbirler?: string[];
+            /**
+             * Is Sureci
+             * @default
+             */
+            is_sureci: string;
+            /** Islem */
+            islem?: string[];
+            /** Kategoriler */
+            kategoriler?: string[];
+            /** Kisi Grubu */
+            kisi_grubu: string;
+            /** Konum */
+            konum?: string[];
+            /** Ortam Format */
+            ortam_format?: string[];
+            /** Saklama Sureleri */
+            saklama_sureleri?: string[];
+            /** Teknik Tedbirler */
+            teknik_tedbirler?: string[];
+            /** Veri Turleri */
+            veri_turleri?: string[];
+        };
         /** InviteOut */
         InviteOut: {
             /** Email */
@@ -1133,6 +1198,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClientOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_inventory_api_clients__client_id__inventory_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    replace_inventory_api_clients__client_id__inventory_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InventoryReplace"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
