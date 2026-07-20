@@ -223,8 +223,10 @@ export async function getClientInventorySummary(id: string): Promise<InventorySu
   return authedJson(`/api/clients/${id}/inventory/summary`, { method: "GET" });
 }
 export const inventoryTemplateUrl = () => `${API_BASE}/api/inventory/template`;
-export async function getGroundingOptions(): Promise<{ kategoriler: string[]; amaclar: string[] }> {
-  if (!API_BASE) return { kategoriler: [], amaclar: [] };
+export type GroundingOptions = { kategoriler: string[]; amaclar: string[]; ozelNitelikli: string[] };
+
+export async function getGroundingOptions(): Promise<GroundingOptions> {
+  if (!API_BASE) return { kategoriler: [], amaclar: [], ozelNitelikli: [] };
   return authedJson("/api/grounding/options", { method: "GET" });
 }
 
