@@ -8,18 +8,40 @@ import { cn } from "@/lib/utils";
   Datagrid hücresi: çoklu-değer combobox. Açılır menü grid'in overflow-auto
   konteynerinin İÇİNDE absolute konumlanırsa kırpılır — bu yüzden menü
   document.body'ye portal edilir ve tetikleyicinin getBoundingClientRect'ine
-  göre position:fixed ile konumlanır. Scroll/resize'da yeniden konumlanır.
+  göre position:fixed ile konumlanır. Scroll/resize'da yeniden konumlanır;
+  tetikleyici dondurulmuş bir kolonun (veya sabit başlığın) altına kayıp
+  görünmez olursa menü kapatılır (elementFromPoint ile tespit).
 */
 
 type MenuPos = { top: number; left: number; minWidth: number };
 
-function useAnchoredPosition(anchorRef: React.RefObject<HTMLElement | null>, menuRef: React.RefObject<HTMLDivElement | null>) {
+function isAnchorVisible(anchor: HTMLElement): boolean {
+  const r = anchor.getBoundingClientRect();
+  if (r.width === 0 || r.height === 0) return false;
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  if (cx < 0 || cy < 0 || cx > window.innerWidth || cy > window.innerHeight) return false;
+  const topEl = document.elementFromPoint(cx, cy);
+  // Görünür alanın merkezinde başka bir öğe (ör. sticky dondurulmuş kolon) varsa
+  // tetikleyici o öğenin altında kalmış demektir.
+  return !!topEl && (topEl === anchor || anchor.contains(topEl));
+}
+
+function useAnchoredPosition(
+  anchorRef: React.RefObject<HTMLElement | null>,
+  menuRef: React.RefObject<HTMLDivElement | null>,
+  onOutOfView: () => void,
+) {
   const [pos, setPos] = useState<MenuPos | null>(null);
 
   useLayoutEffect(() => {
     function reposition() {
       const anchor = anchorRef.current;
       if (!anchor) return;
+      if (!isAnchorVisible(anchor)) {
+        onOutOfView();
+        return;
+      }
       const r = anchor.getBoundingClientRect();
       const menuH = menuRef.current?.offsetHeight ?? 260;
       const menuW = Math.max(r.width, 260);
@@ -37,33 +59,37 @@ function useAnchoredPosition(anchorRef: React.RefObject<HTMLElement | null>, men
       window.removeEventListener("scroll", reposition, true);
       window.removeEventListener("resize", reposition);
     };
-  }, [anchorRef, menuRef]);
+  }, [anchorRef, menuRef, onOutOfView]);
 
   return pos;
 }
 
 function GridComboMenu({
   anchorRef,
-  onClose,
+  onEscape,
+  onOutsideClick,
+  onOutOfView,
   children,
 }: {
   anchorRef: React.RefObject<HTMLElement | null>;
-  onClose: () => void;
+  onEscape: () => void;
+  onOutsideClick: () => void;
+  onOutOfView: () => void;
   children: ReactNode;
 }) {
   const menuRef = useRef<HTMLDivElement>(null);
-  const pos = useAnchoredPosition(anchorRef, menuRef);
+  const pos = useAnchoredPosition(anchorRef, menuRef, onOutOfView);
 
   useEffect(() => {
     function onPointerDown(e: MouseEvent) {
       const t = e.target as Node;
       if (anchorRef.current?.contains(t) || menuRef.current?.contains(t)) return;
-      onClose();
+      onOutsideClick();
     }
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        onEscape();
       }
     }
     document.addEventListener("mousedown", onPointerDown);
@@ -72,7 +98,7 @@ function GridComboMenu({
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [anchorRef, onClose]);
+  }, [anchorRef, onEscape, onOutsideClick]);
 
   return createPortal(
     <div
@@ -106,6 +132,10 @@ function CellSummary({ value, placeholder, hasSensitive }: { value: string[]; pl
 /**
  * Grid hücresi combobox. mode="options" -> sabit liste (grounding), sadece seçim.
  * mode="free" -> serbest giriş: yaz + Enter/virgül ile çip ekle, × ile sil.
+ *
+ * Kapanış semantiği: dışarı tıkla / tetikleyiciye tekrar tıkla / görünürlükten
+ * kayma -> serbest modda yazılmış ama commit edilmemiş taslak KAYDEDİLİR (çip
+ * olarak eklenir), sonra kapanır. Escape -> taslak atılır (iptal semantiği).
  */
 export function ComboCell({
   value,
@@ -127,14 +157,14 @@ export function ComboCell({
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState("");
   const [draft, setDraft] = useState("");
+  const [activeIndex, setActiveIndex] = useState(-1);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const filterInputRef = useRef<HTMLInputElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  function close() {
-    setOpen(false);
-    setFilter("");
-    setDraft("");
-    triggerRef.current?.focus();
-  }
+  useEffect(() => {
+    if (activeIndex >= 0) optionRefs.current[activeIndex]?.focus();
+  }, [activeIndex]);
 
   function toggleOption(o: string) {
     onChange(value.includes(o) ? value.filter((x) => x !== o) : [...value, o]);
@@ -148,10 +178,45 @@ export function ComboCell({
     onChange(next);
   }
 
+  function closeMenu({ commit, focusTrigger }: { commit: boolean; focusTrigger: boolean }) {
+    if (commit && mode === "free" && draft.trim()) commitDraft(draft);
+    setOpen(false);
+    setFilter("");
+    setDraft("");
+    setActiveIndex(-1);
+    if (focusTrigger) triggerRef.current?.focus();
+  }
+
   const hasSensitive = isSensitive ? value.some((v) => isSensitive(v)) : false;
   const filteredOptions = filter.trim()
     ? options.filter((o) => o.toLowerCase().includes(filter.trim().toLowerCase()))
     : options;
+
+  function onOptionsListKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(i + 1, filteredOptions.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (activeIndex <= 0) {
+        setActiveIndex(-1);
+        filterInputRef.current?.focus();
+      } else {
+        setActiveIndex((i) => Math.max(i - 1, 0));
+      }
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      setActiveIndex(0);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      setActiveIndex(filteredOptions.length - 1);
+    } else if (e.key === "Enter" && activeIndex >= 0 && filteredOptions[activeIndex]) {
+      e.preventDefault();
+      toggleOption(filteredOptions[activeIndex]);
+    } else if (e.key === "Tab") {
+      closeMenu({ commit: false, focusTrigger: false });
+    }
+  }
 
   return (
     <>
@@ -161,7 +226,7 @@ export function ComboCell({
         aria-haspopup={mode === "options" ? "listbox" : "dialog"}
         aria-expanded={open}
         aria-label={ariaLabel}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => (open ? closeMenu({ commit: true, focusTrigger: true }) : setOpen(true))}
         className="flex h-8 w-full min-w-0 items-center px-2 text-left text-[12.5px] outline-none hover:bg-bg focus-visible:bg-bg"
       >
         <CellSummary value={value} placeholder={placeholder} hasSensitive={hasSensitive} />
@@ -169,13 +234,22 @@ export function ComboCell({
 
       {open &&
         (mode === "options" ? (
-          <GridComboMenu anchorRef={triggerRef} onClose={close}>
-            <div role="listbox" aria-multiselectable="true" aria-label={ariaLabel}>
+          <GridComboMenu
+            anchorRef={triggerRef}
+            onEscape={() => closeMenu({ commit: false, focusTrigger: true })}
+            onOutsideClick={() => closeMenu({ commit: true, focusTrigger: false })}
+            onOutOfView={() => closeMenu({ commit: true, focusTrigger: false })}
+          >
+            <div role="listbox" aria-multiselectable="true" aria-label={ariaLabel} onKeyDown={onOptionsListKeyDown}>
               <div className="border-b border-border p-1.5">
                 <input
+                  ref={filterInputRef}
                   autoFocus
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
+                  onChange={(e) => {
+                    setFilter(e.target.value);
+                    setActiveIndex(-1);
+                  }}
                   placeholder="Ara…"
                   className="h-8 w-full border border-border bg-bg px-2 text-[12.5px] text-ink outline-none focus:border-accent"
                 />
@@ -183,16 +257,23 @@ export function ComboCell({
               {filteredOptions.length === 0 ? (
                 <p className="px-3 py-2 text-[12.5px] text-ink-subtle">Seçenek bulunamadı.</p>
               ) : (
-                filteredOptions.map((o) => {
+                filteredOptions.map((o, i) => {
                   const sel = value.includes(o);
                   const hassas = isSensitive?.(o) ?? false;
                   return (
                     <button
                       key={o}
+                      ref={(el) => {
+                        optionRefs.current[i] = el;
+                      }}
                       type="button"
                       role="option"
                       aria-selected={sel}
-                      onClick={() => toggleOption(o)}
+                      tabIndex={i === activeIndex ? 0 : -1}
+                      onClick={() => {
+                        setActiveIndex(i);
+                        toggleOption(o);
+                      }}
                       className={cn(
                         "flex w-full items-center gap-2 border-l-2 px-3 py-1.5 text-left text-[12.5px] outline-none",
                         sel
@@ -218,7 +299,12 @@ export function ComboCell({
             </div>
           </GridComboMenu>
         ) : (
-          <GridComboMenu anchorRef={triggerRef} onClose={close}>
+          <GridComboMenu
+            anchorRef={triggerRef}
+            onEscape={() => closeMenu({ commit: false, focusTrigger: true })}
+            onOutsideClick={() => closeMenu({ commit: true, focusTrigger: false })}
+            onOutOfView={() => closeMenu({ commit: true, focusTrigger: false })}
+          >
             <div role="group" aria-label={ariaLabel} className="p-2">
               <div className={cn("flex flex-wrap gap-1.5", value.length === 0 && "hidden")}>
                 {value.map((v) => (
@@ -246,6 +332,8 @@ export function ComboCell({
                     setDraft("");
                   } else if (e.key === "Backspace" && draft === "" && value.length > 0) {
                     onChange(value.slice(0, -1));
+                  } else if (e.key === "Tab") {
+                    closeMenu({ commit: true, focusTrigger: false });
                   }
                 }}
                 placeholder="Ekle, virgül veya Enter…"

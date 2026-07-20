@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Button, buttonClasses } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
 import { ComboCell } from "@/components/app/inventory-grid-cell";
@@ -165,7 +165,7 @@ function GridHeader() {
   );
 }
 
-function GridRow({
+const GridRow = memo(function GridRow({
   row,
   idx,
   groundingOptions,
@@ -176,9 +176,9 @@ function GridRow({
   row: EditableRow;
   idx: number;
   groundingOptions: GroundingOptions;
-  onPatchIdentity: (key: IdentityKey, v: string) => void;
-  onPatchList: (key: ListKey, v: string[]) => void;
-  onRemove: () => void;
+  onPatchIdentity: (id: string, key: IdentityKey, v: string) => void;
+  onPatchList: (id: string, key: ListKey, v: string[]) => void;
+  onRemove: (id: string) => void;
 }) {
   const zebra = idx % 2 === 1;
 
@@ -187,7 +187,7 @@ function GridRow({
       <div className={bodyCellClass(true, zebra, false)} style={{ left: FROZEN_OFFSETS[0] }}>
         <button
           type="button"
-          onClick={onRemove}
+          onClick={() => onRemove(row._id)}
           aria-label={`Kayıt ${idx + 1} satırını sil`}
           className="mx-auto flex h-7 w-7 flex-shrink-0 items-center justify-center text-[15px] text-ink-subtle transition-colors hover:text-warning"
         >
@@ -205,7 +205,7 @@ function GridRow({
           >
             <input
               value={row[col.key]}
-              onChange={(e) => onPatchIdentity(col.key, e.target.value)}
+              onChange={(e) => onPatchIdentity(row._id, col.key, e.target.value)}
               aria-label={`${col.label} — kayıt ${idx + 1}`}
               aria-invalid={warn || undefined}
               className="h-8 w-full min-w-0 border-0 bg-transparent px-2 text-[12.5px] text-ink outline-none placeholder:text-ink-subtle"
@@ -218,7 +218,7 @@ function GridRow({
         <div key={col.key} className={bodyCellClass(false, zebra, false)}>
           <ComboCell
             value={row[col.key]}
-            onChange={(v) => onPatchList(col.key, v)}
+            onChange={(v) => onPatchList(row._id, col.key, v)}
             mode={col.groundingKey ? "options" : "free"}
             options={col.groundingKey ? groundingOptions[col.groundingKey] : undefined}
             isSensitive={col.groundingKey ? (o) => groundingOptions.ozelNitelikli.includes(o) : undefined}
@@ -228,7 +228,7 @@ function GridRow({
       ))}
     </>
   );
-}
+});
 
 export function InventoryEditor({ clientId }: { clientId: string }) {
   const toast = useToast();
@@ -276,17 +276,17 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
     setRows((rs) => [...(rs ?? []), withId(emptyRow())]);
   }
 
-  function removeRow(id: string) {
+  const removeRow = useCallback((id: string) => {
     setRows((rs) => rs?.filter((r) => r._id !== id) ?? rs);
-  }
+  }, []);
 
-  function patchIdentity(id: string, key: IdentityKey, v: string) {
+  const patchIdentity = useCallback((id: string, key: IdentityKey, v: string) => {
     setRows((rs) => rs?.map((r) => (r._id === id ? { ...r, [key]: v } : r)) ?? rs);
-  }
+  }, []);
 
-  function patchList(id: string, key: ListKey, v: string[]) {
+  const patchList = useCallback((id: string, key: ListKey, v: string[]) => {
     setRows((rs) => rs?.map((r) => (r._id === id ? { ...r, [key]: v } : r)) ?? rs);
-  }
+  }, []);
 
   function onSave() {
     if (!rows) return;
@@ -361,9 +361,9 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
                   row={row}
                   idx={i}
                   groundingOptions={groundingOptions}
-                  onPatchIdentity={(key, v) => patchIdentity(row._id, key, v)}
-                  onPatchList={(key, v) => patchList(row._id, key, v)}
-                  onRemove={() => removeRow(row._id)}
+                  onPatchIdentity={patchIdentity}
+                  onPatchList={patchList}
+                  onRemove={removeRow}
                 />
               ))}
             </div>
