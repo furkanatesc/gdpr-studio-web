@@ -162,6 +162,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
         <SectionLabel>Araçlar</SectionLabel>
         <NavItem
+          href="/app/envanter"
+          label="Envanter Yönetimi"
+          active={path === "/app/envanter"}
+          onNavigate={onNavigate}
+        />
+        <NavItem
           href="/app/kontrol"
           label="Uyum Kontrol Listesi"
           active={path === "/app/kontrol"}

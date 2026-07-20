@@ -73,7 +73,7 @@ export default function Dashboard() {
         <h2 className="font-display text-[18px] text-ink">Doküman kataloğu</h2>
         <div className="flex items-center gap-5">
           <Link
-            href="/app/muvekkiller"
+            href="/app/envanter"
             className="font-medium text-[10.5px] uppercase tracking-[0.08em] text-ink underline underline-offset-4 decoration-[1px] transition-colors hover:text-accent"
           >
             Envanter ↗
