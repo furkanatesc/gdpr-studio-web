@@ -141,6 +141,14 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <SectionLabel>Sayfa</SectionLabel>
         <NavItem href="/app" label="Başlangıç" active={path === "/app"} onNavigate={onNavigate} />
 
+        <SectionLabel>Müvekkiller</SectionLabel>
+        <NavItem
+          href="/app/muvekkiller"
+          label="Müvekkil Yönetimi"
+          active={path === "/app/muvekkiller"}
+          onNavigate={onNavigate}
+        />
+
         <SectionLabel>Doküman Üret</SectionLabel>
         {DOC_CATALOG.map((d) => (
           <NavItem
