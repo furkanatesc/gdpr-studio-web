@@ -155,9 +155,16 @@ export function ComboCell({
   placeholder?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [openOrder, setOpenOrder] = useState<string[]>([]);
   const [filter, setFilter] = useState("");
   const [draft, setDraft] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
+
+  function openMenu() {
+    // Seçili öğeler en üstte (açılışta dondurulur — seçim yaparken liste zıplamaz).
+    setOpenOrder([...options.filter((o) => value.includes(o)), ...options.filter((o) => !value.includes(o))]);
+    setOpen(true);
+  }
   const triggerRef = useRef<HTMLButtonElement>(null);
   const filterInputRef = useRef<HTMLInputElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -188,9 +195,10 @@ export function ComboCell({
   }
 
   const hasSensitive = isSensitive ? value.some((v) => isSensitive(v)) : false;
+  const baseOptions = openOrder.length ? openOrder : options;
   const filteredOptions = filter.trim()
-    ? options.filter((o) => o.toLowerCase().includes(filter.trim().toLowerCase()))
-    : options;
+    ? baseOptions.filter((o) => o.toLowerCase().includes(filter.trim().toLowerCase()))
+    : baseOptions;
 
   function onOptionsListKeyDown(e: React.KeyboardEvent) {
     if (e.key === "ArrowDown") {
@@ -226,7 +234,7 @@ export function ComboCell({
         aria-haspopup={mode === "options" ? "listbox" : "dialog"}
         aria-expanded={open}
         aria-label={ariaLabel}
-        onClick={() => (open ? closeMenu({ commit: true, focusTrigger: true }) : setOpen(true))}
+        onClick={() => (open ? closeMenu({ commit: true, focusTrigger: true }) : openMenu())}
         className="flex h-8 w-full min-w-0 items-center px-2 text-left text-[12.5px] outline-none hover:bg-bg focus-visible:bg-bg"
       >
         <CellSummary value={value} placeholder={placeholder} hasSensitive={hasSensitive} />
