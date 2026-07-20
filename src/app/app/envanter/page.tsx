@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { EnvanterClient } from "./envanter-client";
 
 export const metadata = {
@@ -5,5 +6,9 @@ export const metadata = {
 };
 
 export default function EnvanterPage() {
-  return <EnvanterClient />;
+  return (
+    <Suspense fallback={<p className="p-8 text-[14px] text-ink-muted">Yükleniyor…</p>}>
+      <EnvanterClient />
+    </Suspense>
+  );
 }

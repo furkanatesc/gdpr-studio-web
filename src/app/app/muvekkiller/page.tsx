@@ -253,7 +253,7 @@ export default function MuvekkillerPage() {
               <ProfileForm key={selected.id} client={selected} isAdmin={isAdmin} onSaved={onProfileSaved} />
               <div className="mt-5 border-t border-border pt-4">
                 <Link
-                  href="/app/envanter"
+                  href={`/app/envanter?client=${selected.id}`}
                   className="font-medium text-[12.5px] uppercase tracking-[0.08em] text-accent-strong hover:underline"
                 >
                   Veri envanterini düzenle ↗

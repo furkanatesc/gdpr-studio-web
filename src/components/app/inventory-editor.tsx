@@ -363,9 +363,12 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
       <div className="mt-6 border-t border-border pt-5">
         <div className="flex items-center justify-between gap-3">
           <h3 className="font-display text-[15px] text-ink">Envanter kayıtları</h3>
-          <Button type="button" variant="secondary" size="sm" onClick={addRow} disabled={rows === null}>
-            Satır ekle
-          </Button>
+          <div className="flex items-center gap-3">
+            {importing && <span className="text-[12px] text-ink-subtle">İçe aktarılıyor…</span>}
+            <Button type="button" variant="secondary" size="sm" onClick={addRow} disabled={rows === null || importing}>
+              Satır ekle
+            </Button>
+          </div>
         </div>
 
         {rows === null ? (
@@ -373,7 +376,7 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
         ) : rows.length === 0 ? (
           <p className="mt-4 text-[13px] text-ink-muted">Henüz envanter kaydı yok.</p>
         ) : (
-          <div>
+          <div className={cn(importing && "pointer-events-none opacity-50")}>
             {rows.map((row, i) => (
               <InventoryRowEditor
                 key={row._id}
@@ -387,8 +390,14 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
           </div>
         )}
 
-        <Button type="button" size="sm" className="mt-5" onClick={onSave} disabled={saving || rows === null}>
-          Envanteri kaydet
+        <Button
+          type="button"
+          size="sm"
+          className="mt-5"
+          onClick={onSave}
+          disabled={saving || importing || rows === null}
+        >
+          {saving ? "Kaydediliyor…" : "Envanteri kaydet"}
         </Button>
       </div>
     </div>

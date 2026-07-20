@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/app/page-header";
 import { InventoryEditor } from "@/components/app/inventory-editor";
 import { Field, Select } from "@/components/ui";
@@ -11,9 +12,13 @@ import { listClients, SECTOR_LABELS, usingRealApi, type Client } from "@/lib/api
 /*
   Envanter merkezi ekranı — müvekkil seç, envanterini elle düzenle/yükle.
   Düzenleme mantığı InventoryEditor'da (müvekkil sayfasıyla paylaşılır).
+  ?client=<id> ile müvekkil sayfasından gelen bağlam taşınır; geçersiz/yoksa
+  listedeki ilk müvekkile düşülür.
 */
 export function EnvanterClient() {
   const toast = useToast();
+  const searchParams = useSearchParams();
+  const clientParam = searchParams.get("client");
   const [clients, setClients] = useState<Client[] | null>(null);
   const [selectedId, setSelectedId] = useState<string>("");
 
@@ -22,10 +27,14 @@ export function EnvanterClient() {
     listClients()
       .then((cs) => {
         setClients(cs);
-        setSelectedId((id) => id || cs[0]?.id || "");
+        setSelectedId((id) => {
+          if (id) return id;
+          if (clientParam && cs.some((c) => c.id === clientParam)) return clientParam;
+          return cs[0]?.id ?? "";
+        });
       })
       .catch((e) => toast(e instanceof Error ? e.message : "Müvekkiller yüklenemedi."));
-  }, [toast]);
+  }, [toast, clientParam]);
 
   const header = <PageHeader eyebrow="Araçlar / Envanter" title="Envanter Yönetimi" />;
 
