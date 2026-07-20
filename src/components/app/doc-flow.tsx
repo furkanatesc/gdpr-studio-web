@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Field } from "@/components/ui/field";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { Tag } from "@/components/ui/tag";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
@@ -16,8 +17,8 @@ import { PageHeader } from "./page-header";
 import { SensitiveNotice } from "./sensitive-notice";
 import { DocumentOutput } from "./document-output";
 import { docByType, docEyebrow, OZEL_NITELIKLI } from "@/lib/catalog";
-import { SCHEMAS, type CardDef, type FieldDef } from "@/lib/schemas";
-import { generateDocStream, listPersonGroups, usingRealApi } from "@/lib/api";
+import { SCHEMAS, type CardDef, type FieldDef, type TagGroupDef } from "@/lib/schemas";
+import { generateDocStream, getGroundingOptions, listPersonGroups, usingRealApi, type GroundingOptions } from "@/lib/api";
 import type { DocType, GenerateResponse, GroundingRecord } from "@/lib/types";
 
 function initialFields(type: DocType): Record<string, string> {
@@ -71,6 +72,18 @@ export function DocFlow({ type }: { type: DocType }) {
   const [quotaBlock, setQuotaBlock] = useState<{ used: number; quota: number } | null>(null);
   const [personGroups, setPersonGroups] = useState<string[]>([]);
   const [kisiGrubu, setKisiGrubu] = useState("");
+  const [groundingOptions, setGroundingOptions] = useState<GroundingOptions>({
+    kategoriler: [],
+    amaclar: [],
+    ozelNitelikli: [],
+  });
+
+  // KVKK m.6 hassasiyeti kategori ETİKETİNE bağlı; etiketlerin kaynağı backend grounding'i.
+  // Sabit katalog yalnız mock/hata durumunda geçerli — tek başına bırakılırsa uyarı sessizce kaybolur.
+  const sensitiveSet = useMemo(
+    () => new Set<string>([...OZEL_NITELIKLI, ...groundingOptions.ozelNitelikli]),
+    [groundingOptions.ozelNitelikli],
+  );
 
   useEffect(() => {
     if (!usingRealApi) return;
@@ -78,6 +91,21 @@ export function DocFlow({ type }: { type: DocType }) {
       .then(setPersonGroups)
       .catch(() => setPersonGroups([])); // sektör yok/hata → adım gizlenir, akış bozulmaz
   }, []);
+
+  // Yalnız aydınlatma metni veri kategorisi/amaç alanları grounding'den beslenir (envanter gerçekliği).
+  useEffect(() => {
+    if (!usingRealApi || type !== "aydinlatma") return;
+    getGroundingOptions()
+      .then(setGroundingOptions)
+      .catch(() => setGroundingOptions({ kategoriler: [], amaclar: [], ozelNitelikli: [] }));
+  }, [type]);
+
+  /** Grounding boşsa (mock/hata) şemadaki sabit katalog listesine düşer. */
+  function groupOptions(g: TagGroupDef): string[] {
+    if (type !== "aydinlatma") return g.options;
+    const dynamic = g.key === "veriler" ? groundingOptions.kategoriler : groundingOptions.amaclar;
+    return dynamic.length ? dynamic : g.options;
+  }
 
   const setField = (k: string, v: string) => setFields((f) => ({ ...f, [k]: v }));
   const toggleTag = (group: "veriler" | "amaclar", v: string) =>
@@ -107,7 +135,7 @@ export function DocFlow({ type }: { type: DocType }) {
     setMaxReached((m) => Math.max(m, i));
   }
 
-  const anySensitive = [...tags.veriler, ...tags.amaclar].some((v) => OZEL_NITELIKLI.has(v));
+  const anySensitive = [...tags.veriler, ...tags.amaclar].some((v) => sensitiveSet.has(v));
 
   async function onGenerate() {
     setLoading(true);
@@ -212,21 +240,33 @@ export function DocFlow({ type }: { type: DocType }) {
     return (
       <Card title={card.title} icon={<Icon name={card.icon} className="text-[18px]" />}>
         {card.groups?.map((g) => {
-          const hasSensitive = tags[g.key].some((v) => OZEL_NITELIKLI.has(v));
+          const hasSensitive = tags[g.key].some((v) => sensitiveSet.has(v));
+          const opts = groupOptions(g);
           return (
             <div key={g.key} className="mb-5 last:mb-0">
               <p className="mb-2.5 text-[13px] font-medium text-ink-muted">{g.label}</p>
-              <div className="flex flex-wrap gap-2">
-                {g.options.map((o) => (
-                  <Tag
-                    key={o}
-                    label={o}
-                    on={tags[g.key].includes(o)}
-                    onToggle={() => toggleTag(g.key, o)}
-                    sensitive={OZEL_NITELIKLI.has(o)}
-                  />
-                ))}
-              </div>
+              {type === "aydinlatma" ? (
+                <MultiSelect
+                  options={opts}
+                  value={tags[g.key]}
+                  onChange={(v) => setTags((t) => ({ ...t, [g.key]: v }))}
+                  ariaLabel={g.label}
+                  placeholder="Seçin…"
+                  isSensitive={(o) => sensitiveSet.has(o)}
+                />
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {opts.map((o) => (
+                    <Tag
+                      key={o}
+                      label={o}
+                      on={tags[g.key].includes(o)}
+                      onToggle={() => toggleTag(g.key, o)}
+                      sensitive={sensitiveSet.has(o)}
+                    />
+                  ))}
+                </div>
+              )}
               {hasSensitive && <SensitiveNotice />}
             </div>
           );
@@ -279,7 +319,7 @@ export function DocFlow({ type }: { type: DocType }) {
                     <span
                       key={v}
                       className={
-                        OZEL_NITELIKLI.has(v)
+                        sensitiveSet.has(v)
                           ? " border border-warning/60 bg-warning-soft px-2.5 py-1 text-[12px] text-warning"
                           : " border border-border-strong bg-surface-2 px-2.5 py-1 text-[12px] text-ink-muted"
                       }

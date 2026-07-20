@@ -19,6 +19,12 @@ import { supabase } from "./supabase";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "");
 
+/** Authorization başlığı — JSON istekler ve multipart yükleme (form-data) ortak kullanır. */
+async function authHeaders(): Promise<HeadersInit> {
+  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 /*
   Tek istek çekirdeği (interceptor): auth header + Content-Type burada eklenir,
   hata gövdesi tek yerden okunur. authedJson / generateDoc / generateDocStream
@@ -26,12 +32,11 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE?.replace(/\/$/, "");
 */
 async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   if (!API_BASE) throw new Error("API yapılandırılmamış.");
-  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
   return fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(await authHeaders()),
       ...(init.headers || {}),
     },
   });
@@ -167,6 +172,62 @@ export async function setComplianceStatus(
     method: "PUT",
     body: JSON.stringify({ status, note: note ?? null }),
   });
+}
+
+/*
+  Müvekkil (client) yönetimi — hukuk bürosu kurumunun altında her müvekkilin kendi
+  sektörü + envanteri + veri sorumlusu profili var (bkz. clients.py). Mock modda
+  (API yok) boş liste döner — sahte müvekkil uydurulmaz.
+*/
+export type Client = {
+  id: string;
+  name: string;
+  sector: string | null;
+  legal_name?: string | null;
+  kep?: string | null;
+  mersis?: string | null;
+  adres?: string | null;
+  eposta?: string | null;
+  telefon?: string | null;
+  vergi_dairesi?: string | null;
+  vergi_no?: string | null;
+};
+
+export type InventorySummary = { count: number; kisiGruplari: string[]; departmanlar: string[] };
+
+export async function listClients(): Promise<Client[]> {
+  if (!API_BASE) return [];
+  return authedJson("/api/clients", { method: "GET" });
+}
+export async function createClient(name: string, sector?: string | null): Promise<Client> {
+  return authedJson("/api/clients", { method: "POST", body: JSON.stringify({ name, sector: sector ?? null }) });
+}
+export async function getClient(id: string): Promise<Client> {
+  return authedJson(`/api/clients/${id}`, { method: "GET" });
+}
+export async function updateClient(id: string, patch: Partial<Client>): Promise<Client> {
+  return authedJson(`/api/clients/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
+}
+export async function importClientInventory(id: string, file: File): Promise<InventorySummary> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${API_BASE}/api/clients/${id}/inventory/import`, {
+    method: "POST",
+    headers: await authHeaders(),
+    body: fd,
+  });
+  if (!res.ok) throw new Error(await errorDetail(res));
+  return res.json();
+}
+export async function getClientInventorySummary(id: string): Promise<InventorySummary> {
+  return authedJson(`/api/clients/${id}/inventory/summary`, { method: "GET" });
+}
+export const inventoryTemplateUrl = () => `${API_BASE}/api/inventory/template`;
+export type GroundingOptions = { kategoriler: string[]; amaclar: string[]; ozelNitelikli: string[] };
+
+export async function getGroundingOptions(): Promise<GroundingOptions> {
+  if (!API_BASE) return { kategoriler: [], amaclar: [], ozelNitelikli: [] };
+  return authedJson("/api/grounding/options", { method: "GET" });
 }
 
 async function authedJson(path: string, init: RequestInit) {
