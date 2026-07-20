@@ -105,9 +105,6 @@ export async function listPersonGroups(): Promise<string[]> {
   return authedJson("/api/processes/person-groups", { method: "GET" });
 }
 
-export async function updateOrgSector(sector: string): Promise<IdentityOut> {
-  return authedJson("/api/auth/org", { method: "PATCH", body: JSON.stringify({ sector }) });
-}
 export type InviteOut = components["schemas"]["InviteOut"];
 export type MemberOut = components["schemas"]["MemberOut"];
 
