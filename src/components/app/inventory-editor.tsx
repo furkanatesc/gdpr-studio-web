@@ -8,8 +8,10 @@ import {
   getClientInventory,
   getGroundingOptions,
   importClientInventory,
+  importClientWorkbook,
   inventoryTemplateUrl,
   replaceClientInventory,
+  workbookTemplateUrl,
   type GroundingOptions,
   type InventoryRow,
 } from "@/lib/api";
@@ -39,7 +41,9 @@ type ListKey =
   | "ortam_format"
   | "konum"
   | "idari_tedbirler"
-  | "teknik_tedbirler";
+  | "teknik_tedbirler"
+  | "aktarim"
+  | "toplama";
 
 const IDENTITY_COLUMNS: { key: IdentityKey; label: string; width: number; required?: boolean }[] = [
   { key: "departman", label: "Departman", width: 160 },
@@ -60,6 +64,8 @@ const LIST_COLUMNS: { key: ListKey; label: string; width: number; groundingKey?:
   { key: "konum", label: "Konum", width: 170 },
   { key: "idari_tedbirler", label: "İdari tedbirler", width: 190 },
   { key: "teknik_tedbirler", label: "Teknik tedbirler", width: 190 },
+  { key: "aktarim", label: "Aktarım", width: 190 },
+  { key: "toplama", label: "Toplama", width: 190 },
 ];
 
 const ACTION_WIDTH = 40;
@@ -101,6 +107,8 @@ function emptyRow(): InventoryRow {
     konum: [],
     idari_tedbirler: [],
     teknik_tedbirler: [],
+    aktarim: [],
+    toplama: [],
   };
 }
 
@@ -125,6 +133,8 @@ function toInventoryRow(row: EditableRow): InventoryRow {
     konum: row.konum,
     idari_tedbirler: row.idari_tedbirler,
     teknik_tedbirler: row.teknik_tedbirler,
+    aktarim: row.aktarim,
+    toplama: row.toplama,
   };
 }
 
@@ -249,6 +259,23 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
       });
   }
 
+  function onWorkbookChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    importClientWorkbook(clientId, file)
+      .then((s) => {
+        toast(`${s.count} kayıt yüklendi.`);
+        return getClientInventory(clientId);
+      })
+      .then((d) => setRows(d.rows.map(withId)))
+      .catch((err) => toast(err instanceof Error ? err.message : "Yükleme başarısız."))
+      .finally(() => {
+        setImporting(false);
+        e.target.value = "";
+      });
+  }
+
   function addRow() {
     setRows((rs) => [...(rs ?? []), withId(emptyRow())]);
   }
@@ -307,6 +334,17 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
       <p className="mt-2 text-[12px] text-ink-subtle">
         Dosya yükleme mevcut envanterin tamamının yerini alır; elle yaptığınız düzenlemelerin üzerine yazar.
       </p>
+
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <span className="text-[12px] text-ink-subtle">veya KVKK anket kitabından</span>
+        <label className={cn(buttonClasses("secondary", "sm"), "cursor-pointer", importing && "pointer-events-none opacity-50")}>
+          Anket kitabından yükle (.xlsx)
+          <input type="file" accept=".xlsx" className="hidden" onChange={onWorkbookChange} disabled={importing} />
+        </label>
+        <a href={workbookTemplateUrl()} className="text-[12.5px] text-accent-strong hover:underline">
+          Anket şablonu indir
+        </a>
+      </div>
 
       <div className="mt-6 border-t border-border pt-5">
         <div className="flex items-center justify-between gap-3">
