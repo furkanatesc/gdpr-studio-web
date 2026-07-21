@@ -252,6 +252,125 @@ export async function getGroundingOptions(): Promise<GroundingOptions> {
   return authedJson("/api/grounding/options", { method: "GET" });
 }
 
+/*
+  Aydınlatma metni üretimi — envanterden hazırlanan bölümler (Section, m.10 alanları)
+  öneri onayından geçtikten sonra sabit DocType.aydinlatma üretimine gider (bkz.
+  backend app/modules/aydinlatma.py). Grounding'e ek olarak her bölüm kendi
+  "oneriler" haritasını taşır — boş alan için öneri onayı burada yapılır.
+*/
+export type AydinlatmaSection = {
+  isSureci: string;
+  kisiGruplari: string[];
+  kategoriler: string[];
+  veriTurleri: string[];
+  amaclar: string[];
+  hukukiSebepler: string[];
+  saklamaSureleri: string[];
+  aktarim: string[];
+  toplama: string[];
+};
+export type EnrichedSection = AydinlatmaSection & { oneriler: Record<string, string[]> };
+
+export async function prepareAydinlatma(
+  clientId: string,
+  targetGroups: string[],
+): Promise<{ sections: EnrichedSection[] }> {
+  return authedJson(`/api/clients/${clientId}/aydinlatma/prepare`, {
+    method: "POST",
+    body: JSON.stringify({ targetGroups }),
+  });
+}
+
+/** Streaming aydınlatma üretimi — generateDocStream ile aynı SSE/kota/idempotency deseni. */
+export async function generateAydinlatmaStream(
+  clientId: string,
+  sections: AydinlatmaSection[],
+  h: StreamHandlers,
+): Promise<void> {
+  if (!API_BASE) {
+    h.onError?.("Aydınlatma üretimi gerçek API bağlantısı gerektirir.");
+    return;
+  }
+
+  let resp: Response;
+  try {
+    resp = await apiFetch(`/api/clients/${clientId}/aydinlatma/generate`, {
+      method: "POST",
+      body: JSON.stringify({ sections }),
+      headers: { "Idempotency-Key": newIdempotencyKey() },
+    });
+  } catch {
+    h.onError?.("Sunucuya ulaşılamadı. Backend çalışıyor mu?");
+    return;
+  }
+
+  if (await isDuplicateRequest(resp)) {
+    h.onError?.(DUPLICATE_MESSAGE);
+    return;
+  }
+
+  if (resp.status === 402) {
+    let info = { used: 0, quota: 5 };
+    try {
+      const e = await resp.json();
+      if (e?.detail?.code === "quota_exceeded") info = { used: e.detail.used, quota: e.detail.quota };
+    } catch { /* */ }
+    h.onQuotaExceeded?.(info);
+    return;
+  }
+
+  if (!resp.ok || !resp.body) {
+    h.onError?.(await errorDetail(resp));
+    return;
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+
+    let sep: number;
+    while ((sep = buf.indexOf("\n\n")) !== -1) {
+      const frame = buf.slice(0, sep);
+      buf = buf.slice(sep + 2);
+
+      let event = "message";
+      let data = "";
+      for (const line of frame.split("\n")) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) data += line.slice(5).trim();
+      }
+      if (!data) continue;
+
+      let payload: unknown;
+      try {
+        payload = JSON.parse(data);
+      } catch {
+        continue;
+      }
+
+      if (event === "grounding") h.onGrounding?.(payload as GroundingRecord[]);
+      else if (event === "delta") h.onDelta?.((payload as { text: string }).text);
+      else if (event === "done")
+        h.onDone?.(payload as { model: string; disclaimer: string; usage?: GenerateResponse["usage"] });
+      else if (event === "error") h.onError?.((payload as { detail?: string }).detail || "Üretim hatası.");
+    }
+  }
+}
+
+export async function aydinlatmaDocx(clientId: string, text: string, title?: string): Promise<Blob> {
+  const res = await apiFetch(`/api/clients/${clientId}/aydinlatma/docx`, {
+    method: "POST",
+    body: JSON.stringify({ text, title }),
+  });
+  if (!res.ok) throw new Error(await errorDetail(res));
+  return res.blob();
+}
+
 async function authedJson(path: string, init: RequestInit) {
   const res = await apiFetch(path, init);
   if (!res.ok) throw new Error(await errorDetail(res));
