@@ -168,6 +168,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           onNavigate={onNavigate}
         />
         <NavItem
+          href="/app/anket-sihirbazi"
+          label="Anket Sihirbazı"
+          active={path === "/app/anket-sihirbazi"}
+          onNavigate={onNavigate}
+        />
+        <NavItem
           href="/app/aydinlatma"
           label="Aydınlatma Üret"
           active={path === "/app/aydinlatma"}
