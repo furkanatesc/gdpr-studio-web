@@ -288,6 +288,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clients/{client_id}/inventory/import-workbook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import Workbook */
+        post: operations["import_workbook_api_clients__client_id__inventory_import_workbook_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clients/{client_id}/inventory/summary": {
         parameters: {
             query?: never;
@@ -402,6 +419,23 @@ export interface paths {
         };
         /** Template */
         get: operations["template_api_inventory_template_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/inventory/workbook-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Workbook Template */
+        get: operations["workbook_template_api_inventory_workbook_template_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -571,6 +605,11 @@ export interface components {
         };
         /** Body_import_inventory_api_clients__client_id__inventory_import_post */
         Body_import_inventory_api_clients__client_id__inventory_import_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_import_workbook_api_clients__client_id__inventory_import_workbook_post */
+        Body_import_workbook_api_clients__client_id__inventory_import_workbook_post: {
             /** File */
             file: string;
         };
@@ -850,6 +889,8 @@ export interface components {
         };
         /** InventoryRow */
         InventoryRow: {
+            /** Aktarim */
+            aktarim?: string[];
             /**
              * Alt Surec
              * @default
@@ -887,6 +928,8 @@ export interface components {
             saklama_sureleri?: string[];
             /** Teknik Tedbirler */
             teknik_tedbirler?: string[];
+            /** Toplama */
+            toplama?: string[];
             /** Veri Turleri */
             veri_turleri?: string[];
         };
@@ -1599,6 +1642,43 @@ export interface operations {
             };
         };
     };
+    import_workbook_api_clients__client_id__inventory_import_workbook_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_import_workbook_api_clients__client_id__inventory_import_workbook_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     inventory_summary_api_clients__client_id__inventory_summary_get: {
         parameters: {
             query?: never;
@@ -1782,6 +1862,26 @@ export interface operations {
         };
     };
     template_api_inventory_template_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    workbook_template_api_inventory_workbook_template_get: {
         parameters: {
             query?: never;
             header?: never;

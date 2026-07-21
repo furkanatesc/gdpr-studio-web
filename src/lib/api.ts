@@ -216,6 +216,17 @@ export async function importClientInventory(id: string, file: File): Promise<Inv
   if (!res.ok) throw new Error(await errorDetail(res));
   return res.json();
 }
+export async function importClientWorkbook(id: string, file: File): Promise<InventorySummary> {
+  const fd = new FormData();
+  fd.append("file", file);
+  const res = await fetch(`${API_BASE}/api/clients/${id}/inventory/import-workbook`, {
+    method: "POST",
+    headers: await authHeaders(),
+    body: fd,
+  });
+  if (!res.ok) throw new Error(await errorDetail(res));
+  return res.json();
+}
 export async function getClientInventorySummary(id: string): Promise<InventorySummary> {
   return authedJson(`/api/clients/${id}/inventory/summary`, { method: "GET" });
 }
@@ -236,6 +247,8 @@ export type InventoryRow = {
   konum: string[];
   idari_tedbirler: string[];
   teknik_tedbirler: string[];
+  aktarim: string[];
+  toplama: string[];
 };
 
 export async function getClientInventory(id: string): Promise<{ rows: InventoryRow[] }> {
@@ -245,6 +258,7 @@ export async function replaceClientInventory(id: string, rows: InventoryRow[]): 
   return authedJson(`/api/clients/${id}/inventory`, { method: "PUT", body: JSON.stringify({ rows }) });
 }
 export const inventoryTemplateUrl = () => `${API_BASE}/api/inventory/template`;
+export const workbookTemplateUrl = () => `${API_BASE}/api/inventory/workbook-template`;
 export type GroundingOptions = { kategoriler: string[]; amaclar: string[]; ozelNitelikli: string[] };
 
 export async function getGroundingOptions(): Promise<GroundingOptions> {
