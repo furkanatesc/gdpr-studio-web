@@ -410,6 +410,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/inventory/survey-schema": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Survey Schema */
+        get: operations["survey_schema_api_inventory_survey_schema_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/inventory/template": {
         parameters: {
             query?: never;
@@ -1840,6 +1857,28 @@ export interface operations {
         };
     };
     options_api_grounding_options_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    survey_schema_api_inventory_survey_schema_get: {
         parameters: {
             query?: never;
             header?: never;

@@ -259,6 +259,20 @@ export async function replaceClientInventory(id: string, rows: InventoryRow[]): 
 }
 export const inventoryTemplateUrl = () => `${API_BASE}/api/inventory/template`;
 export const workbookTemplateUrl = () => `${API_BASE}/api/inventory/workbook-template`;
+
+/*
+  Anket sihirbazı soru şeması — departman/bölüm/soru rehberi + Listeler vocab
+  (bkz. backend app/survey_schema.py, anket_sorular.json). Salt rehber; envanter
+  kaydı InventoryRow ile mevcut replaceClientInventory üzerinden gider.
+*/
+export type SurveySchema = {
+  departments: { key: string; label: string; bolumler: { label: string; sorular: string[] }[] }[];
+  vocab: { kisiGrubu: string[]; hukukiSebep: string[]; kaynak: string[]; yurtdisi: string[] };
+};
+
+export async function getSurveySchema(): Promise<SurveySchema> {
+  return authedJson("/api/inventory/survey-schema", { method: "GET" });
+}
 export type GroundingOptions = { kategoriler: string[]; amaclar: string[]; ozelNitelikli: string[] };
 
 export async function getGroundingOptions(): Promise<GroundingOptions> {
