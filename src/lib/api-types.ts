@@ -199,6 +199,60 @@ export interface paths {
         patch: operations["update_client_api_clients__client_id__patch"];
         trace?: never;
     };
+    "/api/clients/{client_id}/aydinlatma/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Docx */
+        post: operations["docx_api_clients__client_id__aydinlatma_docx_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/aydinlatma/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate
+         * @description Onaylı envanter bölümlerinden Aydınlatma Metni akışı (SSE).
+         */
+        post: operations["generate_api_clients__client_id__aydinlatma_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/aydinlatma/prepare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Prepare */
+        post: operations["prepare_api_clients__client_id__aydinlatma_prepare_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clients/{client_id}/inventory": {
         parameters: {
             query?: never;
@@ -634,6 +688,70 @@ export interface components {
          * @enum {string}
          */
         DocType: "aydinlatma" | "cerez" | "kayit" | "dpa" | "dpia" | "ihlal";
+        /** DocxIn */
+        DocxIn: {
+            /** Text */
+            text: string;
+            /** Title */
+            title?: string | null;
+        };
+        /** EnrichedSectionOut */
+        EnrichedSectionOut: {
+            /**
+             * Aktarim
+             * @default []
+             */
+            aktarim: string[];
+            /**
+             * Amaclar
+             * @default []
+             */
+            amaclar: string[];
+            /**
+             * Hukukisebepler
+             * @default []
+             */
+            hukukiSebepler: string[];
+            /** Issureci */
+            isSureci: string;
+            /**
+             * Kategoriler
+             * @default []
+             */
+            kategoriler: string[];
+            /**
+             * Kisigruplari
+             * @default []
+             */
+            kisiGruplari: string[];
+            /**
+             * Oneriler
+             * @default {}
+             */
+            oneriler: {
+                [key: string]: string[];
+            };
+            /**
+             * Saklamasureleri
+             * @default []
+             */
+            saklamaSureleri: string[];
+            /**
+             * Toplama
+             * @default []
+             */
+            toplama: string[];
+            /**
+             * Veriturleri
+             * @default []
+             */
+            veriTurleri: string[];
+        };
+        /** GenerateIn */
+        GenerateIn: {
+            /** Sections */
+            sections: components["schemas"]["SectionIn"][];
+        };
         /** GenerateRequest */
         GenerateRequest: {
             /**
@@ -811,10 +929,65 @@ export interface components {
             /** Sector */
             sector: string;
         };
+        /** PrepareIn */
+        PrepareIn: {
+            /** Targetgroups */
+            targetGroups: string[];
+        };
+        /** PrepareOut */
+        PrepareOut: {
+            /** Sections */
+            sections: components["schemas"]["EnrichedSectionOut"][];
+        };
         /** RoleUpdate */
         RoleUpdate: {
             /** Role */
             role: string;
+        };
+        /** SectionIn */
+        SectionIn: {
+            /**
+             * Aktarim
+             * @default []
+             */
+            aktarim: string[];
+            /**
+             * Amaclar
+             * @default []
+             */
+            amaclar: string[];
+            /**
+             * Hukukisebepler
+             * @default []
+             */
+            hukukiSebepler: string[];
+            /** Issureci */
+            isSureci: string;
+            /**
+             * Kategoriler
+             * @default []
+             */
+            kategoriler: string[];
+            /**
+             * Kisigruplari
+             * @default []
+             */
+            kisiGruplari: string[];
+            /**
+             * Saklamasureleri
+             * @default []
+             */
+            saklamaSureleri: string[];
+            /**
+             * Toplama
+             * @default []
+             */
+            toplama: string[];
+            /**
+             * Veriturleri
+             * @default []
+             */
+            veriTurleri: string[];
         };
         /** StatusUpdate */
         StatusUpdate: {
@@ -1198,6 +1371,114 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClientOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    docx_api_clients__client_id__aydinlatma_docx_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocxIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_api_clients__client_id__aydinlatma_generate_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Anthropic-Key"?: string | null;
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    prepare_api_clients__client_id__aydinlatma_prepare_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrepareIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrepareOut"];
                 };
             };
             /** @description Validation Error */
