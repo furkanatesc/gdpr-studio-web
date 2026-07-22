@@ -41,6 +41,8 @@ const FIELD_LABELS: Record<keyof Omit<AydinlatmaSection, "isSureci">, string> = 
   toplama: "Toplama yöntemi",
 };
 const EDITABLE_FIELDS = Object.keys(FIELD_LABELS) as (keyof typeof FIELD_LABELS)[];
+// Dolu olsa da düzenlenebilir (mevcut + öneri; ekle/çıkar) alanlar — avukat S2.
+const ADDITIVE_FIELDS = new Set<keyof typeof FIELD_LABELS>(["amaclar"]);
 
 function toApproved(s: EnrichedSection): AydinlatmaSection {
   return {
@@ -316,7 +318,22 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
                         <p className="mb-1.5 text-[12.5px] font-medium text-ink-muted">
                           {FIELD_LABELS[field]}
                         </p>
-                        {base.length > 0 ? (
+                        {ADDITIVE_FIELDS.has(field) ? (
+                          <>
+                            <MultiSelect
+                              options={Array.from(new Set([...base, ...oneri]))}
+                              value={edited[i]?.[field] ?? base}
+                              onChange={(v) => updateField(i, field, v)}
+                              ariaLabel={FIELD_LABELS[field]}
+                              placeholder="Mevcut + öneriler; ekleyin/çıkarın…"
+                            />
+                            {oneri.length > 0 && (
+                              <p className="mt-1 text-[11px] text-ink-subtle">
+                                Öneri: {oneri.join(", ")}
+                              </p>
+                            )}
+                          </>
+                        ) : base.length > 0 ? (
                           <div className="flex flex-wrap gap-1.5">
                             {base.map((v) => (
                               <span
