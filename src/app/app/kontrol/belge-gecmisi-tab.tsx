@@ -32,6 +32,12 @@ export function BelgeGecmisiTab() {
   const [clientId, setClientId] = useState("");
   const [docs, setDocs] = useState<ClientDocumentMeta[]>([]);
   const [open, setOpen] = useState<ClientDocument | null>(null);
+  const [prevClientId, setPrevClientId] = useState(clientId);
+  if (clientId !== prevClientId) {
+    setPrevClientId(clientId);
+    setOpen(null);
+    setDocs([]);
+  }
 
   useEffect(() => {
     if (!usingRealApi) return;
@@ -44,14 +50,8 @@ export function BelgeGecmisiTab() {
   useEffect(() => {
     if (!clientId) return;
     getClientDocuments(clientId)
-      .then((ds) => {
-        setDocs(ds);
-        setOpen(null);
-      })
-      .catch(() => {
-        setDocs([]);
-        setOpen(null);
-      });
+      .then(setDocs)
+      .catch(() => setDocs([]));
   }, [clientId]);
 
   const byType = useMemo(() => {
