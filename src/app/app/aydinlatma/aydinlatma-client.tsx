@@ -301,9 +301,9 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
       {sections && sections.length > 0 && (
         <Card title="Öneri onayı" icon={<Icon name="clipboard" className="text-[18px]" />}>
           <p className="mb-4 text-[13px] text-ink-muted">
-            Envanterde boş bırakılan alanlar için öneriler listelenir; seçtiğiniz değerler metne
-            işlenir. Öneri olmayan boş alanlar üretimde &quot;[Avukat tarafından
-            doldurulacak]&quot; olarak bırakılır.
+            Boş bırakılan ve ek öneri sunulan (ör. hukuk departmanı) alanlar için öneriler
+            listelenir; seçtiğiniz değerler metne işlenir. Öneri olmayan boş alanlar üretimde
+            &quot;[Avukat tarafından doldurulacak]&quot; olarak bırakılır.
           </p>
           <div className="space-y-6">
             {sections.map((s, i) => (
@@ -318,7 +318,9 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
                         <p className="mb-1.5 text-[12.5px] font-medium text-ink-muted">
                           {FIELD_LABELS[field]}
                         </p>
-                        {ADDITIVE_FIELDS.has(field) ? (
+                        {ADDITIVE_FIELDS.has(field) || oneri.length > 0 ? (
+                          // Additive alan ya da (dolu/bos farketmez) oneri bulunan alan: mevcut +
+                          // oneri birlesik, avukat ekler/cikarir (S4 hukuk mesru menfaat dahil).
                           <>
                             <MultiSelect
                               options={Array.from(new Set([...base, ...oneri]))}
@@ -344,14 +346,6 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
                               </span>
                             ))}
                           </div>
-                        ) : oneri.length > 0 ? (
-                          <MultiSelect
-                            options={oneri}
-                            value={edited[i]?.[field] ?? []}
-                            onChange={(v) => updateField(i, field, v)}
-                            ariaLabel={FIELD_LABELS[field]}
-                            placeholder="Öneriden seçin…"
-                          />
                         ) : (
                           <p className="text-[12.5px] text-ink-subtle">
                             [Avukat tarafından doldurulacak]
