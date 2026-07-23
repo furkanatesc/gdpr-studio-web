@@ -419,6 +419,91 @@ export async function aydinlatmaDocx(clientId: string, text: string, title?: str
   return res.blob();
 }
 
+export type CerezInput = { site: string; tools: string; cmp: string; kategoriler: string[] };
+
+/** Streaming cerez politikasi uretimi — generateAydinlatmaStream ile ayni SSE/kota/idempotency deseni. */
+export async function generateCerezStream(
+  clientId: string,
+  input: CerezInput,
+  h: StreamHandlers,
+): Promise<void> {
+  if (!API_BASE) {
+    h.onError?.("Çerez üretimi gerçek API bağlantısı gerektirir.");
+    return;
+  }
+
+  let resp: Response;
+  try {
+    resp = await apiFetch(`/api/clients/${clientId}/cerez/generate`, {
+      method: "POST",
+      body: JSON.stringify(input),
+      headers: { "Idempotency-Key": newIdempotencyKey() },
+    });
+  } catch {
+    h.onError?.("Sunucuya ulaşılamadı. Backend çalışıyor mu?");
+    return;
+  }
+
+  if (await isDuplicateRequest(resp)) {
+    h.onError?.(DUPLICATE_MESSAGE);
+    return;
+  }
+  if (resp.status === 402) {
+    let info = { used: 0, quota: 5 };
+    try {
+      const e = await resp.json();
+      if (e?.detail?.code === "quota_exceeded") info = { used: e.detail.used, quota: e.detail.quota };
+    } catch { /* */ }
+    h.onQuotaExceeded?.(info);
+    return;
+  }
+  if (!resp.ok || !resp.body) {
+    h.onError?.(await errorDetail(resp));
+    return;
+  }
+
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    let sep: number;
+    while ((sep = buf.indexOf("\n\n")) !== -1) {
+      const frame = buf.slice(0, sep);
+      buf = buf.slice(sep + 2);
+      let event = "message";
+      let data = "";
+      for (const line of frame.split("\n")) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) data += line.slice(5).trim();
+      }
+      if (!data) continue;
+      let payload: unknown;
+      try {
+        payload = JSON.parse(data);
+      } catch {
+        continue;
+      }
+      if (event === "grounding") h.onGrounding?.(payload as GroundingRecord[]);
+      else if (event === "delta") h.onDelta?.((payload as { text: string }).text);
+      else if (event === "done")
+        h.onDone?.(payload as { model: string; disclaimer: string; usage?: GenerateResponse["usage"] });
+      else if (event === "error") h.onError?.((payload as { detail?: string }).detail || "Üretim hatası.");
+    }
+  }
+}
+
+export async function cerezDocx(clientId: string, text: string, title?: string): Promise<Blob> {
+  const res = await apiFetch(`/api/clients/${clientId}/cerez/docx`, {
+    method: "POST",
+    body: JSON.stringify({ text, title }),
+  });
+  if (!res.ok) throw new Error(await errorDetail(res));
+  return res.blob();
+}
+
 async function authedJson(path: string, init: RequestInit) {
   const res = await apiFetch(path, init);
   if (!res.ok) throw new Error(await errorDetail(res));
