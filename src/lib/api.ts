@@ -231,6 +231,26 @@ export async function getClientInventorySummary(id: string): Promise<InventorySu
   return authedJson(`/api/clients/${id}/inventory/summary`, { method: "GET" });
 }
 
+export type ClientDocumentMeta = {
+  id: string;
+  docType: "aydinlatma" | "cerez" | "kayit" | "dpa" | "dpia" | "ihlal";
+  title: string;
+  scoreCompleteness: number | null;
+  scoreCompliance: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+export type ClientDocument = ClientDocumentMeta & { content: string };
+
+export async function getClientDocuments(clientId: string): Promise<ClientDocumentMeta[]> {
+  if (!API_BASE) return [];
+  const r = await authedJson(`/api/clients/${clientId}/documents`, { method: "GET" });
+  return r.documents;
+}
+export async function getClientDocument(clientId: string, docId: string): Promise<ClientDocument> {
+  return authedJson(`/api/clients/${clientId}/documents/${docId}`, { method: "GET" });
+}
+
 export type InventoryRow = {
   departman: string;
   is_sureci: string;
