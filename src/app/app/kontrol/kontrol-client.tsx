@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { setComplianceStatus } from "@/lib/api";
 import type { ChecklistGroup, ChecklistItem, ComplianceStatusValue } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { BelgeGecmisiTab } from "./belge-gecmisi-tab";
 
 /*
   /app/kontrol — Uyum Kontrol Listesi (Faz B, spec §6). PageHeader grameri (eyebrow +
@@ -152,6 +153,7 @@ export function KontrolClient() {
   const [groups, setGroups] = useState<ChecklistGroup[] | null>(null);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
+  const [tab, setTab] = useState<"liste" | "belgeler">("liste");
 
   useEffect(() => {
     if (checklist) setGroups(checklist.groups);
@@ -199,50 +201,57 @@ export function KontrolClient() {
       title="Uyum Kontrol Listesi"
       description="KVKK/GDPR yükümlülüklerinizin durumu — tek tek işaretleyin; sistem bazı kalemleri üretim kayıtlarından önerir, son kararı siz verirsiniz."
       action={
-        <div className="text-right">
-          <p className="font-medium text-[9.5px] uppercase tracking-[0.12em] text-ink-subtle">
-            Genel uyum skoru
-          </p>
-          <p className="mt-1 font-display text-3xl font-light text-ink">{pct(overallScore)}</p>
-        </div>
+        tab === "liste" ? (
+          <div className="text-right">
+            <p className="font-medium text-[9.5px] uppercase tracking-[0.12em] text-ink-subtle">
+              Genel uyum skoru
+            </p>
+            <p className="mt-1 font-display text-3xl font-light text-ink">{pct(overallScore)}</p>
+          </div>
+        ) : undefined
       }
     />
   );
 
-  if (!ready)
-    return (
-      <div>
-        {header}
-        <p className="mt-6 text-[14px] text-ink-muted">Yükleniyor…</p>
-      </div>
-    );
+  const tabBar = (
+    <div className="mt-6 flex gap-1 border-b border-border">
+      {([["liste", "Kontrol Listesi"], ["belgeler", "Belge Geçmişi"]] as const).map(([k, label]) => (
+        <button
+          key={k}
+          type="button"
+          onClick={() => setTab(k)}
+          className={cn(
+            "px-4 py-2 text-[12.5px] font-medium uppercase tracking-[0.06em] transition-colors",
+            tab === k ? "border-b-2 border-accent text-ink" : "text-ink-muted hover:text-ink",
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
 
-  if (loadError && !groups)
-    return (
-      <div>
-        {header}
+  function renderListeBody() {
+    if (!ready) return <p className="mt-6 text-[14px] text-ink-muted">Yükleniyor…</p>;
+
+    if (loadError && !groups)
+      return (
         <div className="mt-6 border border-danger/40 bg-danger-soft px-5 py-4 text-sm text-danger">
           {loadError}
         </div>
-      </div>
-    );
+      );
 
-  if (!groups || groups.every((g) => g.items.length === 0))
-    return (
-      <div>
-        {header}
+    if (!groups || groups.every((g) => g.items.length === 0))
+      return (
         <div className="mt-8 border border-dashed border-border-strong bg-surface px-8 py-12 text-center">
           <p className="mx-auto max-w-md font-display text-xl text-ink">Gereksinim seti yakında</p>
           <p className="mx-auto mt-3 max-w-md text-[13.5px] leading-relaxed text-ink-muted">
             Uyum kontrol listesi içeriği hazırlandıktan sonra burada görünecek.
           </p>
         </div>
-      </div>
-    );
+      );
 
-  return (
-    <div>
-      {header}
+    return (
       <div className="mt-8 flex flex-col gap-8">
         {groups.map((group) => {
           const groupScore = scoreOf(group.items);
@@ -268,6 +277,14 @@ export function KontrolClient() {
           );
         })}
       </div>
+    );
+  }
+
+  return (
+    <div>
+      {header}
+      {tabBar}
+      {tab === "liste" ? renderListeBody() : <BelgeGecmisiTab />}
     </div>
   );
 }
