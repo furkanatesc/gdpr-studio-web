@@ -20,6 +20,7 @@ import { docByType, docEyebrow, OZEL_NITELIKLI } from "@/lib/catalog";
 import { SCHEMAS, type CardDef, type FieldDef, type TagGroupDef } from "@/lib/schemas";
 import { generateDocStream, getGroundingOptions, listPersonGroups, usingRealApi, type GroundingOptions } from "@/lib/api";
 import type { DocType, GenerateResponse, GroundingRecord } from "@/lib/types";
+import { refreshWorkspaceInfo } from "@/components/app/use-workspace-info";
 
 function initialFields(type: DocType): Record<string, string> {
   const f: Record<string, string> = {};
@@ -186,6 +187,7 @@ export function DocFlow({ type }: { type: DocType }) {
               usage: meta.usage,
             });
             toast("Doküman hazır");
+            refreshWorkspaceInfo(); // kenar çubuğu kullanım sayacı
           },
           onQuotaExceeded: (info) => setQuotaBlock(info),
           onError: (msg) => setError(msg),

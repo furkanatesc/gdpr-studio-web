@@ -22,6 +22,7 @@ import {
   type AydinlatmaSection,
 } from "@/lib/api";
 import type { GenerateResponse, GroundingRecord } from "@/lib/types";
+import { refreshWorkspaceInfo } from "@/components/app/use-workspace-info";
 
 /*
   Aydınlatma üretim akışı (m.10): müvekkil seç → hedef kişi grupları → Hazırla
@@ -223,6 +224,7 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
             usage: meta.usage,
           });
           toast("Aydınlatma metni hazır");
+          refreshWorkspaceInfo(); // kenar çubuğu kullanım sayacı
         },
         onQuotaExceeded: (info) => setQuotaBlock(info),
         onError: (msg) => setGenError(msg),
