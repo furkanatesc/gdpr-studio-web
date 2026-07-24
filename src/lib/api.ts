@@ -329,6 +329,50 @@ export async function prepareAydinlatma(
   });
 }
 
+/*
+  SSE çerçeveleme + olay dağıtımı — generateDocStream / generateAydinlatmaStream /
+  generateCerezStream / generateKayitStream ortak döngüsü. Çağıran, resp.body'nin
+  var olduğunu (!resp.ok || !resp.body erken dönüşü) zaten doğrulamış olmalı.
+*/
+async function consumeSseStream(resp: Response, h: StreamHandlers): Promise<void> {
+  const reader = resp.body!.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+
+    let sep: number;
+    while ((sep = buf.indexOf("\n\n")) !== -1) {
+      const frame = buf.slice(0, sep);
+      buf = buf.slice(sep + 2);
+
+      let event = "message";
+      let data = "";
+      for (const line of frame.split("\n")) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) data += line.slice(5).trim();
+      }
+      if (!data) continue;
+
+      let payload: unknown;
+      try {
+        payload = JSON.parse(data);
+      } catch {
+        continue;
+      }
+
+      if (event === "grounding") h.onGrounding?.(payload as GroundingRecord[]);
+      else if (event === "delta") h.onDelta?.((payload as { text: string }).text);
+      else if (event === "done")
+        h.onDone?.(payload as { model: string; disclaimer: string; usage?: GenerateResponse["usage"] });
+      else if (event === "error") h.onError?.((payload as { detail?: string }).detail || "Üretim hatası.");
+    }
+  }
+}
+
 /** Streaming aydınlatma üretimi — generateDocStream ile aynı SSE/kota/idempotency deseni. */
 export async function generateAydinlatmaStream(
   clientId: string,
@@ -372,42 +416,7 @@ export async function generateAydinlatmaStream(
     return;
   }
 
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder();
-  let buf = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += decoder.decode(value, { stream: true });
-
-    let sep: number;
-    while ((sep = buf.indexOf("\n\n")) !== -1) {
-      const frame = buf.slice(0, sep);
-      buf = buf.slice(sep + 2);
-
-      let event = "message";
-      let data = "";
-      for (const line of frame.split("\n")) {
-        if (line.startsWith("event:")) event = line.slice(6).trim();
-        else if (line.startsWith("data:")) data += line.slice(5).trim();
-      }
-      if (!data) continue;
-
-      let payload: unknown;
-      try {
-        payload = JSON.parse(data);
-      } catch {
-        continue;
-      }
-
-      if (event === "grounding") h.onGrounding?.(payload as GroundingRecord[]);
-      else if (event === "delta") h.onDelta?.((payload as { text: string }).text);
-      else if (event === "done")
-        h.onDone?.(payload as { model: string; disclaimer: string; usage?: GenerateResponse["usage"] });
-      else if (event === "error") h.onError?.((payload as { detail?: string }).detail || "Üretim hatası.");
-    }
-  }
+  await consumeSseStream(resp, h);
 }
 
 export async function aydinlatmaDocx(clientId: string, text: string, title?: string): Promise<Blob> {
@@ -462,41 +471,60 @@ export async function generateCerezStream(
     return;
   }
 
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder();
-  let buf = "";
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += decoder.decode(value, { stream: true });
-    let sep: number;
-    while ((sep = buf.indexOf("\n\n")) !== -1) {
-      const frame = buf.slice(0, sep);
-      buf = buf.slice(sep + 2);
-      let event = "message";
-      let data = "";
-      for (const line of frame.split("\n")) {
-        if (line.startsWith("event:")) event = line.slice(6).trim();
-        else if (line.startsWith("data:")) data += line.slice(5).trim();
-      }
-      if (!data) continue;
-      let payload: unknown;
-      try {
-        payload = JSON.parse(data);
-      } catch {
-        continue;
-      }
-      if (event === "grounding") h.onGrounding?.(payload as GroundingRecord[]);
-      else if (event === "delta") h.onDelta?.((payload as { text: string }).text);
-      else if (event === "done")
-        h.onDone?.(payload as { model: string; disclaimer: string; usage?: GenerateResponse["usage"] });
-      else if (event === "error") h.onError?.((payload as { detail?: string }).detail || "Üretim hatası.");
-    }
-  }
+  await consumeSseStream(resp, h);
 }
 
 export async function cerezDocx(clientId: string, text: string, title?: string): Promise<Blob> {
   const res = await apiFetch(`/api/clients/${clientId}/cerez/docx`, {
+    method: "POST",
+    body: JSON.stringify({ text, title }),
+  });
+  if (!res.ok) throw new Error(await errorDetail(res));
+  return res.blob();
+}
+
+/** Streaming isleme kaydi (VERBIS) uretimi — generateCerezStream ile ayni SSE/kota/idempotency deseni. */
+export async function generateKayitStream(clientId: string, h: StreamHandlers): Promise<void> {
+  if (!API_BASE) {
+    h.onError?.("İşleme kaydı üretimi gerçek API bağlantısı gerektirir.");
+    return;
+  }
+
+  let resp: Response;
+  try {
+    resp = await apiFetch(`/api/clients/${clientId}/kayit/generate`, {
+      method: "POST",
+      body: JSON.stringify({}),
+      headers: { "Idempotency-Key": newIdempotencyKey() },
+    });
+  } catch {
+    h.onError?.("Sunucuya ulaşılamadı. Backend çalışıyor mu?");
+    return;
+  }
+
+  if (await isDuplicateRequest(resp)) {
+    h.onError?.(DUPLICATE_MESSAGE);
+    return;
+  }
+  if (resp.status === 402) {
+    let info = { used: 0, quota: 5 };
+    try {
+      const e = await resp.json();
+      if (e?.detail?.code === "quota_exceeded") info = { used: e.detail.used, quota: e.detail.quota };
+    } catch { /* */ }
+    h.onQuotaExceeded?.(info);
+    return;
+  }
+  if (!resp.ok || !resp.body) {
+    h.onError?.(await errorDetail(resp));
+    return;
+  }
+
+  await consumeSseStream(resp, h);
+}
+
+export async function kayitDocx(clientId: string, text: string, title?: string): Promise<Blob> {
+  const res = await apiFetch(`/api/clients/${clientId}/kayit/docx`, {
     method: "POST",
     body: JSON.stringify({ text, title }),
   });
@@ -555,42 +583,7 @@ export async function generateDocStream(req: GenerateRequest, h: StreamHandlers)
     return;
   }
 
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder();
-  let buf = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += decoder.decode(value, { stream: true });
-
-    let sep: number;
-    while ((sep = buf.indexOf("\n\n")) !== -1) {
-      const frame = buf.slice(0, sep);
-      buf = buf.slice(sep + 2);
-
-      let event = "message";
-      let data = "";
-      for (const line of frame.split("\n")) {
-        if (line.startsWith("event:")) event = line.slice(6).trim();
-        else if (line.startsWith("data:")) data += line.slice(5).trim();
-      }
-      if (!data) continue;
-
-      let payload: unknown;
-      try {
-        payload = JSON.parse(data);
-      } catch {
-        continue;
-      }
-
-      if (event === "grounding") h.onGrounding?.(payload as GroundingRecord[]);
-      else if (event === "delta") h.onDelta?.((payload as { text: string }).text);
-      else if (event === "done")
-        h.onDone?.(payload as { model: string; disclaimer: string; usage?: GenerateResponse["usage"] });
-      else if (event === "error") h.onError?.((payload as { detail?: string }).detail || "Üretim hatası.");
-    }
-  }
+  await consumeSseStream(resp, h);
 }
 
 /** Mock için akış simülasyonu — prod'da da "yazılıyor" hissi verir. */
