@@ -21,8 +21,8 @@ import {
   type EnrichedSection,
   type AydinlatmaSection,
 } from "@/lib/api";
-import type { GenerateResponse, GroundingRecord } from "@/lib/types";
-import { refreshWorkspaceInfo } from "@/components/app/use-workspace-info";
+import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
+import { GenerationWarning } from "@/components/app/generation-warning";
 
 /*
   Aydınlatma üretim akışı (m.10): müvekkil seç → hedef kişi grupları → Hazırla
@@ -139,8 +139,6 @@ export function AydinlatmaClient() {
 }
 
 function AydinlatmaFlow({ clientId }: { clientId: string }) {
-  const toast = useToast();
-
   const [summary, setSummary] = useState<InventorySummary | null>(null);
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [targetGroups, setTargetGroups] = useState<string[]>([]);
@@ -150,12 +148,9 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
   const [sections, setSections] = useState<EnrichedSection[] | null>(null);
   const [edited, setEdited] = useState<AydinlatmaSection[]>([]);
 
-  const [loading, setLoading] = useState(false);
-  const [streaming, setStreaming] = useState(false);
-  const [result, setResult] = useState<GenerateResponse | null>(null);
-  const [genError, setGenError] = useState<string | null>(null);
-  const [quotaBlock, setQuotaBlock] = useState<{ used: number; quota: number } | null>(null);
-  const [downloading, setDownloading] = useState(false);
+  const { loading, streaming, result, error: genError, quotaBlock, warning, generate, reset } =
+    useDocumentStream();
+  const { downloading, download } = useDocumentDownload();
 
   useEffect(() => {
     getClientInventorySummary(clientId)
@@ -174,9 +169,7 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
     setPrepareError(null);
     setSections(null);
     setEdited([]);
-    setResult(null);
-    setGenError(null);
-    setQuotaBlock(null);
+    reset();
     try {
       const res = await prepareAydinlatma(clientId, targetGroups);
       setSections(res.sections);
@@ -188,71 +181,13 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
     }
   }
 
-  async function onGenerate() {
-    setLoading(true);
-    setStreaming(true);
-    setResult(null);
-    setGenError(null);
-    setQuotaBlock(null);
-
-    let acc = "";
-    let grounding: GroundingRecord[] = [];
-    let lastFlush = 0;
-    const flush = (force = false) => {
-      const now = Date.now();
-      if (!force && now - lastFlush < 90) return;
-      lastFlush = now;
-      setResult({ text: acc, grounding, model: "", disclaimer: "" });
-    };
-
-    try {
-      await generateAydinlatmaStream(clientId, edited, {
-        onGrounding: (g) => {
-          grounding = g;
-          flush(true);
-        },
-        onDelta: (t) => {
-          acc += t;
-          flush();
-        },
-        onDone: (meta) => {
-          setResult({
-            text: acc,
-            grounding,
-            model: meta.model,
-            disclaimer: meta.disclaimer,
-            usage: meta.usage,
-          });
-          toast("Aydınlatma metni hazır");
-          refreshWorkspaceInfo(); // kenar çubuğu kullanım sayacı
-        },
-        onQuotaExceeded: (info) => setQuotaBlock(info),
-        onError: (msg) => setGenError(msg),
-      });
-    } catch (e) {
-      setGenError(e instanceof Error ? e.message : "Beklenmeyen bir hata oluştu.");
-    } finally {
-      setStreaming(false);
-      setLoading(false);
-    }
+  function onGenerate() {
+    return generate((h) => generateAydinlatmaStream(clientId, edited, h), "Aydınlatma metni hazır");
   }
 
-  async function onDownload() {
-    if (!result) return;
-    setDownloading(true);
-    try {
-      const blob = await aydinlatmaDocx(clientId, result.text, "Aydınlatma Metni");
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "aydinlatma.docx";
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      toast(e instanceof Error ? e.message : "İndirme başarısız.");
-    } finally {
-      setDownloading(false);
-    }
+  function onDownload() {
+    if (!result) return Promise.resolve();
+    return download(() => aydinlatmaDocx(clientId, result.text, "Aydınlatma Metni"), "aydinlatma.docx");
   }
 
   if (summaryError) return <p className="mt-5 text-[13.5px] text-danger">{summaryError}</p>;
@@ -287,7 +222,7 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
           />
         </Field>
         <div className="mt-4">
-          <Button onClick={onPrepare} disabled={targetGroups.length === 0 || preparing}>
+          <Button onClick={onPrepare} disabled={targetGroups.length === 0 || preparing || loading}>
             {preparing ? (
               <>
                 <Icon name="spinner" className="animate-spin text-[15px]" /> Hazırlanıyor…
@@ -400,6 +335,8 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
           </span>
         </div>
       )}
+
+      {warning && <GenerationWarning warning={warning} />}
 
       {result && (
         <>
