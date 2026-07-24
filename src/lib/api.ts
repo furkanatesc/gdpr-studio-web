@@ -420,10 +420,15 @@ export async function generateAydinlatmaStream(
   await consumeSseStream(resp.body, h);
 }
 
-export async function aydinlatmaDocx(clientId: string, text: string, title?: string): Promise<Blob> {
+export async function aydinlatmaDocx(
+  clientId: string,
+  text: string,
+  title?: string,
+  kisiGruplari?: string[],
+): Promise<Blob> {
   const res = await apiFetch(`/api/clients/${clientId}/aydinlatma/docx`, {
     method: "POST",
-    body: JSON.stringify({ text, title }),
+    body: JSON.stringify({ text, title, kisiGruplari }),
   });
   if (!res.ok) throw new Error(await errorDetail(res));
   return res.blob();
@@ -475,10 +480,15 @@ export async function generateCerezStream(
   await consumeSseStream(resp.body, h);
 }
 
-export async function cerezDocx(clientId: string, text: string, title?: string): Promise<Blob> {
+export async function cerezDocx(
+  clientId: string,
+  text: string,
+  title?: string,
+  site?: string,
+): Promise<Blob> {
   const res = await apiFetch(`/api/clients/${clientId}/cerez/docx`, {
     method: "POST",
-    body: JSON.stringify({ text, title }),
+    body: JSON.stringify({ text, title, site }),
   });
   if (!res.ok) throw new Error(await errorDetail(res));
   return res.blob();

@@ -139,7 +139,10 @@ function CerezForm({ clientId }: { clientId: string }) {
 
   function onDownload() {
     if (!result) return Promise.resolve();
-    return download(() => cerezDocx(clientId, result.text, "Çerez Politikası"), "cerez-politikasi.docx");
+    return download(
+      () => cerezDocx(clientId, result.text, "Çerez Politikası", site),
+      "cerez-politikasi.docx",
+    );
   }
 
   return (
