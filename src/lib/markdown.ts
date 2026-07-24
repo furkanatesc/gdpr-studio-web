@@ -101,7 +101,12 @@ export function renderMarkdown(text: string): string {
       continue;
     }
 
-    const para: string[] = [];
+    // Yukaridaki blok kontrollerinin hicbiri eslesmedi: bu satir her kosulda
+    // tuketilir. Akis sirasinda olusan yarim satirlarda ("## " gibi; baslik
+    // regexi metin ister, paragraf dislamasi istemez) dongunun ilerlemesini
+    // garanti eder — aksi halde sekme donar.
+    const para: string[] = [lines[i]];
+    i++;
     while (
       i < lines.length &&
       !/^\s*$/.test(lines[i]) &&
@@ -115,7 +120,7 @@ export function renderMarkdown(text: string): string {
       para.push(lines[i]);
       i++;
     }
-    if (para.length) html += `<p>${inline(para.join(" "))}</p>`;
+    html += `<p>${inline(para.join(" "))}</p>`;
   }
   return html;
 }
