@@ -5,41 +5,29 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/app/page-header";
 import { DocumentOutput } from "@/components/app/document-output";
-import { Field, Select, Input, Button, Card, MultiSelect } from "@/components/ui";
-import { Textarea } from "@/components/ui/textarea";
+import { Field, Select, Button, Card } from "@/components/ui";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import {
   listClients,
-  generateCerezStream,
-  cerezDocx,
+  getClientInventorySummary,
+  generateKayitStream,
+  kayitDocx,
   SECTOR_LABELS,
   usingRealApi,
   type Client,
+  type InventorySummary,
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 
 /*
-  Cerez uretim akisi: muvekkil sec -> sabit form (site + araclar + CMP + kategoriler) ->
-  Uret (stream) -> .docx indir. aydinlatma-client.tsx'in muvekkil secici + stream state
-  makinesi (onGenerate: acc/grounding/flush + Date.now() throttle) desenini izler; fark:
-  prepare/oneri-onay yok, form sabit.
+  İşleme kaydı (VERBİS) üretim akışı: müvekkil seç → envanter özeti kontrolü →
+  Üret (stream) → .docx indir. Form/öneri-onay yok — envanterin tamamından tek
+  parça kayıt üretilir. aydinlatma-client.tsx'in müvekkil seçici + stream state
+  makinesi (use-document-stream.ts) desenini izler.
 */
 
-const CEREZ_KATEGORILERI = [
-  "Zorunlu çerezler",
-  "Fonksiyonel çerezler",
-  "Analitik çerezler",
-  "Pazarlama çerezleri",
-  "Sosyal medya çerezleri",
-];
-const CMP_OPTIONS: [string, string][] = [
-  ["yok", "Yok"],
-  ["var-kendi", "Var — kendi çözümümüz"],
-  ["var-3taraf", "Var — 3. taraf CMP"],
-];
-
-export function CerezClient() {
+export function KayitClient() {
   const toast = useToast();
   const searchParams = useSearchParams();
   const clientParam = searchParams.get("client");
@@ -62,9 +50,9 @@ export function CerezClient() {
 
   const header = (
     <PageHeader
-      eyebrow="Araçlar / Çerez Politikası Üret"
-      title="Çerez Politikası Üret"
-      description="Müvekkilin sitesi/uygulaması için çerez politikası hazırlayın."
+      eyebrow="Araçlar / İşleme Kaydı Üret"
+      title="İşleme Kaydı Üret"
+      description="Müvekkil envanterinden VERBİS işleme kaydı (faaliyet envanteri) hazırlayın."
     />
   );
 
@@ -73,7 +61,7 @@ export function CerezClient() {
       <div>
         {header}
         <p className="mt-6 text-[14px] text-ink-muted">
-          Çerez üretimi gerçek API bağlantısı gerektirir; bu ortamda devre dışı.
+          İşleme kaydı üretimi gerçek API bağlantısı gerektirir; bu ortamda devre dışı.
         </p>
       </div>
     );
@@ -87,7 +75,7 @@ export function CerezClient() {
       ) : clients.length === 0 ? (
         <div className="mt-8 border border-dashed border-border-strong bg-surface px-8 py-12 text-center">
           <p className="text-[13.5px] text-ink-muted">
-            Çerez politikası üretmek için önce bir müvekkil oluşturun.
+            İşleme kaydı üretmek için önce bir müvekkil oluşturun.
           </p>
           <Link
             href="/app/muvekkiller"
@@ -111,84 +99,71 @@ export function CerezClient() {
             </Field>
           </section>
 
-          {selectedId && <CerezForm key={selectedId} clientId={selectedId} />}
+          {selectedId && <KayitFlow key={selectedId} clientId={selectedId} />}
         </div>
       )}
     </div>
   );
 }
 
-function CerezForm({ clientId }: { clientId: string }) {
-  const [site, setSite] = useState("");
-  const [tools, setTools] = useState("");
-  const [cmp, setCmp] = useState("yok");
-  const [kategoriler, setKategoriler] = useState<string[]>([]);
+function KayitFlow({ clientId }: { clientId: string }) {
+  const [summary, setSummary] = useState<InventorySummary | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
 
   const { loading, streaming, result, error: genError, quotaBlock, generate } = useDocumentStream();
   const { downloading, download } = useDocumentDownload();
 
+  useEffect(() => {
+    getClientInventorySummary(clientId)
+      .then(setSummary)
+      .catch((e) =>
+        setSummaryError(e instanceof Error ? e.message : "Envanter özeti yüklenemedi."),
+      );
+  }, [clientId]);
+
   function onGenerate() {
-    return generate(
-      (h) => generateCerezStream(clientId, { site, tools, cmp, kategoriler }, h),
-      "Çerez politikası hazır",
-    );
+    return generate((h) => generateKayitStream(clientId, h), "İşleme kaydı hazır");
   }
 
   function onDownload() {
     if (!result) return Promise.resolve();
-    return download(() => cerezDocx(clientId, result.text, "Çerez Politikası"), "cerez-politikasi.docx");
+    return download(() => kayitDocx(clientId, result.text, "İşleme Kaydı"), "isleme-kaydi.docx");
   }
+
+  if (summaryError) return <p className="mt-5 text-[13.5px] text-danger">{summaryError}</p>;
+
+  if (!summary) return <p className="mt-5 text-[13px] text-ink-muted">Envanter özeti yükleniyor…</p>;
+
+  if (summary.count === 0)
+    return (
+      <div className="mt-5 border border-dashed border-border-strong bg-surface px-8 py-12 text-center">
+        <p className="text-[13.5px] text-ink-muted">
+          Bu müvekkilin envanteri boş. İşleme kaydı üretmek için önce envanter kaydı gerekir.
+        </p>
+        <Link
+          href={`/app/envanter?client=${clientId}`}
+          className="mt-4 inline-block font-medium text-[12.5px] uppercase tracking-[0.08em] text-accent-strong hover:underline"
+        >
+          Envanter Yönetimi&apos;ne git ↗
+        </Link>
+      </div>
+    );
 
   return (
     <div className="mt-5 space-y-5">
-      <Card title="Site ve çerez bilgileri" icon={<Icon name="cookie" className="text-[18px]" />}>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Site / uygulama" required>
-            <Input
-              value={site}
-              onChange={(e) => setSite(e.target.value)}
-              placeholder="www.sirket.com"
-            />
-          </Field>
-          <Field label="Çerez onay aracı (CMP)">
-            <Select value={cmp} onChange={(e) => setCmp(e.target.value)}>
-              {CMP_OPTIONS.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </Select>
-          </Field>
-          <div className="sm:col-span-2">
-            <Field label="Kullanılan 3. taraf araçlar / çerezler">
-              <Textarea
-                value={tools}
-                onChange={(e) => setTools(e.target.value)}
-                placeholder="Örn: Google Analytics, Hotjar, Meta Pixel"
-              />
-            </Field>
-          </div>
-          <div className="sm:col-span-2">
-            <Field label="Çerez kategorileri">
-              <MultiSelect
-                options={CEREZ_KATEGORILERI}
-                value={kategoriler}
-                onChange={setKategoriler}
-                ariaLabel="Çerez kategorileri"
-                placeholder="Kategori seçin…"
-              />
-            </Field>
-          </div>
-        </div>
-
+      <Card title="İşleme kaydı" icon={<Icon name="clipboard" className="text-[18px]" />}>
+        <p className="text-[13px] text-ink-muted">
+          Müvekkilin tüm envanter kayıtlarından VERBİS işleme kaydı (faaliyet envanteri) tek
+          parça olarak üretilir.
+        </p>
         <div className="mt-4">
-          <Button onClick={onGenerate} disabled={!site.trim() || loading}>
+          <Button onClick={onGenerate} disabled={loading}>
             {loading ? (
               <>
                 <Icon name="spinner" className="animate-spin text-[15px]" /> Üretiliyor…
               </>
             ) : (
-              "Üret"
+              "İşleme Kaydı Üret"
             )}
           </Button>
         </div>
