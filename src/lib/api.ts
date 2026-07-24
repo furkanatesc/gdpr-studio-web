@@ -331,11 +331,10 @@ export async function prepareAydinlatma(
 
 /*
   SSE çerçeveleme + olay dağıtımı — generateDocStream / generateAydinlatmaStream /
-  generateCerezStream / generateKayitStream ortak döngüsü. Çağıran, resp.body'nin
-  var olduğunu (!resp.ok || !resp.body erken dönüşü) zaten doğrulamış olmalı.
+  generateCerezStream / generateKayitStream ortak döngüsü.
 */
-async function consumeSseStream(resp: Response, h: StreamHandlers): Promise<void> {
-  const reader = resp.body!.getReader();
+async function consumeSseStream(body: ReadableStream<Uint8Array>, h: StreamHandlers): Promise<void> {
+  const reader = body.getReader();
   const decoder = new TextDecoder();
   let buf = "";
 
@@ -416,7 +415,7 @@ export async function generateAydinlatmaStream(
     return;
   }
 
-  await consumeSseStream(resp, h);
+  await consumeSseStream(resp.body, h);
 }
 
 export async function aydinlatmaDocx(clientId: string, text: string, title?: string): Promise<Blob> {
@@ -471,7 +470,7 @@ export async function generateCerezStream(
     return;
   }
 
-  await consumeSseStream(resp, h);
+  await consumeSseStream(resp.body, h);
 }
 
 export async function cerezDocx(clientId: string, text: string, title?: string): Promise<Blob> {
@@ -520,7 +519,7 @@ export async function generateKayitStream(clientId: string, h: StreamHandlers): 
     return;
   }
 
-  await consumeSseStream(resp, h);
+  await consumeSseStream(resp.body, h);
 }
 
 export async function kayitDocx(clientId: string, text: string, title?: string): Promise<Blob> {
@@ -583,7 +582,7 @@ export async function generateDocStream(req: GenerateRequest, h: StreamHandlers)
     return;
   }
 
-  await consumeSseStream(resp, h);
+  await consumeSseStream(resp.body, h);
 }
 
 /** Mock için akış simülasyonu — prod'da da "yazılıyor" hissi verir. */
