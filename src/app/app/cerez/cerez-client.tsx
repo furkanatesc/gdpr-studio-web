@@ -18,6 +18,7 @@ import {
   type Client,
 } from "@/lib/api";
 import type { GenerateResponse, GroundingRecord } from "@/lib/types";
+import { refreshWorkspaceInfo } from "@/components/app/use-workspace-info";
 
 /*
   Cerez uretim akisi: muvekkil sec -> sabit form (site + araclar + CMP + kategoriler) ->
@@ -169,6 +170,7 @@ function CerezForm({ clientId }: { clientId: string }) {
             usage: meta.usage,
           });
           toast("Çerez politikası hazır");
+          refreshWorkspaceInfo(); // kenar çubuğu kullanım sayacı
         },
         onQuotaExceeded: (info) => setQuotaBlock(info),
         onError: (msg) => setGenError(msg),
