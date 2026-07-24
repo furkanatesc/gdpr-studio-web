@@ -208,11 +208,11 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
           { title: "Öneri Onayı" },
           { title: "Üret" },
         ]}
-        current={result ? 3 : sections ? 2 : targetGroups.length > 0 ? 1 : 0}
+        current={result ? 3 : sections ? 2 : 1}
         reachable={[true, true, Boolean(sections), Boolean(result)]}
         docColor="var(--doc-aydinlatma)"
         onSelect={() => {}}
-        locked={loading || preparing}
+        locked
       />
 
       <Card title="Hedef kişi grupları" icon={<Icon name="grid" className="text-[18px]" />}>
@@ -261,6 +261,21 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
             </Button>
           </div>
         </>
+      )}
+
+      {sections && sections.length === 0 && (
+        <div className="border border-dashed border-border-strong bg-surface px-8 py-12 text-center">
+          <p className="text-[13.5px] text-ink-muted">
+            Seçtiğiniz kişi grupları için envanterde işleme faaliyeti bulunamadı. Farklı bir kişi
+            grubu seçin ya da envanteri güncelleyin.
+          </p>
+          <Link
+            href={`/app/envanter?client=${clientId}`}
+            className="mt-4 inline-block font-medium text-[12.5px] uppercase tracking-[0.08em] text-accent-strong hover:underline"
+          >
+            Envanter Yönetimi&apos;ne git ↗
+          </Link>
+        </div>
       )}
 
       {quotaBlock && (
