@@ -177,7 +177,10 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
 
   function onDownload() {
     if (!result) return Promise.resolve();
-    return download(() => aydinlatmaDocx(clientId, result.text, "Aydınlatma Metni"), "aydinlatma.docx");
+    return download(
+      () => aydinlatmaDocx(clientId, result.text, "Aydınlatma Metni", targetGroups),
+      "aydinlatma.docx",
+    );
   }
 
   if (summaryError) return <p className="mt-5 text-[13.5px] text-danger">{summaryError}</p>;
