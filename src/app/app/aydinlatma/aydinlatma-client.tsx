@@ -220,7 +220,7 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
           />
         </Field>
         <div className="mt-4">
-          <Button onClick={onPrepare} disabled={targetGroups.length === 0 || preparing}>
+          <Button onClick={onPrepare} disabled={targetGroups.length === 0 || preparing || loading}>
             {preparing ? (
               <>
                 <Icon name="spinner" className="animate-spin text-[15px]" /> Hazırlanıyor…
