@@ -20,6 +20,33 @@ export type SectionField = keyof typeof FIELD_LABELS;
 
 export const EDITABLE_FIELDS = Object.keys(FIELD_LABELS) as SectionField[];
 
+/*
+  Backend `oneriler` sozlugunu snake_case anahtarla dolduruyor (bkz.
+  aydinlatma_enrich.py ENRICHABLE); Pydantic'in camelCase alias'i sozluk
+  anahtarlarina uygulanmiyor. Her alan icin denenecek anahtarlari sirayla
+  listeler — ileride backend camelCase'e gecerse de kirilmasin diye camel
+  once denenir.
+*/
+const ONERI_KEYS: Record<SectionField, string[]> = {
+  kisiGruplari: ["kisiGruplari", "kisi_gruplari"],
+  kategoriler: ["kategoriler"],
+  veriTurleri: ["veriTurleri", "veri_turleri"],
+  amaclar: ["amaclar"],
+  hukukiSebepler: ["hukukiSebepler", "hukuki_sebepler"],
+  saklamaSureleri: ["saklamaSureleri", "saklama_sureleri"],
+  aktarim: ["aktarim"],
+  toplama: ["toplama"],
+};
+
+function oneriFor(oneriler: Record<string, string[]> | undefined, field: SectionField): string[] {
+  if (!oneriler) return [];
+  for (const key of ONERI_KEYS[field]) {
+    const values = oneriler[key];
+    if (values && values.length > 0) return values;
+  }
+  return [];
+}
+
 /** Dolu olsa da duzenlenebilir alanlar (mevcut + oneri; ekle/cikar) — avukat S2. */
 export const ADDITIVE_FIELDS = new Set<SectionField>(["amaclar"]);
 
@@ -59,7 +86,7 @@ export function classifySections(sections: EnrichedSection[]): Classified {
 
     for (const field of EDITABLE_FIELDS) {
       const base = s[field] ?? [];
-      const oneri = s.oneriler?.[field] ?? [];
+      const oneri = oneriFor(s.oneriler, field);
 
       if (ADDITIVE_FIELDS.has(field) || oneri.length > 0) {
         kararlar.push({ sectionIndex: index, isSureci: s.isSureci, field, base, oneri });

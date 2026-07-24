@@ -64,6 +64,10 @@ export function OneriOnayi({
       {eksikler.length > 0 && (
         <section className="mt-8">
           <h3 className="eyebrow mb-3">Eksikler ({eksikHucre}) — envanterde doldurulmalı</h3>
+          <p className="mb-3 text-[12.5px] text-ink-muted">
+            Boş alanlar üretimi engellemez; belgede &quot;[Avukat tarafından doldurulacak]&quot;
+            olarak görünür.
+          </p>
           <div className="space-y-2">
             {eksikler.map((e) => (
               <div
@@ -83,6 +87,8 @@ export function OneriOnayi({
                   </button>
                   <Link
                     href={`/app/envanter?client=${clientId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="font-medium text-[12.5px] uppercase tracking-[0.08em] text-accent-strong hover:underline"
                   >
                     Envanter&apos;de düzelt ↗
