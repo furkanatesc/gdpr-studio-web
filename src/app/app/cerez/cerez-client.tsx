@@ -18,6 +18,7 @@ import {
   type Client,
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
+import { GenerationWarning } from "@/components/app/generation-warning";
 
 /*
   Cerez uretim akisi: muvekkil sec -> sabit form (site + araclar + CMP + kategoriler) ->
@@ -124,7 +125,8 @@ function CerezForm({ clientId }: { clientId: string }) {
   const [cmp, setCmp] = useState("yok");
   const [kategoriler, setKategoriler] = useState<string[]>([]);
 
-  const { loading, streaming, result, error: genError, quotaBlock, generate } = useDocumentStream();
+  const { loading, streaming, result, error: genError, quotaBlock, warning, generate } =
+    useDocumentStream();
   const { downloading, download } = useDocumentDownload();
 
   function onGenerate() {
@@ -219,6 +221,8 @@ function CerezForm({ clientId }: { clientId: string }) {
           </span>
         </div>
       )}
+
+      {warning && <GenerationWarning warning={warning} />}
 
       {result && (
         <>

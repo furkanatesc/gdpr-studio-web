@@ -368,6 +368,8 @@ async function consumeSseStream(body: ReadableStream<Uint8Array>, h: StreamHandl
       else if (event === "done")
         h.onDone?.(payload as { model: string; disclaimer: string; usage?: GenerateResponse["usage"] });
       else if (event === "error") h.onError?.((payload as { detail?: string }).detail || "Üretim hatası.");
+      else if (event === "warning")
+        h.onWarning?.(payload as { code: string; message: string });
     }
   }
 }
@@ -544,6 +546,7 @@ export interface StreamHandlers {
   onDone?: (meta: { model: string; disclaimer: string; usage?: GenerateResponse["usage"] }) => void;
   onError?: (message: string) => void;
   onQuotaExceeded?: (info: { used: number; quota: number }) => void;
+  onWarning?: (w: { code: string; message: string }) => void;
 }
 
 /** Streaming üretim — gerçek backend'de SSE, mock'ta simüle akış. */

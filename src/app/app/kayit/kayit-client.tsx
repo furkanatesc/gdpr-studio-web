@@ -19,6 +19,7 @@ import {
   type InventorySummary,
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
+import { GenerationWarning } from "@/components/app/generation-warning";
 
 /*
   İşleme kaydı (VERBİS) üretim akışı: müvekkil seç → envanter özeti kontrolü →
@@ -110,7 +111,8 @@ function KayitFlow({ clientId }: { clientId: string }) {
   const [summary, setSummary] = useState<InventorySummary | null>(null);
   const [summaryError, setSummaryError] = useState<string | null>(null);
 
-  const { loading, streaming, result, error: genError, quotaBlock, generate } = useDocumentStream();
+  const { loading, streaming, result, error: genError, quotaBlock, warning, generate } =
+    useDocumentStream();
   const { downloading, download } = useDocumentDownload();
 
   useEffect(() => {
@@ -194,6 +196,8 @@ function KayitFlow({ clientId }: { clientId: string }) {
           </span>
         </div>
       )}
+
+      {warning && <GenerationWarning warning={warning} />}
 
       {result && (
         <>

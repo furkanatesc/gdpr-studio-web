@@ -22,6 +22,7 @@ import {
   type AydinlatmaSection,
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
+import { GenerationWarning } from "@/components/app/generation-warning";
 
 /*
   Aydınlatma üretim akışı (m.10): müvekkil seç → hedef kişi grupları → Hazırla
@@ -147,7 +148,8 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
   const [sections, setSections] = useState<EnrichedSection[] | null>(null);
   const [edited, setEdited] = useState<AydinlatmaSection[]>([]);
 
-  const { loading, streaming, result, error: genError, quotaBlock, generate, reset } = useDocumentStream();
+  const { loading, streaming, result, error: genError, quotaBlock, warning, generate, reset } =
+    useDocumentStream();
   const { downloading, download } = useDocumentDownload();
 
   useEffect(() => {
@@ -333,6 +335,8 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
           </span>
         </div>
       )}
+
+      {warning && <GenerationWarning warning={warning} />}
 
       {result && (
         <>

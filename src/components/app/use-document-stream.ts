@@ -20,6 +20,7 @@ export function useDocumentStream() {
   const [result, setResult] = useState<GenerateResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [quotaBlock, setQuotaBlock] = useState<{ used: number; quota: number } | null>(null);
+  const [warning, setWarning] = useState<{ code: string; message: string } | null>(null);
 
   async function generate(
     startStream: (h: StreamHandlers) => Promise<void>,
@@ -30,6 +31,7 @@ export function useDocumentStream() {
     setResult(null);
     setError(null);
     setQuotaBlock(null);
+    setWarning(null);
 
     let acc = "";
     let grounding: GroundingRecord[] = [];
@@ -64,6 +66,7 @@ export function useDocumentStream() {
         },
         onQuotaExceeded: (info) => setQuotaBlock(info),
         onError: (msg) => setError(msg),
+        onWarning: (w) => setWarning(w),
       });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Beklenmeyen bir hata oluştu.");
@@ -77,9 +80,10 @@ export function useDocumentStream() {
     setResult(null);
     setError(null);
     setQuotaBlock(null);
+    setWarning(null);
   }
 
-  return { loading, streaming, result, error, quotaBlock, generate, reset };
+  return { loading, streaming, result, error, quotaBlock, warning, generate, reset };
 }
 
 /** İndirme akışı — blob → geçici `<a download>` (aydinlatma-client.tsx'teki orijinal onDownload ile birebir). */
