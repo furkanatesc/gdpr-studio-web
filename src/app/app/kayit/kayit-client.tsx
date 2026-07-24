@@ -20,6 +20,7 @@ import {
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
+import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 
 /*
   İşleme kaydı (VERBİS) üretim akışı: müvekkil seç → envanter özeti kontrolü →
@@ -198,6 +199,8 @@ function KayitFlow({ clientId }: { clientId: string }) {
       )}
 
       {warning && <GenerationWarning warning={warning} />}
+
+      {loading && !result && <GenerationSkeleton />}
 
       {result && (
         <>

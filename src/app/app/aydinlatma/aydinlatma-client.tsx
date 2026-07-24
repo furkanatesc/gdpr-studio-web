@@ -23,6 +23,10 @@ import {
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
+import { StepBar } from "@/components/app/step-bar";
+import { GenerationSkeleton } from "@/components/app/generation-skeleton";
+import { OneriOnayi } from "./oneri-onayi";
+import type { SectionField } from "@/lib/section-classify";
 
 /*
   Aydınlatma üretim akışı (m.10): müvekkil seç → hedef kişi grupları → Hazırla
@@ -30,20 +34,6 @@ import { GenerationWarning } from "@/components/app/generation-warning";
   onayı → Üret (stream) → .docx indir. envanter-client.tsx (müvekkil seçici) ve
   doc-flow.tsx (stream state makinesi) desenlerini izler.
 */
-
-const FIELD_LABELS: Record<keyof Omit<AydinlatmaSection, "isSureci">, string> = {
-  kisiGruplari: "İlgili kişi grupları",
-  kategoriler: "Veri kategorileri",
-  veriTurleri: "Veri türleri",
-  amaclar: "İşleme amaçları",
-  hukukiSebepler: "Hukuki sebepler",
-  saklamaSureleri: "Saklama süreleri",
-  aktarim: "Aktarım",
-  toplama: "Toplama yöntemi",
-};
-const EDITABLE_FIELDS = Object.keys(FIELD_LABELS) as (keyof typeof FIELD_LABELS)[];
-// Dolu olsa da düzenlenebilir (mevcut + öneri; ekle/çıkar) alanlar — avukat S2.
-const ADDITIVE_FIELDS = new Set<keyof typeof FIELD_LABELS>(["amaclar"]);
 
 function toApproved(s: EnrichedSection): AydinlatmaSection {
   return {
@@ -160,7 +150,7 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
       );
   }, [clientId]);
 
-  function updateField(i: number, field: keyof typeof FIELD_LABELS, values: string[]) {
+  function updateField(i: number, field: SectionField, values: string[]) {
     setEdited((prev) => prev.map((s, idx) => (idx === i ? { ...s, [field]: values } : s)));
   }
 
@@ -211,6 +201,20 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
 
   return (
     <div className="mt-5 space-y-5">
+      <StepBar
+        steps={[
+          { title: "Müvekkil" },
+          { title: "Kişi Grupları" },
+          { title: "Öneri Onayı" },
+          { title: "Üret" },
+        ]}
+        current={result ? 3 : sections ? 2 : 1}
+        reachable={[true, true, Boolean(sections), Boolean(result)]}
+        docColor="var(--doc-aydinlatma)"
+        onSelect={() => {}}
+        locked
+      />
+
       <Card title="Hedef kişi grupları" icon={<Icon name="grid" className="text-[18px]" />}>
         <Field label="Aydınlatma metninin kapsayacağı kişi grupları">
           <MultiSelect
@@ -235,68 +239,17 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
         {prepareError && <p className="mt-3 text-[13px] text-danger">{prepareError}</p>}
       </Card>
 
-      {sections && sections.length > 0 && (
-        <Card title="Öneri onayı" icon={<Icon name="clipboard" className="text-[18px]" />}>
-          <p className="mb-4 text-[13px] text-ink-muted">
-            Boş bırakılan ve ek öneri sunulan (ör. hukuk departmanı) alanlar için öneriler
-            listelenir; seçtiğiniz değerler metne işlenir. Öneri olmayan boş alanlar üretimde
-            &quot;[Avukat tarafından doldurulacak]&quot; olarak bırakılır.
-          </p>
-          <div className="space-y-6">
-            {sections.map((s, i) => (
-              <div key={`${s.isSureci}-${i}`} className="border border-border p-4">
-                <h3 className="font-display text-[14.5px] text-ink">{s.isSureci}</h3>
-                <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {EDITABLE_FIELDS.map((field) => {
-                    const base = s[field];
-                    const oneri = s.oneriler[field] ?? [];
-                    return (
-                      <div key={field}>
-                        <p className="mb-1.5 text-[12.5px] font-medium text-ink-muted">
-                          {FIELD_LABELS[field]}
-                        </p>
-                        {ADDITIVE_FIELDS.has(field) || oneri.length > 0 ? (
-                          // Additive alan ya da (dolu/bos farketmez) oneri bulunan alan: mevcut +
-                          // oneri birlesik, avukat ekler/cikarir (S4 hukuk mesru menfaat dahil).
-                          <>
-                            <MultiSelect
-                              options={Array.from(new Set([...base, ...oneri]))}
-                              value={edited[i]?.[field] ?? base}
-                              onChange={(v) => updateField(i, field, v)}
-                              ariaLabel={FIELD_LABELS[field]}
-                              placeholder="Mevcut + öneriler; ekleyin/çıkarın…"
-                            />
-                            {oneri.length > 0 && (
-                              <p className="mt-1 text-[11px] text-ink-subtle">
-                                Öneri: {oneri.join(", ")}
-                              </p>
-                            )}
-                          </>
-                        ) : base.length > 0 ? (
-                          <div className="flex flex-wrap gap-1.5">
-                            {base.map((v) => (
-                              <span
-                                key={v}
-                                className="border border-border-strong bg-surface-2 px-2 py-0.5 text-[12px] text-ink-muted"
-                              >
-                                {v}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-[12.5px] text-ink-subtle">
-                            [Avukat tarafından doldurulacak]
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
+      {preparing && <GenerationSkeleton label="Envanterden bölümler çıkarılıyor…" />}
 
-          <div className="mt-6 flex items-center gap-3">
+      {sections && sections.length > 0 && (
+        <>
+          <OneriOnayi
+            sections={sections}
+            edited={edited}
+            clientId={clientId}
+            onChange={updateField}
+          />
+          <div className="flex items-center gap-3">
             <Button onClick={onGenerate} disabled={loading}>
               {loading ? (
                 <>
@@ -307,7 +260,22 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
               )}
             </Button>
           </div>
-        </Card>
+        </>
+      )}
+
+      {sections && sections.length === 0 && (
+        <div className="border border-dashed border-border-strong bg-surface px-8 py-12 text-center">
+          <p className="text-[13.5px] text-ink-muted">
+            Seçtiğiniz kişi grupları için envanterde işleme faaliyeti bulunamadı. Farklı bir kişi
+            grubu seçin ya da envanteri güncelleyin.
+          </p>
+          <Link
+            href={`/app/envanter?client=${clientId}`}
+            className="mt-4 inline-block font-medium text-[12.5px] uppercase tracking-[0.08em] text-accent-strong hover:underline"
+          >
+            Envanter Yönetimi&apos;ne git ↗
+          </Link>
+        </div>
       )}
 
       {quotaBlock && (
@@ -337,6 +305,8 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
       )}
 
       {warning && <GenerationWarning warning={warning} />}
+
+      {loading && !result && <GenerationSkeleton />}
 
       {result && (
         <>

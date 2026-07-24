@@ -19,6 +19,7 @@ import {
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
+import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 
 /*
   Cerez uretim akisi: muvekkil sec -> sabit form (site + araclar + CMP + kategoriler) ->
@@ -223,6 +224,8 @@ function CerezForm({ clientId }: { clientId: string }) {
       )}
 
       {warning && <GenerationWarning warning={warning} />}
+
+      {loading && !result && <GenerationSkeleton />}
 
       {result && (
         <>
