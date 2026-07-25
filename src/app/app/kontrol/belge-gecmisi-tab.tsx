@@ -2,15 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Field, Select } from "@/components/ui";
+import { useDocumentDownload } from "@/components/app/use-document-stream";
 import { renderMarkdown } from "@/lib/markdown";
 import {
+  documentVersionDocx,
   getClientDocument,
   getClientDocuments,
+  getDocumentVersion,
+  getDocumentVersions,
   listClients,
+  publishDocument,
   usingRealApi,
   type Client,
-  type ClientDocument,
   type ClientDocumentMeta,
+  type ClientDocumentVersionMeta,
 } from "@/lib/api";
 
 const DOC_TYPE_LABELS: Record<ClientDocumentMeta["docType"], string> = {
@@ -27,16 +32,31 @@ function pct(v: number | null): string {
   return v === null ? "—" : `%${Math.round(v * 100)}`;
 }
 
+function fmtDate(iso: string | null): string {
+  return iso ? new Date(iso).toLocaleDateString("tr-TR") : "—";
+}
+
 export function BelgeGecmisiTab() {
   const [clients, setClients] = useState<Client[] | null>(null);
   const [clientId, setClientId] = useState("");
   const [docs, setDocs] = useState<ClientDocumentMeta[]>([]);
-  const [open, setOpen] = useState<ClientDocument | null>(null);
+  const [open, setOpen] = useState<{ title: string; content: string } | null>(null);
+  const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({});
+  const [publishing, setPublishing] = useState<Set<string>>(new Set());
+  const [publishErrors, setPublishErrors] = useState<Record<string, string>>({});
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [versions, setVersions] = useState<Record<string, ClientDocumentVersionMeta[]>>({});
+  const { downloading, download } = useDocumentDownload();
   const [prevClientId, setPrevClientId] = useState(clientId);
   if (clientId !== prevClientId) {
     setPrevClientId(clientId);
     setOpen(null);
     setDocs([]);
+    setNoteDrafts({});
+    setPublishing(new Set());
+    setPublishErrors({});
+    setExpanded(new Set());
+    setVersions({});
   }
 
   useEffect(() => {
@@ -59,6 +79,60 @@ export function BelgeGecmisiTab() {
     for (const d of docs) (m[d.docType] ??= []).push(d);
     return m;
   }, [docs]);
+
+  function onPublish(d: ClientDocumentMeta) {
+    const note = (noteDrafts[d.id] ?? "").trim();
+    setPublishing((prev) => new Set(prev).add(d.id));
+    setPublishErrors((prev) => ({ ...prev, [d.id]: "" }));
+    publishDocument(clientId, d.id, note || null)
+      .then(() => {
+        setNoteDrafts((prev) => ({ ...prev, [d.id]: "" }));
+        return Promise.all([
+          getClientDocuments(clientId).then(setDocs),
+          versions[d.id]
+            ? getDocumentVersions(clientId, d.id).then((vs) =>
+                setVersions((prev) => ({ ...prev, [d.id]: vs })),
+              )
+            : Promise.resolve(),
+        ]);
+      })
+      .catch((e) =>
+        setPublishErrors((prev) => ({
+          ...prev,
+          [d.id]: e instanceof Error ? e.message : "Yayınlama başarısız.",
+        })),
+      )
+      .finally(() =>
+        setPublishing((prev) => {
+          const next = new Set(prev);
+          next.delete(d.id);
+          return next;
+        }),
+      );
+  }
+
+  function onToggleVersions(d: ClientDocumentMeta) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(d.id)) {
+        next.delete(d.id);
+      } else {
+        next.add(d.id);
+        if (!versions[d.id]) {
+          getDocumentVersions(clientId, d.id)
+            .then((vs) => setVersions((prev2) => ({ ...prev2, [d.id]: vs })))
+            .catch(() => setVersions((prev2) => ({ ...prev2, [d.id]: [] })));
+        }
+      }
+      return next;
+    });
+  }
+
+  function onViewVersion(d: ClientDocumentMeta, v: ClientDocumentVersionMeta) {
+    getDocumentVersion(clientId, d.id, v.id).then((full) =>
+      setOpen({ title: `${d.title} · v${v.version}`, content: full.content }),
+    );
+  }
 
   if (!usingRealApi)
     return <p className="mt-6 text-[14px] text-ink-muted">Belge geçmişi gerçek API bağlantısı gerektirir.</p>;
@@ -90,11 +164,11 @@ export function BelgeGecmisiTab() {
               ) : (
                 <ul className="mt-3 flex flex-col gap-2">
                   {items.map((d) => (
-                    <li key={d.id}>
+                    <li key={d.id} className="border border-border-strong">
                       <button
                         type="button"
                         onClick={() => getClientDocument(clientId, d.id).then(setOpen)}
-                        className="flex w-full flex-wrap items-center justify-between gap-2 border border-border-strong px-3 py-2 text-left transition-colors hover:bg-surface-2"
+                        className="flex w-full flex-wrap items-center justify-between gap-2 px-3 py-2 text-left transition-colors hover:bg-surface-2"
                       >
                         <span className="text-[13px] text-ink">{d.title}</span>
                         <span className="flex gap-2 font-mono text-[11px] text-ink-subtle">
@@ -102,6 +176,90 @@ export function BelgeGecmisiTab() {
                           <span title="Uyum maddeleri">Uyum {pct(d.scoreCompliance)}</span>
                         </span>
                       </button>
+
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-3 py-2">
+                        <span className="text-[11px] text-ink-subtle">
+                          {d.latestVersion
+                            ? `v${d.latestVersion} · ${fmtDate(d.latestPublishedAt)}`
+                            : "Yayınlanmamış taslak"}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={noteDrafts[d.id] ?? ""}
+                            onChange={(e) =>
+                              setNoteDrafts((prev) => ({ ...prev, [d.id]: e.target.value }))
+                            }
+                            placeholder="Not (opsiyonel)"
+                            className="h-8 w-32 border border-border bg-surface px-2 text-[12px] text-ink outline-none focus:border-accent sm:w-40"
+                          />
+                          <button
+                            type="button"
+                            disabled={publishing.has(d.id)}
+                            onClick={() => onPublish(d)}
+                            className="whitespace-nowrap border border-border-strong px-3 py-1.5 text-[12px] text-ink transition-colors hover:bg-surface-2 disabled:opacity-50"
+                          >
+                            {publishing.has(d.id) ? "Yayınlanıyor…" : "Yayınla"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onToggleVersions(d)}
+                            className="whitespace-nowrap text-[12px] text-ink-subtle hover:text-ink"
+                          >
+                            {expanded.has(d.id) ? "Sürümler ▲" : "Sürümler ▼"}
+                          </button>
+                        </div>
+                      </div>
+                      {publishErrors[d.id] && (
+                        <p className="border-t border-border px-3 py-1.5 text-[11px] text-danger">
+                          {publishErrors[d.id]}
+                        </p>
+                      )}
+
+                      {expanded.has(d.id) && (
+                        <div className="border-t border-border px-3 py-2">
+                          {!versions[d.id] ? (
+                            <p className="text-[12px] text-ink-muted">Yükleniyor…</p>
+                          ) : versions[d.id].length === 0 ? (
+                            <p className="text-[12px] text-ink-muted">Henüz yayınlanmış sürüm yok.</p>
+                          ) : (
+                            <ul className="flex flex-col gap-1.5">
+                              {versions[d.id].map((v) => (
+                                <li
+                                  key={v.id}
+                                  className="flex flex-wrap items-center justify-between gap-2 text-[12px] text-ink-muted"
+                                >
+                                  <span>
+                                    v{v.version} · {fmtDate(v.publishedAt)} · {v.note ?? "—"}
+                                  </span>
+                                  <span className="flex gap-3">
+                                    <button
+                                      type="button"
+                                      onClick={() => onViewVersion(d, v)}
+                                      className="text-accent-strong hover:underline"
+                                    >
+                                      Görüntüle
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={downloading}
+                                      onClick={() =>
+                                        download(
+                                          () => documentVersionDocx(clientId, v.id),
+                                          `${d.docType}-v${v.version}.docx`,
+                                        )
+                                      }
+                                      className="text-accent-strong hover:underline disabled:opacity-50"
+                                    >
+                                      .docx
+                                    </button>
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
