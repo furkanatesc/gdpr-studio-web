@@ -87,14 +87,16 @@ export function BelgeGecmisiTab() {
     publishDocument(clientId, d.id, note || null)
       .then(() => {
         setNoteDrafts((prev) => ({ ...prev, [d.id]: "" }));
-        return Promise.all([
+        setPublishErrors((prev) => ({ ...prev, [d.id]: "" }));
+        // Refresh sonrası hatası yayınlamayı geçersiz kılmaz; sessizce yut.
+        Promise.all([
           getClientDocuments(clientId).then(setDocs),
           versions[d.id]
             ? getDocumentVersions(clientId, d.id).then((vs) =>
                 setVersions((prev) => ({ ...prev, [d.id]: vs })),
               )
             : Promise.resolve(),
-        ]);
+        ]).catch(() => {});
       })
       .catch((e) =>
         setPublishErrors((prev) => ({
@@ -191,6 +193,7 @@ export function BelgeGecmisiTab() {
                               setNoteDrafts((prev) => ({ ...prev, [d.id]: e.target.value }))
                             }
                             placeholder="Not (opsiyonel)"
+                            aria-label="Yayın notu"
                             className="h-8 w-32 border border-border bg-surface px-2 text-[12px] text-ink outline-none focus:border-accent sm:w-40"
                           />
                           <button
@@ -204,6 +207,7 @@ export function BelgeGecmisiTab() {
                           <button
                             type="button"
                             onClick={() => onToggleVersions(d)}
+                            aria-expanded={expanded.has(d.id)}
                             className="whitespace-nowrap text-[12px] text-ink-subtle hover:text-ink"
                           >
                             {expanded.has(d.id) ? "Sürümler ▲" : "Sürümler ▼"}
