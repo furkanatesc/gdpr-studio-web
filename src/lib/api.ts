@@ -239,6 +239,8 @@ export type ClientDocumentMeta = {
   scoreCompliance: number | null;
   createdAt: string;
   updatedAt: string;
+  latestVersion: number | null;
+  latestPublishedAt: string | null;
 };
 export type ClientDocument = ClientDocumentMeta & { content: string };
 
@@ -249,6 +251,47 @@ export async function getClientDocuments(clientId: string): Promise<ClientDocume
 }
 export async function getClientDocument(clientId: string, docId: string): Promise<ClientDocument> {
   return authedJson(`/api/clients/${clientId}/documents/${docId}`, { method: "GET" });
+}
+
+export type ClientDocumentVersionMeta = {
+  id: string;
+  version: number;
+  note: string | null;
+  publishedAt: string;
+  publishedBy: string | null;
+  scoreCompleteness: number | null;
+  scoreCompliance: number | null;
+};
+export type ClientDocumentVersion = ClientDocumentVersionMeta & { content: string };
+
+export async function publishDocument(
+  clientId: string,
+  docId: string,
+  note: string | null,
+): Promise<ClientDocumentVersionMeta> {
+  return authedJson(`/api/clients/${clientId}/documents/${docId}/publish`, {
+    method: "POST",
+    body: JSON.stringify({ note }),
+  });
+}
+export async function getDocumentVersions(
+  clientId: string,
+  docId: string,
+): Promise<ClientDocumentVersionMeta[]> {
+  const r = await authedJson(`/api/clients/${clientId}/documents/${docId}/versions`, { method: "GET" });
+  return r.versions;
+}
+export async function getDocumentVersion(
+  clientId: string,
+  docId: string,
+  verId: string,
+): Promise<ClientDocumentVersion> {
+  return authedJson(`/api/clients/${clientId}/documents/${docId}/versions/${verId}`, { method: "GET" });
+}
+export async function documentVersionDocx(clientId: string, verId: string): Promise<Blob> {
+  const res = await apiFetch(`/api/clients/${clientId}/documents/versions/${verId}/docx`, { method: "GET" });
+  if (!res.ok) throw new Error(await errorDetail(res));
+  return res.blob();
 }
 
 export type InventoryRow = {
