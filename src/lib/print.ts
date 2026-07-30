@@ -1,6 +1,6 @@
 import type { Client } from "@/lib/api";
 
-export type PrintDocType = "aydinlatma" | "cerez" | "kayit";
+export type PrintDocType = "aydinlatma" | "cerez" | "kayit" | "dpia";
 
 export type PrintCover = {
   veriSorumlusu: string;
