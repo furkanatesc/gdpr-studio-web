@@ -13,6 +13,7 @@ const BASLIK: Record<string, string> = {
   aydinlatma: "Kişisel Verilerin Korunması Kanunu Kapsamında Aydınlatma Metni",
   cerez: "Çerez Politikası",
   kayit: "Kişisel Veri İşleme Kaydı",
+  dpia: "Veri Koruma Etki Değerlendirmesi",
 };
 
 export function YazdirClient() {

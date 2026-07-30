@@ -22,7 +22,7 @@ import {
 } from "@/lib/api";
 
 function toPrintDocType(t: ClientDocumentMeta["docType"]): PrintDocType {
-  return t === "aydinlatma" || t === "cerez" || t === "kayit" ? t : "kayit";
+  return t === "aydinlatma" || t === "cerez" || t === "kayit" || t === "dpia" ? t : "kayit";
 }
 
 type OpenDoc = {
@@ -42,7 +42,7 @@ const DOC_TYPE_LABELS: Record<ClientDocumentMeta["docType"], string> = {
   dpia: "Etki Değerlendirmesi",
   ihlal: "İhlal Bildirimi",
 };
-const ACTIVE_TYPES: ClientDocumentMeta["docType"][] = ["aydinlatma", "cerez", "kayit"];
+const ACTIVE_TYPES: ClientDocumentMeta["docType"][] = ["aydinlatma", "cerez", "kayit", "dpia"];
 
 function pct(v: number | null): string {
   return v === null ? "—" : `%${Math.round(v * 100)}`;
