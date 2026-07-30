@@ -215,8 +215,8 @@ export function BelgeGecmisiTab() {
                               coverTitle: full.title,
                               content: full.content,
                               docType: toPrintDocType(full.docType),
-                              versiyon: full.latestVersion ? String(full.latestVersion) : "Taslak",
-                              tarih: formatTrDate(full.latestPublishedAt ?? full.updatedAt),
+                              versiyon: "Taslak",
+                              tarih: formatTrDate(),
                             }),
                           )
                         }
