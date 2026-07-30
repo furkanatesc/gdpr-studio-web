@@ -10,6 +10,7 @@ import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import {
   listClients,
+  getClient,
   getClientInventorySummary,
   prepareAydinlatma,
   generateAydinlatmaStream,
@@ -27,6 +28,7 @@ import { StepBar } from "@/components/app/step-bar";
 import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { OneriOnayi } from "./oneri-onayi";
 import type { SectionField } from "@/lib/section-classify";
+import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 
 /*
   Aydınlatma üretim akışı (m.10): müvekkil seç → hedef kişi grupları → Hazırla
@@ -132,6 +134,7 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
   const [summary, setSummary] = useState<InventorySummary | null>(null);
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [targetGroups, setTargetGroups] = useState<string[]>([]);
+  const [client, setClient] = useState<Client | null>(null);
 
   const [preparing, setPreparing] = useState(false);
   const [prepareError, setPrepareError] = useState<string | null>(null);
@@ -148,6 +151,12 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
       .catch((e) =>
         setSummaryError(e instanceof Error ? e.message : "Envanter özeti yüklenemedi."),
       );
+  }, [clientId]);
+
+  useEffect(() => {
+    getClient(clientId)
+      .then(setClient)
+      .catch(() => setClient(null));
   }, [clientId]);
 
   function updateField(i: number, field: SectionField, values: string[]) {
@@ -181,6 +190,16 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
       () => aydinlatmaDocx(clientId, result.text, "Aydınlatma Metni", targetGroups),
       "aydinlatma.docx",
     );
+  }
+
+  function onPrint() {
+    if (!result || !client) return;
+    const cover = buildCover(client, "aydinlatma", {
+      ilgiliKisi: targetGroups.join(", ") || undefined,
+      tarih: formatTrDate(),
+      versiyon: "Taslak",
+    });
+    openPrintView({ docType: "aydinlatma", content: result.text, cover });
   }
 
   if (summaryError) return <p className="mt-5 text-[13.5px] text-danger">{summaryError}</p>;
@@ -315,17 +334,22 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
         <>
           <DocumentOutput result={result} streaming={streaming} />
           {!streaming && (
-            <Button variant="secondary" onClick={onDownload} disabled={downloading}>
-              {downloading ? (
-                <>
-                  <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
-                </>
-              ) : (
-                <>
-                  <Icon name="file" className="text-[15px]" /> .docx indir
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button variant="secondary" onClick={onDownload} disabled={downloading}>
+                {downloading ? (
+                  <>
+                    <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
+                  </>
+                ) : (
+                  <>
+                    <Icon name="file" className="text-[15px]" /> .docx indir
+                  </>
+                )}
+              </Button>
+              <Button variant="secondary" onClick={onPrint} disabled={!client}>
+                <Icon name="file" className="text-[15px]" /> PDF / Yazdır
+              </Button>
+            </div>
           )}
         </>
       )}

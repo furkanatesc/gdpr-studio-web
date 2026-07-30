@@ -11,6 +11,7 @@ import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import {
   listClients,
+  getClient,
   generateCerezStream,
   cerezDocx,
   SECTOR_LABELS,
@@ -20,6 +21,7 @@ import {
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationSkeleton } from "@/components/app/generation-skeleton";
+import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 
 /*
   Cerez uretim akisi: muvekkil sec -> sabit form (site + araclar + CMP + kategoriler) ->
@@ -125,10 +127,17 @@ function CerezForm({ clientId }: { clientId: string }) {
   const [tools, setTools] = useState("");
   const [cmp, setCmp] = useState("yok");
   const [kategoriler, setKategoriler] = useState<string[]>([]);
+  const [client, setClient] = useState<Client | null>(null);
 
   const { loading, streaming, result, error: genError, quotaBlock, warning, generate } =
     useDocumentStream();
   const { downloading, download } = useDocumentDownload();
+
+  useEffect(() => {
+    getClient(clientId)
+      .then(setClient)
+      .catch(() => setClient(null));
+  }, [clientId]);
 
   function onGenerate() {
     return generate(
@@ -143,6 +152,16 @@ function CerezForm({ clientId }: { clientId: string }) {
       () => cerezDocx(clientId, result.text, "Çerez Politikası", site),
       "cerez-politikasi.docx",
     );
+  }
+
+  function onPrint() {
+    if (!result || !client) return;
+    const cover = buildCover(client, "cerez", {
+      site: site || undefined,
+      tarih: formatTrDate(),
+      versiyon: "Taslak",
+    });
+    openPrintView({ docType: "cerez", content: result.text, cover });
   }
 
   return (
@@ -234,17 +253,22 @@ function CerezForm({ clientId }: { clientId: string }) {
         <>
           <DocumentOutput result={result} streaming={streaming} />
           {!streaming && (
-            <Button variant="secondary" onClick={onDownload} disabled={downloading}>
-              {downloading ? (
-                <>
-                  <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
-                </>
-              ) : (
-                <>
-                  <Icon name="file" className="text-[15px]" /> .docx indir
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button variant="secondary" onClick={onDownload} disabled={downloading}>
+                {downloading ? (
+                  <>
+                    <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
+                  </>
+                ) : (
+                  <>
+                    <Icon name="file" className="text-[15px]" /> .docx indir
+                  </>
+                )}
+              </Button>
+              <Button variant="secondary" onClick={onPrint} disabled={!client}>
+                <Icon name="file" className="text-[15px]" /> PDF / Yazdır
+              </Button>
+            </div>
           )}
         </>
       )}

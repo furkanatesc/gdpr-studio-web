@@ -10,6 +10,7 @@ import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import {
   listClients,
+  getClient,
   getClientInventorySummary,
   generateKayitStream,
   kayitDocx,
@@ -21,6 +22,7 @@ import {
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationSkeleton } from "@/components/app/generation-skeleton";
+import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 
 /*
   İşleme kaydı (VERBİS) üretim akışı: müvekkil seç → envanter özeti kontrolü →
@@ -111,6 +113,7 @@ export function KayitClient() {
 function KayitFlow({ clientId }: { clientId: string }) {
   const [summary, setSummary] = useState<InventorySummary | null>(null);
   const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [client, setClient] = useState<Client | null>(null);
 
   const { loading, streaming, result, error: genError, quotaBlock, warning, generate } =
     useDocumentStream();
@@ -124,6 +127,12 @@ function KayitFlow({ clientId }: { clientId: string }) {
       );
   }, [clientId]);
 
+  useEffect(() => {
+    getClient(clientId)
+      .then(setClient)
+      .catch(() => setClient(null));
+  }, [clientId]);
+
   function onGenerate() {
     return generate((h) => generateKayitStream(clientId, h), "İşleme kaydı hazır");
   }
@@ -131,6 +140,12 @@ function KayitFlow({ clientId }: { clientId: string }) {
   function onDownload() {
     if (!result) return Promise.resolve();
     return download(() => kayitDocx(clientId, result.text, "İşleme Kaydı"), "isleme-kaydi.docx");
+  }
+
+  function onPrint() {
+    if (!result || !client) return;
+    const cover = buildCover(client, "kayit", { tarih: formatTrDate(), versiyon: "Taslak" });
+    openPrintView({ docType: "kayit", content: result.text, cover });
   }
 
   if (summaryError) return <p className="mt-5 text-[13.5px] text-danger">{summaryError}</p>;
@@ -206,17 +221,22 @@ function KayitFlow({ clientId }: { clientId: string }) {
         <>
           <DocumentOutput result={result} streaming={streaming} />
           {!streaming && (
-            <Button variant="secondary" onClick={onDownload} disabled={downloading}>
-              {downloading ? (
-                <>
-                  <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
-                </>
-              ) : (
-                <>
-                  <Icon name="file" className="text-[15px]" /> .docx indir
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button variant="secondary" onClick={onDownload} disabled={downloading}>
+                {downloading ? (
+                  <>
+                    <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
+                  </>
+                ) : (
+                  <>
+                    <Icon name="file" className="text-[15px]" /> .docx indir
+                  </>
+                )}
+              </Button>
+              <Button variant="secondary" onClick={onPrint} disabled={!client}>
+                <Icon name="file" className="text-[15px]" /> PDF / Yazdır
+              </Button>
+            </div>
           )}
         </>
       )}
