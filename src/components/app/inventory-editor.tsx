@@ -4,6 +4,8 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { Button, buttonClasses } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
 import { ComboCell } from "@/components/app/inventory-grid-cell";
+import { EksikleriDoldurPanel } from "@/components/app/eksikleri-doldur-panel";
+import type { ListKey } from "@/components/app/inventory-fields";
 import {
   getClientInventory,
   getGroundingOptions,
@@ -30,20 +32,6 @@ import { cn } from "@/lib/utils";
 type EditableRow = InventoryRow & { _id: string };
 
 type IdentityKey = "departman" | "is_sureci" | "alt_surec" | "kisi_grubu";
-type ListKey =
-  | "kategoriler"
-  | "veri_turleri"
-  | "amaclar"
-  | "hukuki_sebepler"
-  | "dayanaklar"
-  | "saklama_sureleri"
-  | "islem"
-  | "ortam_format"
-  | "konum"
-  | "idari_tedbirler"
-  | "teknik_tedbirler"
-  | "aktarim"
-  | "toplama";
 
 const IDENTITY_COLUMNS: { key: IdentityKey; label: string; width: number; required?: boolean }[] = [
   { key: "departman", label: "Departman", width: 160 },
@@ -242,6 +230,12 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
       .catch(() => setGroundingOptions({ kategoriler: [], amaclar: [], ozelNitelikli: [] }));
   }, [clientId, toast]);
 
+  const reloadRows = useCallback(() => {
+    return getClientInventory(clientId)
+      .then((d) => setRows(d.rows.map(withId)))
+      .catch((e) => toast(e instanceof Error ? e.message : "Envanter yenilenemedi."));
+  }, [clientId, toast]);
+
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -367,6 +361,12 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
             </button>
           </div>
         </div>
+
+        <EksikleriDoldurPanel
+          clientId={clientId}
+          onApplied={reloadRows}
+          disabled={!rows || rows.length === 0 || importing || saving}
+        />
 
         {rows === null ? (
           <p className="mt-4 text-[13px] text-ink-muted">Yükleniyor…</p>
