@@ -1,0 +1,48 @@
+.sayfa {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px;
+  font-family: var(--print-govde), Georgia, serif;
+  color: #1c1c1a;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.bos { padding: 48px; text-align: center; color: #6b6963; }
+
+.kapak { padding-bottom: 24px; border-bottom: 2px solid #3e7a72; margin-bottom: 28px; }
+.kapakBaslik {
+  font-family: var(--print-baslik), Georgia, serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: #3e7a72;
+  margin-bottom: 20px;
+  line-height: 1.25;
+}
+.meta { display: grid; gap: 6px; }
+.metaSatir { display: flex; gap: 8px; }
+.metaEtiket { color: #6b6963; min-width: 140px; }
+.metaDeger { color: #1c1c1a; font-weight: 600; }
+
+/* doc-prose zaten globals.css'te; print için başlık fontunu ve ayraçları güçlendir */
+.govde :global(h1),
+.govde :global(h2),
+.govde :global(h3) { font-family: var(--print-baslik), Georgia, serif; color: #3e7a72; }
+.govde :global(h2) { border-bottom: 1px solid #e4e2db; padding-bottom: 4px; }
+.govde :global(table) { width: 100%; border-collapse: collapse; font-size: 13px; }
+.govde :global(th),
+.govde :global(td) { border: 1px solid #d8d6cf; padding: 6px 8px; text-align: left; }
+.govde :global(th) { background: #f3f1ea; }
+
+@media print {
+  .sayfa { max-width: none; margin: 0; padding: 0; }
+  .kapak { break-after: page; }
+  .govde :global(h1),
+  .govde :global(h2),
+  .govde :global(h3) { break-after: avoid; }
+  .govde :global(tr) { break-inside: avoid; }
+}
+
+@page {
+  size: A4;
+  margin: 20mm 18mm 22mm;
+}

@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Field, Select } from "@/components/ui";
+import { Field, Select, Button } from "@/components/ui";
+import { Icon } from "@/components/ui/icon";
 import { useDocumentDownload } from "@/components/app/use-document-stream";
 import { renderMarkdown } from "@/lib/markdown";
+import { openPrintView, buildCover, formatTrDate, type PrintDocType } from "@/lib/print";
 import {
   documentVersionDocx,
+  getClient,
   getClientDocument,
   getClientDocuments,
   getDocumentVersion,
@@ -17,6 +20,19 @@ import {
   type ClientDocumentMeta,
   type ClientDocumentVersionMeta,
 } from "@/lib/api";
+
+function toPrintDocType(t: ClientDocumentMeta["docType"]): PrintDocType {
+  return t === "aydinlatma" || t === "cerez" || t === "kayit" ? t : "kayit";
+}
+
+type OpenDoc = {
+  title: string;
+  coverTitle: string;
+  content: string;
+  docType: PrintDocType;
+  versiyon: string;
+  tarih: string;
+};
 
 const DOC_TYPE_LABELS: Record<ClientDocumentMeta["docType"], string> = {
   aydinlatma: "Aydınlatma Metni",
@@ -39,8 +55,9 @@ function fmtDate(iso: string | null): string {
 export function BelgeGecmisiTab() {
   const [clients, setClients] = useState<Client[] | null>(null);
   const [clientId, setClientId] = useState("");
+  const [client, setClient] = useState<Client | null>(null);
   const [docs, setDocs] = useState<ClientDocumentMeta[]>([]);
-  const [open, setOpen] = useState<{ title: string; content: string } | null>(null);
+  const [open, setOpen] = useState<OpenDoc | null>(null);
   const [noteDrafts, setNoteDrafts] = useState<Record<string, string>>({});
   const [publishing, setPublishing] = useState<Set<string>>(new Set());
   const [publishErrors, setPublishErrors] = useState<Record<string, string>>({});
@@ -51,6 +68,7 @@ export function BelgeGecmisiTab() {
   if (clientId !== prevClientId) {
     setPrevClientId(clientId);
     setOpen(null);
+    setClient(null);
     setDocs([]);
     setNoteDrafts({});
     setPublishing(new Set());
@@ -72,6 +90,9 @@ export function BelgeGecmisiTab() {
     getClientDocuments(clientId)
       .then(setDocs)
       .catch(() => setDocs([]));
+    getClient(clientId)
+      .then(setClient)
+      .catch(() => setClient(null));
   }, [clientId]);
 
   const byType = useMemo(() => {
@@ -132,8 +153,26 @@ export function BelgeGecmisiTab() {
 
   function onViewVersion(d: ClientDocumentMeta, v: ClientDocumentVersionMeta) {
     getDocumentVersion(clientId, d.id, v.id).then((full) =>
-      setOpen({ title: `${d.title} · v${v.version}`, content: full.content }),
+      setOpen({
+        title: `${d.title} · v${v.version}`,
+        coverTitle: d.title,
+        content: full.content,
+        docType: toPrintDocType(d.docType),
+        versiyon: String(v.version),
+        tarih: formatTrDate(v.publishedAt),
+      }),
     );
+  }
+
+  function onPrint() {
+    if (!open || !client) return;
+    const cover = buildCover(client, open.docType, {
+      ilgiliKisi: open.coverTitle,
+      site: open.coverTitle,
+      tarih: open.tarih,
+      versiyon: open.versiyon,
+    });
+    openPrintView({ docType: open.docType, content: open.content, cover });
   }
 
   if (!usingRealApi)
@@ -169,7 +208,18 @@ export function BelgeGecmisiTab() {
                     <li key={d.id} className="border border-border-strong">
                       <button
                         type="button"
-                        onClick={() => getClientDocument(clientId, d.id).then(setOpen)}
+                        onClick={() =>
+                          getClientDocument(clientId, d.id).then((full) =>
+                            setOpen({
+                              title: full.title,
+                              coverTitle: full.title,
+                              content: full.content,
+                              docType: toPrintDocType(full.docType),
+                              versiyon: "Taslak",
+                              tarih: formatTrDate(),
+                            }),
+                          )
+                        }
                         className="flex w-full flex-wrap items-center justify-between gap-2 px-3 py-2 text-left transition-colors hover:bg-surface-2"
                       >
                         <span className="text-[13px] text-ink">{d.title}</span>
@@ -275,11 +325,16 @@ export function BelgeGecmisiTab() {
 
       {open && (
         <section className="border border-border bg-surface p-6">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <h3 className="font-display text-[16px] text-ink">{open.title}</h3>
-            <button type="button" onClick={() => setOpen(null)} className="text-[12px] text-ink-subtle hover:text-ink">
-              Kapat ✕
-            </button>
+            <div className="flex items-center gap-3">
+              <Button variant="secondary" size="sm" onClick={onPrint} disabled={!client}>
+                <Icon name="file" className="text-[15px]" /> PDF / Yazdır
+              </Button>
+              <button type="button" onClick={() => setOpen(null)} className="text-[12px] text-ink-subtle hover:text-ink">
+                Kapat ✕
+              </button>
+            </div>
           </div>
           <div
             className="doc-prose max-w-none text-[14px] leading-relaxed"
