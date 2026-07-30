@@ -27,6 +27,7 @@ function toPrintDocType(t: ClientDocumentMeta["docType"]): PrintDocType {
 
 type OpenDoc = {
   title: string;
+  coverTitle: string;
   content: string;
   docType: PrintDocType;
   versiyon: string;
@@ -154,6 +155,7 @@ export function BelgeGecmisiTab() {
     getDocumentVersion(clientId, d.id, v.id).then((full) =>
       setOpen({
         title: `${d.title} · v${v.version}`,
+        coverTitle: d.title,
         content: full.content,
         docType: toPrintDocType(d.docType),
         versiyon: String(v.version),
@@ -165,8 +167,8 @@ export function BelgeGecmisiTab() {
   function onPrint() {
     if (!open || !client) return;
     const cover = buildCover(client, open.docType, {
-      ilgiliKisi: open.title,
-      site: open.title,
+      ilgiliKisi: open.coverTitle,
+      site: open.coverTitle,
       tarih: open.tarih,
       versiyon: open.versiyon,
     });
@@ -210,6 +212,7 @@ export function BelgeGecmisiTab() {
                           getClientDocument(clientId, d.id).then((full) =>
                             setOpen({
                               title: full.title,
+                              coverTitle: full.title,
                               content: full.content,
                               docType: toPrintDocType(full.docType),
                               versiyon: full.latestVersion ? String(full.latestVersion) : "Taslak",
