@@ -320,6 +320,27 @@ export async function getClientInventory(id: string): Promise<{ rows: InventoryR
 export async function replaceClientInventory(id: string, rows: InventoryRow[]): Promise<InventorySummary> {
   return authedJson(`/api/clients/${id}/inventory`, { method: "PUT", body: JSON.stringify({ rows }) });
 }
+
+export type InventorySuggestionRow = {
+  index: number;
+  departman: string;
+  isSureci: string;
+  altSurec: string;
+  kisiGrubu: string;
+  oneriler: Record<string, string[]>;
+  elleAlanlar: string[];
+};
+
+export type InventorySuggestions = {
+  bosSlot: number;
+  tamlik: number | null;
+  rows: InventorySuggestionRow[];
+};
+
+export async function getInventorySuggestions(id: string): Promise<InventorySuggestions> {
+  return authedJson(`/api/clients/${id}/inventory/suggestions`, { method: "GET" });
+}
+
 export const inventoryTemplateUrl = () => `${API_BASE}/api/inventory/template`;
 export const workbookTemplateUrl = () => `${API_BASE}/api/inventory/workbook-template`;
 
