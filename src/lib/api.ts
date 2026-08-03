@@ -672,6 +672,109 @@ export async function dpiaDocx(clientId: string, text: string, title?: string): 
   return res.blob();
 }
 
+/*
+  Veri işleyen (processor) yönetimi — DPA (Veri İşleyen Sözleşmesi) her işleyen için
+  ayrı hazırlanır (bkz. backend app/modules/processors.py). Mock modda (API yok) boş
+  liste döner — sahte işleyen uydurulmaz.
+*/
+export type Processor = components["schemas"]["ProcessorOut"];
+export type ProcessorIn = components["schemas"]["ProcessorIn"];
+
+export async function listProcessors(clientId: string): Promise<Processor[]> {
+  if (!API_BASE) return [];
+  return authedJson(`/api/clients/${clientId}/processors`, { method: "GET" });
+}
+export async function createProcessor(clientId: string, body: ProcessorIn): Promise<Processor> {
+  return authedJson(`/api/clients/${clientId}/processors`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+export async function updateProcessor(clientId: string, id: string, body: ProcessorIn): Promise<Processor> {
+  return authedJson(`/api/clients/${clientId}/processors/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+export async function deleteProcessor(clientId: string, id: string): Promise<void> {
+  return authedJson(`/api/clients/${clientId}/processors/${id}`, { method: "DELETE" });
+}
+
+export type AktarimAdlariOut = components["schemas"]["AktarimAdlariOut"];
+
+export async function getAktarimAdlari(clientId: string): Promise<AktarimAdlariOut> {
+  if (!API_BASE) return { adlar: [] };
+  return authedJson(`/api/clients/${clientId}/aktarim-adlari`, { method: "GET" });
+}
+
+export type DpaPrepareResult = components["schemas"]["DpaPrepareOut"];
+
+export async function prepareDpa(clientId: string, processorId: string): Promise<DpaPrepareResult> {
+  return authedJson(`/api/clients/${clientId}/dpa/prepare`, {
+    method: "POST",
+    body: JSON.stringify({ processorId }),
+  });
+}
+
+/** Streaming DPA uretimi — generateDpiaStream ile ayni SSE/kota/idempotency deseni. */
+export async function generateDpaStream(
+  clientId: string,
+  processorId: string,
+  h: StreamHandlers,
+): Promise<void> {
+  if (!API_BASE) {
+    h.onError?.("DPA üretimi gerçek API bağlantısı gerektirir.");
+    return;
+  }
+
+  let resp: Response;
+  try {
+    resp = await apiFetch(`/api/clients/${clientId}/dpa/generate`, {
+      method: "POST",
+      body: JSON.stringify({ processorId }),
+      headers: { "Idempotency-Key": newIdempotencyKey() },
+    });
+  } catch {
+    h.onError?.("Sunucuya ulaşılamadı. Backend çalışıyor mu?");
+    return;
+  }
+
+  if (await isDuplicateRequest(resp)) {
+    h.onError?.(DUPLICATE_MESSAGE);
+    return;
+  }
+  if (resp.status === 402) {
+    let info = { used: 0, quota: 5 };
+    try {
+      const e = await resp.json();
+      if (e?.detail?.code === "quota_exceeded") info = { used: e.detail.used, quota: e.detail.quota };
+    } catch { /* */ }
+    h.onQuotaExceeded?.(info);
+    return;
+  }
+  if (!resp.ok || !resp.body) {
+    h.onError?.(await errorDetail(resp));
+    return;
+  }
+
+  await consumeSseStream(resp.body, h);
+}
+
+/** processorId verilirse üretilen DOCX kapağına Veri İşleyen bilgisi eklenir. */
+export async function dpaDocx(
+  clientId: string,
+  text: string,
+  processorId?: string,
+  title?: string,
+): Promise<Blob> {
+  const res = await apiFetch(`/api/clients/${clientId}/dpa/docx`, {
+    method: "POST",
+    body: JSON.stringify({ text, processorId, title }),
+  });
+  if (!res.ok) throw new Error(await errorDetail(res));
+  return res.blob();
+}
+
 async function authedJson(path: string, init: RequestInit) {
   const res = await apiFetch(path, init);
   if (!res.ok) throw new Error(await errorDetail(res));
