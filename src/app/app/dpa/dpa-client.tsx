@@ -203,7 +203,16 @@ function DpaScope({
         if (!cancelled) setPrepareResult(res);
       })
       .catch((e) => {
-        if (!cancelled) setPrepareError(e instanceof Error ? e.message : "Kapsam hesaplanamadı.");
+        if (!cancelled) {
+          const errMsg = e instanceof Error ? e.message : "Kapsam hesaplanamadı.";
+          // Check if this is an empty-scope error (422)
+          const isEmptyScopeError = errMsg.includes("422") || errMsg.toLowerCase().includes("empty");
+          if (isEmptyScopeError) {
+            setPrepareError("Bu işleyene aktarılan süreç yok; işleyenin aktarım eşlemesini kontrol edin.");
+          } else {
+            setPrepareError(errMsg);
+          }
+        }
       })
       .finally(() => {
         if (!cancelled) setPreparing(false);

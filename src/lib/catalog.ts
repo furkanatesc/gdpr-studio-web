@@ -35,7 +35,7 @@ export const DOC_CATALOG: DocMeta[] = [
     type: "dpa",
     no: "04",
     mevzuat: "KVKK m.12 / GDPR m.28",
-    title: "Veri İşleme Sözleşmesi",
+    title: "Veri İşleyen Sözleşmesi",
     desc: "Veri sorumlusu ile veri işleyen arasındaki yükümlülükleri tanımlayan sözleşme (DPA / VİS).",
   },
   {
