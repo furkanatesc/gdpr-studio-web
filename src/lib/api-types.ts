@@ -199,6 +199,23 @@ export interface paths {
         patch: operations["update_client_api_clients__client_id__patch"];
         trace?: never;
     };
+    "/api/clients/{client_id}/aktarim-adlari": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Aktarim Adlari */
+        get: operations["aktarim_adlari_api_clients__client_id__aktarim_adlari_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clients/{client_id}/aydinlatma/docx": {
         parameters: {
             query?: never;
@@ -247,6 +264,253 @@ export interface paths {
         put?: never;
         /** Prepare */
         post: operations["prepare_api_clients__client_id__aydinlatma_prepare_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/cerez/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Docx */
+        post: operations["docx_api_clients__client_id__cerez_docx_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/cerez/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate
+         * @description Muvekkil kimligi + form girdisinden Cerez Politikasi akisi (SSE).
+         */
+        post: operations["generate_api_clients__client_id__cerez_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Documents */
+        get: operations["list_documents_api_clients__client_id__documents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/documents/versions/{version_id}/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Version Docx */
+        get: operations["get_version_docx_api_clients__client_id__documents_versions__version_id__docx_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/documents/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Document */
+        get: operations["get_document_api_clients__client_id__documents__document_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/documents/{document_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Document Version */
+        post: operations["publish_document_version_api_clients__client_id__documents__document_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/documents/{document_id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Document Versions */
+        get: operations["list_document_versions_api_clients__client_id__documents__document_id__versions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/documents/{document_id}/versions/{version_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Document Version */
+        get: operations["get_document_version_api_clients__client_id__documents__document_id__versions__version_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/dpa/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Docx */
+        post: operations["docx_api_clients__client_id__dpa_docx_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/dpa/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate
+         * @description Muvekkil envanterinden, isleyene aktarilan kapsamdan DPA taslagi akisi (SSE).
+         */
+        post: operations["generate_api_clients__client_id__dpa_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/dpa/prepare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Prepare */
+        post: operations["prepare_api_clients__client_id__dpa_prepare_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/dpia/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Docx */
+        post: operations["docx_api_clients__client_id__dpia_docx_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/dpia/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate
+         * @description Muvekkil envanterinden DPIA taslagi akisi (SSE).
+         */
+        post: operations["generate_api_clients__client_id__dpia_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/dpia/prepare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Prepare */
+        post: operations["prepare_api_clients__client_id__dpia_prepare_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -305,6 +569,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clients/{client_id}/inventory/suggestions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Inventory Suggestions */
+        get: operations["inventory_suggestions_api_clients__client_id__inventory_suggestions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clients/{client_id}/inventory/summary": {
         parameters: {
             query?: never;
@@ -317,6 +598,80 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/kayit/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Docx */
+        post: operations["docx_api_clients__client_id__kayit_docx_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/kayit/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate
+         * @description Muvekkil envanterinden Isleme Kaydi (VERBIS) akisi (SSE).
+         */
+        post: operations["generate_api_clients__client_id__kayit_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/processors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Processors */
+        get: operations["list_processors_api_clients__client_id__processors_get"];
+        put?: never;
+        /** Create Processor */
+        post: operations["create_processor_api_clients__client_id__processors_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/processors/{processor_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Processor */
+        get: operations["get_processor_api_clients__client_id__processors__processor_id__get"];
+        /** Update Processor */
+        put: operations["update_processor_api_clients__client_id__processors__processor_id__put"];
+        post?: never;
+        /** Delete Processor */
+        delete: operations["delete_processor_api_clients__client_id__processors__processor_id__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -606,6 +961,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AktarimAdlariOut */
+        AktarimAdlariOut: {
+            /** Adlar */
+            adlar: string[];
+        };
         /** BillingStatusOut */
         BillingStatusOut: {
             /** Canmanage */
@@ -634,6 +994,26 @@ export interface components {
         BootstrapRequest: {
             /** Orgname */
             orgName: string;
+        };
+        /** CerezGenerateIn */
+        CerezGenerateIn: {
+            /**
+             * Cmp
+             * @default yok
+             */
+            cmp: string;
+            /**
+             * Kategoriler
+             * @default []
+             */
+            kategoriler: string[];
+            /** Site */
+            site: string;
+            /**
+             * Tools
+             * @default
+             */
+            tools: string;
         };
         /** ChecklistGroup */
         ChecklistGroup: {
@@ -687,6 +1067,126 @@ export interface components {
             name: string;
             /** Sector */
             sector?: string | null;
+        };
+        /** ClientDocumentMetaOut */
+        ClientDocumentMetaOut: {
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Doctype */
+            docType: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Latestpublishedat */
+            latestPublishedAt?: string | null;
+            /** Latestversion */
+            latestVersion?: number | null;
+            /** Scorecompleteness */
+            scoreCompleteness?: number | null;
+            /** Scorecompliance */
+            scoreCompliance?: number | null;
+            /** Title */
+            title: string;
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+        };
+        /** ClientDocumentOut */
+        ClientDocumentOut: {
+            /** Content */
+            content: string;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Doctype */
+            docType: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Latestpublishedat */
+            latestPublishedAt?: string | null;
+            /** Latestversion */
+            latestVersion?: number | null;
+            /** Scorecompleteness */
+            scoreCompleteness?: number | null;
+            /** Scorecompliance */
+            scoreCompliance?: number | null;
+            /** Title */
+            title: string;
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+        };
+        /** ClientDocumentVersionMetaOut */
+        ClientDocumentVersionMetaOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Note */
+            note?: string | null;
+            /**
+             * Publishedat
+             * Format: date-time
+             */
+            publishedAt: string;
+            /** Publishedby */
+            publishedBy?: string | null;
+            /** Scorecompleteness */
+            scoreCompleteness?: number | null;
+            /** Scorecompliance */
+            scoreCompliance?: number | null;
+            /** Version */
+            version: number;
+        };
+        /** ClientDocumentVersionOut */
+        ClientDocumentVersionOut: {
+            /** Content */
+            content: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Note */
+            note?: string | null;
+            /**
+             * Publishedat
+             * Format: date-time
+             */
+            publishedAt: string;
+            /** Publishedby */
+            publishedBy?: string | null;
+            /** Scorecompleteness */
+            scoreCompleteness?: number | null;
+            /** Scorecompliance */
+            scoreCompliance?: number | null;
+            /** Version */
+            version: number;
+        };
+        /** ClientDocumentVersionsOut */
+        ClientDocumentVersionsOut: {
+            /** Versions */
+            versions: components["schemas"]["ClientDocumentVersionMetaOut"][];
+        };
+        /** ClientDocumentsOut */
+        ClientDocumentsOut: {
+            /** Documents */
+            documents: components["schemas"]["ClientDocumentMetaOut"][];
         };
         /** ClientOut */
         ClientOut: {
@@ -744,12 +1244,90 @@ export interface components {
          * @enum {string}
          */
         DocType: "aydinlatma" | "cerez" | "kayit" | "dpa" | "dpia" | "ihlal";
-        /** DocxIn */
-        DocxIn: {
-            /** Text */
-            text: string;
-            /** Title */
-            title?: string | null;
+        /** DpaGenerateIn */
+        DpaGenerateIn: {
+            /**
+             * Processorid
+             * Format: uuid
+             */
+            processorId: string;
+        };
+        /** DpaPrepareIn */
+        DpaPrepareIn: {
+            /**
+             * Processorid
+             * Format: uuid
+             */
+            processorId: string;
+        };
+        /** DpaPrepareOut */
+        DpaPrepareOut: {
+            /** Amaclar */
+            amaclar: string[];
+            /** Eslesensurecsayisi */
+            eslesenSurecSayisi: number;
+            /** Idaritedbirler */
+            idariTedbirler: string[];
+            /** Kategoriler */
+            kategoriler: string[];
+            /** Saklamasureleri */
+            saklamaSureleri: string[];
+            /** Tekniktedbirler */
+            teknikTedbirler: string[];
+            /** Veriturleri */
+            veriTurleri: string[];
+        };
+        /** DpiaAnketIn */
+        DpiaAnketIn: {
+            /**
+             * Buyukolcek
+             * @default false
+             */
+            buyukOlcek: boolean;
+            /**
+             * Savunmasizgrup
+             * @default false
+             */
+            savunmasizGrup: boolean;
+            /**
+             * Verieslestirme
+             * @default false
+             */
+            veriEslestirme: boolean;
+            /**
+             * Yeniteknoloji
+             * @default false
+             */
+            yeniTeknoloji: boolean;
+        };
+        /** DpiaGenerateIn */
+        DpiaGenerateIn: {
+            /**
+             * Tetiklenenler
+             * @default []
+             */
+            tetiklenenler: string[];
+        };
+        /** DpiaOtomatikOut */
+        DpiaOtomatikOut: {
+            /** Ozelniteliklivar */
+            ozelNitelikliVar: boolean;
+            /** Profillemevar */
+            profillemeVar: boolean;
+        };
+        /** DpiaPrepareIn */
+        DpiaPrepareIn: {
+            anket: components["schemas"]["DpiaAnketIn"];
+        };
+        /** DpiaPrepareOut */
+        DpiaPrepareOut: {
+            /** Kritersayisi */
+            kriterSayisi: number;
+            otomatik: components["schemas"]["DpiaOtomatikOut"];
+            /** Tetiklenenler */
+            tetiklenenler: string[];
+            /** Zorunlu */
+            zorunlu: boolean;
         };
         /** EnrichedSectionOut */
         EnrichedSectionOut: {
@@ -950,6 +1528,34 @@ export interface components {
             /** Veri Turleri */
             veri_turleri?: string[];
         };
+        /** InventorySuggestionRowOut */
+        InventorySuggestionRowOut: {
+            /** Altsurec */
+            altSurec: string;
+            /** Departman */
+            departman: string;
+            /** Ellealanlar */
+            elleAlanlar: string[];
+            /** Index */
+            index: number;
+            /** Issureci */
+            isSureci: string;
+            /** Kisigrubu */
+            kisiGrubu: string;
+            /** Oneriler */
+            oneriler: {
+                [key: string]: string[];
+            };
+        };
+        /** InventorySuggestionsOut */
+        InventorySuggestionsOut: {
+            /** Bosslot */
+            bosSlot: number;
+            /** Rows */
+            rows: components["schemas"]["InventorySuggestionRowOut"][];
+            /** Tamlik */
+            tamlik: number | null;
+        };
         /** InviteOut */
         InviteOut: {
             /** Email */
@@ -998,6 +1604,71 @@ export interface components {
         PrepareOut: {
             /** Sections */
             sections: components["schemas"]["EnrichedSectionOut"][];
+        };
+        /** ProcessorIn */
+        ProcessorIn: {
+            /** Ad */
+            ad: string;
+            /** Adres */
+            adres?: string | null;
+            /**
+             * Aktarimaliases
+             * @default []
+             */
+            aktarimAliases: string[];
+            /**
+             * Altisleyenvar
+             * @default false
+             */
+            altIsleyenVar: boolean;
+            /** Iletisim */
+            iletisim?: string | null;
+            /** Notlar */
+            notlar?: string | null;
+            /** Unvan */
+            unvan: string;
+            /** Vergidairesino */
+            vergiDairesiNo?: string | null;
+            /** Yetkilikisi */
+            yetkiliKisi?: string | null;
+            /**
+             * Yurtdisi
+             * @default false
+             */
+            yurtDisi: boolean;
+        };
+        /** ProcessorOut */
+        ProcessorOut: {
+            /** Ad */
+            ad: string;
+            /** Adres */
+            adres: string | null;
+            /** Aktarimaliases */
+            aktarimAliases: string[];
+            /** Altisleyenvar */
+            altIsleyenVar: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Iletisim */
+            iletisim: string | null;
+            /** Notlar */
+            notlar: string | null;
+            /** Unvan */
+            unvan: string;
+            /** Vergidairesino */
+            vergiDairesiNo: string | null;
+            /** Yetkilikisi */
+            yetkiliKisi: string | null;
+            /** Yurtdisi */
+            yurtDisi: boolean;
+        };
+        /** PublishIn */
+        PublishIn: {
+            /** Note */
+            note?: string | null;
         };
         /** RoleUpdate */
         RoleUpdate: {
@@ -1090,6 +1761,47 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** DocxIn */
+        app__modules__aydinlatma__DocxIn: {
+            /** Kisigruplari */
+            kisiGruplari?: string[] | null;
+            /** Text */
+            text: string;
+            /** Title */
+            title?: string | null;
+        };
+        /** DocxIn */
+        app__modules__cerez__DocxIn: {
+            /** Site */
+            site?: string | null;
+            /** Text */
+            text: string;
+            /** Title */
+            title?: string | null;
+        };
+        /** DocxIn */
+        app__modules__dpa__DocxIn: {
+            /** Processorid */
+            processorId?: string | null;
+            /** Text */
+            text: string;
+            /** Title */
+            title?: string | null;
+        };
+        /** DocxIn */
+        app__modules__dpia__DocxIn: {
+            /** Text */
+            text: string;
+            /** Title */
+            title?: string | null;
+        };
+        /** DocxIn */
+        app__modules__kayit__DocxIn: {
+            /** Text */
+            text: string;
+            /** Title */
+            title?: string | null;
         };
     };
     responses: never;
@@ -1444,6 +2156,37 @@ export interface operations {
             };
         };
     };
+    aktarim_adlari_api_clients__client_id__aktarim_adlari_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AktarimAdlariOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     docx_api_clients__client_id__aydinlatma_docx_post: {
         parameters: {
             query?: never;
@@ -1455,7 +2198,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["DocxIn"];
+                "application/json": components["schemas"]["app__modules__aydinlatma__DocxIn"];
             };
         };
         responses: {
@@ -1539,6 +2282,491 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PrepareOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    docx_api_clients__client_id__cerez_docx_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["app__modules__cerez__DocxIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_api_clients__client_id__cerez_generate_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Anthropic-Key"?: string | null;
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CerezGenerateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_documents_api_clients__client_id__documents_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientDocumentsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_version_docx_api_clients__client_id__documents_versions__version_id__docx_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_document_api_clients__client_id__documents__document_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientDocumentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_document_version_api_clients__client_id__documents__document_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientDocumentVersionMetaOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_document_versions_api_clients__client_id__documents__document_id__versions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientDocumentVersionsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_document_version_api_clients__client_id__documents__document_id__versions__version_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+                document_id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientDocumentVersionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    docx_api_clients__client_id__dpa_docx_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["app__modules__dpa__DocxIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_api_clients__client_id__dpa_generate_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Anthropic-Key"?: string | null;
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DpaGenerateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    prepare_api_clients__client_id__dpa_prepare_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DpaPrepareIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DpaPrepareOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    docx_api_clients__client_id__dpia_docx_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["app__modules__dpia__DocxIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_api_clients__client_id__dpia_generate_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Anthropic-Key"?: string | null;
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DpiaGenerateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    prepare_api_clients__client_id__dpia_prepare_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DpiaPrepareIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DpiaPrepareOut"];
                 };
             };
             /** @description Validation Error */
@@ -1696,6 +2924,37 @@ export interface operations {
             };
         };
     };
+    inventory_suggestions_api_clients__client_id__inventory_suggestions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InventorySuggestionsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     inventory_summary_api_clients__client_id__inventory_summary_get: {
         parameters: {
             query?: never;
@@ -1717,6 +2976,239 @@ export interface operations {
                         [key: string]: unknown;
                     };
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    docx_api_clients__client_id__kayit_docx_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["app__modules__kayit__DocxIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_api_clients__client_id__kayit_generate_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Anthropic-Key"?: string | null;
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_processors_api_clients__client_id__processors_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProcessorOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_processor_api_clients__client_id__processors_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProcessorIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProcessorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_processor_api_clients__client_id__processors__processor_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+                processor_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProcessorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_processor_api_clients__client_id__processors__processor_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+                processor_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProcessorIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProcessorOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_processor_api_clients__client_id__processors__processor_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+                processor_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
