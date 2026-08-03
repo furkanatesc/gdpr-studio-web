@@ -15,6 +15,7 @@ import {
   type Client,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { VeriIsleyenlerSection } from "./veri-isleyenler-section";
 
 /*
   Müvekkil yönetimi (Faz 2.1 envanter-müvekkil): kurum = hukuk bürosu, her müvekkilin
@@ -241,25 +242,28 @@ export default function MuvekkillerPage() {
 
         <div className="flex flex-col gap-5">
           {selected ? (
-            <section className="border border-border bg-surface p-6">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-display text-[17px] text-ink">{selected.name}</h2>
-                {selected.sector && (
-                  <span className="font-medium text-[10px] uppercase tracking-[0.08em] text-accent">
-                    {SECTOR_LABELS[selected.sector] ?? selected.sector}
-                  </span>
-                )}
-              </div>
-              <ProfileForm key={selected.id} client={selected} isAdmin={isAdmin} onSaved={onProfileSaved} />
-              <div className="mt-5 border-t border-border pt-4">
-                <Link
-                  href={`/app/envanter?client=${selected.id}`}
-                  className="font-medium text-[12.5px] uppercase tracking-[0.08em] text-accent-strong hover:underline"
-                >
-                  Veri envanterini düzenle ↗
-                </Link>
-              </div>
-            </section>
+            <>
+              <section className="border border-border bg-surface p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="font-display text-[17px] text-ink">{selected.name}</h2>
+                  {selected.sector && (
+                    <span className="font-medium text-[10px] uppercase tracking-[0.08em] text-accent">
+                      {SECTOR_LABELS[selected.sector] ?? selected.sector}
+                    </span>
+                  )}
+                </div>
+                <ProfileForm key={selected.id} client={selected} isAdmin={isAdmin} onSaved={onProfileSaved} />
+                <div className="mt-5 border-t border-border pt-4">
+                  <Link
+                    href={`/app/envanter?client=${selected.id}`}
+                    className="font-medium text-[12.5px] uppercase tracking-[0.08em] text-accent-strong hover:underline"
+                  >
+                    Veri envanterini düzenle ↗
+                  </Link>
+                </div>
+              </section>
+              <VeriIsleyenlerSection key={selected.id} client={selected} />
+            </>
           ) : (
             <section className="border border-dashed border-border-strong bg-surface px-8 py-12 text-center">
               <p className="text-[13.5px] text-ink-muted">Bir müvekkil seçin veya yeni ekleyin.</p>
