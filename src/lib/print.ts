@@ -1,11 +1,12 @@
 import type { Client } from "@/lib/api";
 
-export type PrintDocType = "aydinlatma" | "cerez" | "kayit" | "dpia";
+export type PrintDocType = "aydinlatma" | "cerez" | "kayit" | "dpia" | "dpa";
 
 export type PrintCover = {
   veriSorumlusu: string;
   ilgiliKisi?: string;
   site?: string;
+  veriIsleyen?: string;
   tarih: string;
   versiyon: string;
 };
@@ -28,12 +29,13 @@ export function formatTrDate(iso?: string): string {
 export function buildCover(
   client: Pick<Client, "legal_name" | "name">,
   docType: PrintDocType,
-  opts: { ilgiliKisi?: string; site?: string; tarih: string; versiyon: string },
+  opts: { ilgiliKisi?: string; site?: string; veriIsleyen?: string; tarih: string; versiyon: string },
 ): PrintCover {
   return {
     veriSorumlusu: client.legal_name || client.name || "",
     ilgiliKisi: docType === "aydinlatma" ? opts.ilgiliKisi : undefined,
     site: docType === "cerez" ? opts.site : undefined,
+    veriIsleyen: docType === "dpa" ? opts.veriIsleyen : undefined,
     tarih: opts.tarih,
     versiyon: opts.versiyon,
   };

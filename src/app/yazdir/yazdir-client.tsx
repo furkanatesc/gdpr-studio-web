@@ -14,6 +14,7 @@ const BASLIK: Record<string, string> = {
   cerez: "Çerez Politikası",
   kayit: "Kişisel Veri İşleme Kaydı",
   dpia: "Veri Koruma Etki Değerlendirmesi",
+  dpa: "Veri İşleyen Sözleşmesi",
 };
 
 export function YazdirClient() {
@@ -62,6 +63,7 @@ export function YazdirClient() {
           <Alan etiket="Veri Sorumlusu" deger={cover.veriSorumlusu} />
           {docType === "aydinlatma" && <Alan etiket="İlgili Kişi" deger={cover.ilgiliKisi} />}
           {docType === "cerez" && <Alan etiket="Site / Uygulama" deger={cover.site} />}
+          {docType === "dpa" && <Alan etiket="Veri İşleyen" deger={cover.veriIsleyen} />}
           <Alan etiket="Yürürlük Tarihi" deger={cover.tarih} />
           <Alan etiket="Versiyon" deger={cover.versiyon} />
         </dl>
