@@ -775,6 +775,43 @@ export async function dpaDocx(
   return res.blob();
 }
 
+export type ReviewFinding = {
+  maddeId: string;
+  baslik: string;
+  kvkkRef: string;
+  kirmiziBayrak: boolean;
+  durum: "var" | "eksik" | "yetersiz";
+  alinti: string;
+  gerekce: string;
+  oneri: string;
+};
+export type DpaReviewResult = {
+  bulgular: ReviewFinding[];
+  uygun: number;
+  eksik: number;
+  yetersiz: number;
+  kirmiziBayrak: number;
+  disclaimer: string;
+};
+
+/** DPA-İncele: metin veya .docx/.pdf yükle → madde-bazlı m.12 uyum raporu (multipart). */
+export async function reviewDpa(
+  clientId: string,
+  opts: { text?: string; file?: File; processorId?: string },
+): Promise<DpaReviewResult> {
+  const fd = new FormData();
+  if (opts.file) fd.append("file", opts.file);
+  if (opts.text) fd.append("text", opts.text);
+  if (opts.processorId) fd.append("processorId", opts.processorId);
+  const res = await fetch(`${API_BASE}/api/clients/${clientId}/dpa/review`, {
+    method: "POST",
+    headers: await authHeaders(),
+    body: fd,
+  });
+  if (!res.ok) throw new Error(await errorDetail(res));
+  return res.json();
+}
+
 async function authedJson(path: string, init: RequestInit) {
   const res = await apiFetch(path, init);
   if (!res.ok) throw new Error(await errorDetail(res));
