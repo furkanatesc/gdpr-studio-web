@@ -1,14 +1,14 @@
 import { Suspense } from "react";
-import { DpaClient } from "./dpa-client";
+import { DpaTabs } from "./dpa-tabs";
 
 export const metadata = {
-  title: "Veri İşleyen Sözleşmesi Üret",
+  title: "Veri İşleyen Sözleşmesi",
 };
 
 export default function DpaPage() {
   return (
     <Suspense fallback={<p className="p-8 text-[14px] text-ink-muted">Yükleniyor…</p>}>
-      <DpaClient />
+      <DpaTabs />
     </Suspense>
   );
 }
