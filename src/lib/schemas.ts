@@ -179,4 +179,4 @@ export const SCHEMAS = {
     cta: "DPIA / KİA Raporu Oluştur",
   },
 
-} as Record<DocType, DocSchema>;
+} satisfies Record<Exclude<DocType, "ihlal">, DocSchema> as Record<DocType, DocSchema>;
