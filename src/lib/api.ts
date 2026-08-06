@@ -797,7 +797,7 @@ export type IhlalPrepareResult = {
 };
 
 export async function prepareIhlal(clientId: string, olay: IhlalOlay): Promise<IhlalPrepareResult> {
-  return authedJson(`/api/clients/${clientId}/ihlal/prepare`, { method: "POST", body: JSON.stringify({ olay }) });
+  return authedJson(`/api/clients/${clientId}/ihlal/prepare`, { method: "POST", body: JSON.stringify(olay) });
 }
 
 /** Streaming ihlal üretimi — generateDpiaStream ile aynı SSE/kota/idempotency deseni. */
