@@ -775,6 +775,84 @@ export async function dpaDocx(
   return res.blob();
 }
 
+export type IhlalOlay = {
+  tespit: string;
+  tur: string;
+  etkilenenIndeksler: number[];
+  kimlikFinansal: boolean;
+  sifreli: boolean;
+  kisiSayisi: number;
+  nasil: string;
+  onlemler: string;
+};
+
+export type IhlalPrepareResult = {
+  kurulGerekli: boolean;
+  ilgiliKisiGerekli: boolean;
+  ilgiliKisiMuafiyet: boolean;
+  ilgiliKisiSinyaller: string[];
+  ozelNitelikliVar: boolean;
+  saatKalan: number | null;
+  sureAsildi: boolean;
+};
+
+export async function prepareIhlal(clientId: string, olay: IhlalOlay): Promise<IhlalPrepareResult> {
+  return authedJson(`/api/clients/${clientId}/ihlal/prepare`, { method: "POST", body: JSON.stringify(olay) });
+}
+
+/** Streaming ihlal üretimi — generateDpiaStream ile aynı SSE/kota/idempotency deseni. */
+export async function generateIhlalStream(
+  clientId: string,
+  body: IhlalOlay & { bildirimTuru: "kurul" | "ilgili_kisi" },
+  h: StreamHandlers,
+): Promise<void> {
+  if (!API_BASE) {
+    h.onError?.("İhlal üretimi gerçek API bağlantısı gerektirir.");
+    return;
+  }
+
+  let resp: Response;
+  try {
+    resp = await apiFetch(`/api/clients/${clientId}/ihlal/generate`, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "Idempotency-Key": newIdempotencyKey() },
+    });
+  } catch {
+    h.onError?.("Sunucuya ulaşılamadı. Backend çalışıyor mu?");
+    return;
+  }
+
+  if (await isDuplicateRequest(resp)) {
+    h.onError?.(DUPLICATE_MESSAGE);
+    return;
+  }
+  if (resp.status === 402) {
+    let info = { used: 0, quota: 5 };
+    try {
+      const e = await resp.json();
+      if (e?.detail?.code === "quota_exceeded") info = { used: e.detail.used, quota: e.detail.quota };
+    } catch { /* */ }
+    h.onQuotaExceeded?.(info);
+    return;
+  }
+  if (!resp.ok || !resp.body) {
+    h.onError?.(await errorDetail(resp));
+    return;
+  }
+
+  await consumeSseStream(resp.body, h);
+}
+
+export async function ihlalDocx(clientId: string, text: string, title?: string): Promise<Blob> {
+  const res = await apiFetch(`/api/clients/${clientId}/ihlal/docx`, {
+    method: "POST",
+    body: JSON.stringify({ text, title }),
+  });
+  if (!res.ok) throw new Error(await errorDetail(res));
+  return res.blob();
+}
+
 export type ReviewFinding = {
   maddeId: string;
   baslik: string;

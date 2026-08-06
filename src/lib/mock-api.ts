@@ -177,33 +177,6 @@ ${f.guvenlik || "[Güvenlik önlemleri]"}
 Yüksek risk azaltılamıyorsa Kurul danışması gereklidir.${sig}`;
 }
 
-function buildIhlal(req: GenerateRequest, g: GroundingRecord[]): string {
-  const f = req.fields;
-  const veri = g.length ? g.map((x) => x.kategori).join(", ") : (req.veriler || []).join(", ") || "[etkilenen kategoriler]";
-  return `# Kişisel Veri İhlali Bildirim Formu
-
-**Tespit tarihi:** ${f.tarih || "[tarih]"} · **Tür:** ${f.tur || "[tür]"} · **Durum:** ${f.devam || "[durum]"}
-
-## 1. İhlalin Niteliği
-
-${f.aciklama || "[İhlal açıklaması]"}
-
-## 2. Etkilenen Veriler ve Kişiler
-
-- **Veri kategorileri:** ${veri}
-- **Tahmini etkilenen kişi sayısı:** ${f.kisi || "[sayı]"}
-
-## 3. Bildirim Yükümlülüğü (KVKK m.12/5 · GDPR m.33-34)
-
-- Kurul'a / DPA'ya **en geç 72 saat** içinde bildirilir.
-- Yüksek risk varsa **ilgili kişilere** de bildirim (GDPR m.34) değerlendirilmelidir.
-- 72 saat aşıldıysa **gecikme gerekçesi zorunludur**.
-
-## 4. Alınan / Alınacak Tedbirler
-
-[Teknik ve idari önlemler]${sig}`;
-}
-
 /** Mock üretim — backend gelince yalnızca bu fonksiyon gerçek fetch ile değişir. */
 export async function generateDocMock(req: GenerateRequest): Promise<GenerateResponse> {
   await new Promise((r) => setTimeout(r, 1000));
@@ -216,7 +189,6 @@ export async function generateDocMock(req: GenerateRequest): Promise<GenerateRes
     case "kayit": text = buildKayit(req); break;
     case "dpa": text = buildDpa(req, grounding); break;
     case "dpia": text = buildDpia(req); break;
-    case "ihlal": text = buildIhlal(req, grounding); break;
     default: text = `# ${req.type}\n\nDemo içerik.${sig}`;
   }
 
