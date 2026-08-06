@@ -15,6 +15,7 @@ const BASLIK: Record<string, string> = {
   kayit: "Kişisel Veri İşleme Kaydı",
   dpia: "Veri Koruma Etki Değerlendirmesi",
   dpa: "Veri İşleyen Sözleşmesi",
+  ihlal: "Veri İhlali Bildirimi",
 };
 
 export function YazdirClient() {
