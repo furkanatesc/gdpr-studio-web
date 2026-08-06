@@ -173,8 +173,21 @@ function IhlalFlow({ clientId }: { clientId: string }) {
       });
   }, [clientId, toast]);
 
+  // Olayı güncelleyen tek giriş noktası — "Değerlendir" sonrası form değişirse
+  // geçit paneli (ve varsa üretilmiş çıktılar) artık üretim girdisiyle tutarsız
+  // olur; bu yüzden her değişiklikte prepareResult geçersiz kılınır.
+  function updateOlay(updater: (prev: IhlalOlay) => IhlalOlay) {
+    setOlay(updater);
+    if (prepareResult) {
+      setPrepareResult(null);
+      setPrepareError(null);
+      kurul.reset();
+      ilgiliKisi.reset();
+    }
+  }
+
   function toggleRow(i: number) {
-    setOlay((prev) => ({
+    updateOlay((prev) => ({
       ...prev,
       etkilenenIndeksler: prev.etkilenenIndeksler.includes(i)
         ? prev.etkilenenIndeksler.filter((x) => x !== i)
@@ -257,11 +270,11 @@ function IhlalFlow({ clientId }: { clientId: string }) {
             <Input
               type="datetime-local"
               value={olay.tespit}
-              onChange={(e) => setOlay((p) => ({ ...p, tespit: e.target.value }))}
+              onChange={(e) => updateOlay((p) => ({ ...p, tespit: e.target.value }))}
             />
           </Field>
           <Field label="İhlal türü" required>
-            <Select value={olay.tur} onChange={(e) => setOlay((p) => ({ ...p, tur: e.target.value }))}>
+            <Select value={olay.tur} onChange={(e) => updateOlay((p) => ({ ...p, tur: e.target.value }))}>
               {IHLAL_TURLERI.map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -275,7 +288,7 @@ function IhlalFlow({ clientId }: { clientId: string }) {
               min={0}
               value={olay.kisiSayisi}
               onChange={(e) =>
-                setOlay((p) => ({ ...p, kisiSayisi: Math.max(0, Number(e.target.value) || 0) }))
+                updateOlay((p) => ({ ...p, kisiSayisi: Math.max(0, Number(e.target.value) || 0) }))
               }
             />
           </Field>
@@ -284,7 +297,7 @@ function IhlalFlow({ clientId }: { clientId: string }) {
               <input
                 type="checkbox"
                 checked={olay.kimlikFinansal}
-                onChange={(e) => setOlay((p) => ({ ...p, kimlikFinansal: e.target.checked }))}
+                onChange={(e) => updateOlay((p) => ({ ...p, kimlikFinansal: e.target.checked }))}
                 className="h-4 w-4 flex-shrink-0 border border-border accent-accent"
               />
               Kimlik / finansal veri etkilendi
@@ -293,7 +306,7 @@ function IhlalFlow({ clientId }: { clientId: string }) {
               <input
                 type="checkbox"
                 checked={olay.sifreli}
-                onChange={(e) => setOlay((p) => ({ ...p, sifreli: e.target.checked }))}
+                onChange={(e) => updateOlay((p) => ({ ...p, sifreli: e.target.checked }))}
                 className="h-4 w-4 flex-shrink-0 border border-border accent-accent"
               />
               Etkilenen veriler şifreli / anonim
@@ -334,14 +347,14 @@ function IhlalFlow({ clientId }: { clientId: string }) {
           <Field label="İhlal nasıl gerçekleşti">
             <Textarea
               value={olay.nasil}
-              onChange={(e) => setOlay((p) => ({ ...p, nasil: e.target.value }))}
+              onChange={(e) => updateOlay((p) => ({ ...p, nasil: e.target.value }))}
               rows={4}
             />
           </Field>
           <Field label="Alınan / alınacak önlemler">
             <Textarea
               value={olay.onlemler}
-              onChange={(e) => setOlay((p) => ({ ...p, onlemler: e.target.value }))}
+              onChange={(e) => updateOlay((p) => ({ ...p, onlemler: e.target.value }))}
               rows={4}
             />
           </Field>
