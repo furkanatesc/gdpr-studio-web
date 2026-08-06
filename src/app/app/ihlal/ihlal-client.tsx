@@ -250,6 +250,11 @@ function IhlalFlow({ clientId }: { clientId: string }) {
     openPrintView({ docType: "ihlal", content: ilgiliKisi.result.text, cover });
   }
 
+  // Üretim (stream) sürerken form kilitlenir — useDocumentStream.reset() in-flight
+  // isteği iptal etmez, bu yüzden form düzenlemesi orphan-stream/bayat içerik
+  // riski doğurur. Form kilitliyken updateOlay hiç tetiklenmez.
+  const busy = kurul.loading || ilgiliKisi.loading;
+
   const saatBadge = (() => {
     if (!prepareResult || prepareResult.saatKalan === null) return null;
     const saat = Math.round(prepareResult.saatKalan);
@@ -271,10 +276,15 @@ function IhlalFlow({ clientId }: { clientId: string }) {
               type="datetime-local"
               value={olay.tespit}
               onChange={(e) => updateOlay((p) => ({ ...p, tespit: e.target.value }))}
+              disabled={busy}
             />
           </Field>
           <Field label="İhlal türü" required>
-            <Select value={olay.tur} onChange={(e) => updateOlay((p) => ({ ...p, tur: e.target.value }))}>
+            <Select
+              value={olay.tur}
+              onChange={(e) => updateOlay((p) => ({ ...p, tur: e.target.value }))}
+              disabled={busy}
+            >
               {IHLAL_TURLERI.map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -290,6 +300,7 @@ function IhlalFlow({ clientId }: { clientId: string }) {
               onChange={(e) =>
                 updateOlay((p) => ({ ...p, kisiSayisi: Math.max(0, Number(e.target.value) || 0) }))
               }
+              disabled={busy}
             />
           </Field>
           <div className="flex flex-wrap items-center gap-5">
@@ -298,6 +309,7 @@ function IhlalFlow({ clientId }: { clientId: string }) {
                 type="checkbox"
                 checked={olay.kimlikFinansal}
                 onChange={(e) => updateOlay((p) => ({ ...p, kimlikFinansal: e.target.checked }))}
+                disabled={busy}
                 className="h-4 w-4 flex-shrink-0 border border-border accent-accent"
               />
               Kimlik / finansal veri etkilendi
@@ -307,6 +319,7 @@ function IhlalFlow({ clientId }: { clientId: string }) {
                 type="checkbox"
                 checked={olay.sifreli}
                 onChange={(e) => updateOlay((p) => ({ ...p, sifreli: e.target.checked }))}
+                disabled={busy}
                 className="h-4 w-4 flex-shrink-0 border border-border accent-accent"
               />
               Etkilenen veriler şifreli / anonim
@@ -333,6 +346,7 @@ function IhlalFlow({ clientId }: { clientId: string }) {
                       type="checkbox"
                       checked={olay.etkilenenIndeksler.includes(i)}
                       onChange={() => toggleRow(i)}
+                      disabled={busy}
                       className="mt-0.5 h-4 w-4 flex-shrink-0 border border-border accent-accent"
                     />
                     {rowLabel(r)}
@@ -348,6 +362,7 @@ function IhlalFlow({ clientId }: { clientId: string }) {
             <Textarea
               value={olay.nasil}
               onChange={(e) => updateOlay((p) => ({ ...p, nasil: e.target.value }))}
+              disabled={busy}
               rows={4}
             />
           </Field>
@@ -355,13 +370,14 @@ function IhlalFlow({ clientId }: { clientId: string }) {
             <Textarea
               value={olay.onlemler}
               onChange={(e) => updateOlay((p) => ({ ...p, onlemler: e.target.value }))}
+              disabled={busy}
               rows={4}
             />
           </Field>
         </div>
 
         <div className="mt-5">
-          <Button onClick={onPrepare} disabled={preparing || !olay.tespit}>
+          <Button onClick={onPrepare} disabled={preparing || busy || !olay.tespit}>
             {preparing ? (
               <>
                 <Icon name="spinner" className="animate-spin text-[15px]" /> Değerlendiriliyor…
