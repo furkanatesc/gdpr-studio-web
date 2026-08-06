@@ -63,7 +63,9 @@ const DPIA_RISKLERI = [
   "Veri eşleştirme / birleştirme",
 ];
 
-export const SCHEMAS: Record<DocType, DocSchema> = {
+// "ihlal" DocType kontratında var (backend) ama /app/ihlal artık statik gerçek ekran (Task 8) —
+// jenerik [doc] route hiçbir zaman bu anahtarla SCHEMAS'a erişmiyor (statik route öncelikli).
+export const SCHEMAS = {
   aydinlatma: {
     cards: [
       {
@@ -177,25 +179,4 @@ export const SCHEMAS: Record<DocType, DocSchema> = {
     cta: "DPIA / KİA Raporu Oluştur",
   },
 
-  ihlal: {
-    cards: [
-      {
-        title: "İhlal Bilgileri",
-        icon: "shield-alert",
-        fields: [
-          { key: "tarih", label: "İhlalin tespit tarihi", type: "date", required: true },
-          { key: "tur", label: "İhlal türü", type: "select", options: ["Yetkisiz erişim", "Veri kaybı", "Yanlış ifşa", "Fidye / şifreleme", "Diğer"] },
-          { key: "kisi", label: "Tahmini etkilenen kişi sayısı", placeholder: "Örn: ~500" },
-          { key: "devam", label: "İhlalin durumu", type: "select", options: ["Devam ediyor", "Kontrol altında", "Sona erdi"] },
-          { key: "aciklama", label: "İhlal açıklaması", type: "textarea", full: true, placeholder: "Nasıl gerçekleşti, ne zaman fark edildi, alınan ilk önlemler..." },
-        ],
-      },
-      {
-        title: "Etkilenen Veriler",
-        icon: "folders",
-        groups: [{ key: "veriler", label: "Hangi veri kategorileri etkilendi?", options: VERI_KATEGORILERI }],
-      },
-    ],
-    cta: "İhlal Bildirim Formu Oluştur",
-  },
-};
+} as Record<DocType, DocSchema>;
