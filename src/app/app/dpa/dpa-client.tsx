@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/app/page-header";
 import { DocumentOutput } from "@/components/app/document-output";
 import { Field, Select, Button, Card } from "@/components/ui";
@@ -39,6 +39,7 @@ import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 export function DpaClient() {
   const toast = useToast();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const clientParam = searchParams.get("client");
   const [clients, setClients] = useState<Client[] | null>(null);
   const [selectedId, setSelectedId] = useState<string>("");
@@ -56,6 +57,14 @@ export function DpaClient() {
       })
       .catch((e) => toast(e instanceof Error ? e.message : "Müvekkiller yüklenemedi."));
   }, [toast, clientParam]);
+
+  // Seçili müvekkili URL'e yaz → İncele sekmesine geçince bağlam korunur (P3-1).
+  function selectClient(id: string) {
+    setSelectedId(id);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("client", id);
+    router.replace(`/app/dpa?${params.toString()}`);
+  }
 
   const header = (
     <PageHeader
@@ -97,7 +106,7 @@ export function DpaClient() {
         <div className="mt-8">
           <section className="border border-border bg-surface p-6">
             <Field label="Müvekkil">
-              <Select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
+              <Select value={selectedId} onChange={(e) => selectClient(e.target.value)}>
                 {clients.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -147,10 +156,10 @@ function DpaFlow({ clientId }: { clientId: string }) {
           Önce bu müvekkil için bir Veri İşleyen ekleyin.
         </p>
         <Link
-          href="/app/muvekkiller"
+          href={`/app/muvekkiller?client=${clientId}`}
           className="mt-4 inline-block font-medium text-[12.5px] uppercase tracking-[0.08em] text-accent-strong hover:underline"
         >
-          Müvekkil Yönetimi&apos;ne git ↗
+          Bu müvekkilin Veri İşleyenleri&apos;ne git ↗
         </Link>
       </div>
     );
@@ -243,9 +252,17 @@ function DpaScope({
         ) : prepareError ? (
           <div>
             <p className="text-[13px] text-danger">{prepareError}</p>
-            <Button variant="secondary" className="mt-3" onClick={onEvaluate}>
-              Tekrar değerlendir
-            </Button>
+            <div className="mt-3 flex flex-wrap items-center gap-4">
+              <Button variant="secondary" onClick={onEvaluate}>
+                Tekrar değerlendir
+              </Button>
+              <Link
+                href={`/app/muvekkiller?client=${clientId}`}
+                className="font-medium text-[12px] uppercase tracking-[0.06em] text-accent-strong hover:underline"
+              >
+                Aktarım eşlemesini düzenle ↗
+              </Link>
+            </div>
           </div>
         ) : prepareResult ? (
           <>

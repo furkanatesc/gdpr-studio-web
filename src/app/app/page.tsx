@@ -15,7 +15,7 @@ import { useWorkspaceInfo } from "@/components/app/use-workspace-info";
 function todayEyebrow(): string {
   const t = new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "long", year: "numeric" })
     .format(new Date());
-  return `Kontrol Paneli / ${t}`;
+  return `Başlangıç / ${t}`;
 }
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub: string }) {

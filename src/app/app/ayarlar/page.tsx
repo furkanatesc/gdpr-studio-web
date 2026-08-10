@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { PageHeader } from "@/components/app/page-header";
 import { TeamSection } from "@/components/app/team-section";
 import { useWorkspaceInfo } from "@/components/app/use-workspace-info";
@@ -43,6 +44,14 @@ export default function AyarlarPage() {
                   value={PLAN_LABEL[billing.plan as keyof typeof PLAN_LABEL] ?? billing.plan}
                 />
               )}
+              <div className="mt-3 border-t border-border pt-3">
+                <Link
+                  href="/app/faturalama"
+                  className="font-medium text-[12px] uppercase tracking-[0.06em] text-accent-strong hover:underline"
+                >
+                  Planı yönet & faturalama ↗
+                </Link>
+              </div>
             </div>
           ) : (
             <p className="mt-4 text-[13px] leading-relaxed text-ink-muted">
