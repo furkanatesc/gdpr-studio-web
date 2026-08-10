@@ -56,17 +56,22 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Uyum skoru halkası — /app/kontrol'e gider (Faz B); score null → "—" (uydurulmuş sayı yok) */}
-      <div className="mt-4 flex items-center gap-5 border border-border bg-surface px-6 py-5">
-        <ScoreRing score={checklist?.score ?? null} />
+      {/* Uyum skoru kartı — tamamı /app/kontrol'e gider (P4-6); score null → "—" (uydurulmuş sayı yok) */}
+      <Link
+        href="/app/kontrol"
+        className="group mt-4 flex items-center gap-5 border border-border bg-surface px-6 py-5 transition-colors hover:border-border-strong"
+      >
+        <ScoreRing score={checklist?.score ?? null} href={null} />
         <div>
           <p className="font-medium text-[9.5px] uppercase tracking-[0.12em] text-ink-subtle">
             Uyum skoru
           </p>
-          <p className="mt-1 font-display text-xl text-ink">Kontrol listesi</p>
+          <p className="mt-1 font-display text-xl text-ink transition-colors group-hover:text-accent">
+            Kontrol listesi
+          </p>
           <p className="mt-1 text-[12.5px] text-ink-muted">KVKK/GDPR yükümlülük durumunuz</p>
         </div>
-      </div>
+      </Link>
 
       {/* Katalog başlığı + hızlı işlemler */}
       <div className="mt-9 flex flex-wrap items-center justify-between gap-3">
@@ -110,7 +115,7 @@ export default function Dashboard() {
                 />
                 {d.mevzuat}
               </span>
-              <span className="font-medium text-[10px] uppercase tracking-[0.08em] text-accent opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="font-medium text-[10px] uppercase tracking-[0.08em] text-accent opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
                 Üret →
               </span>
             </div>
