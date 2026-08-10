@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useToast } from "@/components/ui/toast";
 import type { StreamHandlers } from "@/lib/api";
 import type { GenerateResponse, GroundingRecord } from "@/lib/types";
 import { refreshWorkspaceInfo } from "@/components/app/use-workspace-info";
+
+type StartStream = (h: StreamHandlers) => Promise<void>;
 
 /*
   Üretim akışı durum makinesi — aydınlatma/çerez/işleme kaydı (ve sonraki DPA/DPIA/ihlal)
@@ -22,10 +24,17 @@ export function useDocumentStream() {
   const [quotaBlock, setQuotaBlock] = useState<{ used: number; quota: number } | null>(null);
   const [warning, setWarning] = useState<{ code: string; message: string } | null>(null);
 
-  async function generate(
-    startStream: (h: StreamHandlers) => Promise<void>,
-    successMessage: string,
-  ): Promise<void> {
+  // Her generate çağrısı benzersiz bir run kimliği alır; Durdur (cancel) sayaç değerini
+  // artırıp mevcut çalıştırmayı geçersizleştirir → gecikmeli/iptal edilmiş olaylar (delta/done)
+  // no-op olur ve yeni bir çalıştırmaya karışmaz. Ağ isteği arkada tamamlanır (rezerve-mahsup
+  // faturalaması disconnect'i zaten kapsar); UI anında serbest kalır.
+  const runRef = useRef(0);
+  const lastRunRef = useRef<{ startStream: StartStream; successMessage: string } | null>(null);
+
+  async function generate(startStream: StartStream, successMessage: string): Promise<void> {
+    const myRun = ++runRef.current;
+    const stale = () => runRef.current !== myRun;
+    lastRunRef.current = { startStream, successMessage };
     setLoading(true);
     setStreaming(true);
     setResult(null);
@@ -37,6 +46,7 @@ export function useDocumentStream() {
     let grounding: GroundingRecord[] = [];
     let lastFlush = 0;
     const flush = (force = false) => {
+      if (stale()) return;
       const now = Date.now();
       if (!force && now - lastFlush < 90) return;
       lastFlush = now;
@@ -46,14 +56,17 @@ export function useDocumentStream() {
     try {
       await startStream({
         onGrounding: (g) => {
+          if (stale()) return;
           grounding = g;
           flush(true);
         },
         onDelta: (t) => {
+          if (stale()) return;
           acc += t;
           flush();
         },
         onDone: (meta) => {
+          if (stale()) return;
           setResult({
             text: acc,
             grounding,
@@ -64,16 +77,43 @@ export function useDocumentStream() {
           toast(successMessage);
           refreshWorkspaceInfo(); // kenar çubuğu kullanım sayacı
         },
-        onQuotaExceeded: (info) => setQuotaBlock(info),
-        onError: (msg) => setError(msg),
-        onWarning: (w) => setWarning(w),
+        onQuotaExceeded: (info) => {
+          if (stale()) return;
+          setQuotaBlock(info);
+        },
+        onError: (msg) => {
+          if (stale()) return;
+          setResult(null); // hatada yarım/kesik belge kalmasın (P2-2)
+          setError(msg);
+        },
+        onWarning: (w) => {
+          if (stale()) return;
+          setWarning(w);
+        },
       });
     } catch (e) {
+      if (stale()) return;
+      setResult(null);
       setError(e instanceof Error ? e.message : "Beklenmeyen bir hata oluştu.");
     } finally {
-      setStreaming(false);
-      setLoading(false);
+      if (!stale()) {
+        setStreaming(false);
+        setLoading(false);
+      }
     }
+  }
+
+  function cancel(): void {
+    runRef.current++; // mevcut çalıştırmayı geçersizleştir
+    setStreaming(false);
+    setLoading(false);
+    setResult(null);
+    setError(null);
+  }
+
+  function retry(): void {
+    const last = lastRunRef.current;
+    if (last) void generate(last.startStream, last.successMessage);
   }
 
   function reset(): void {
@@ -83,7 +123,7 @@ export function useDocumentStream() {
     setWarning(null);
   }
 
-  return { loading, streaming, result, error, quotaBlock, warning, generate, reset };
+  return { loading, streaming, result, error, quotaBlock, warning, generate, reset, cancel, retry };
 }
 
 /** İndirme akışı — blob → geçici `<a download>` (aydinlatma-client.tsx'teki orijinal onDownload ile birebir). */

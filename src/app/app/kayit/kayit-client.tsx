@@ -21,6 +21,7 @@ import {
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
+import { GenerationError } from "@/components/app/generation-error";
 import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 
@@ -115,7 +116,7 @@ function KayitFlow({ clientId }: { clientId: string }) {
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [client, setClient] = useState<Client | null>(null);
 
-  const { loading, streaming, result, error: genError, quotaBlock, warning, generate } =
+  const { loading, streaming, result, error: genError, quotaBlock, warning, generate, cancel, retry } =
     useDocumentStream();
   const { downloading, download } = useDocumentDownload();
 
@@ -174,7 +175,7 @@ function KayitFlow({ clientId }: { clientId: string }) {
           Müvekkilin tüm envanter kayıtlarından VERBİS işleme kaydı (faaliyet envanteri) tek
           parça olarak üretilir.
         </p>
-        <div className="mt-4">
+        <div className="mt-4 flex items-center gap-3">
           <Button onClick={onGenerate} disabled={loading}>
             {loading ? (
               <>
@@ -184,6 +185,11 @@ function KayitFlow({ clientId }: { clientId: string }) {
               "İşleme Kaydı Üret"
             )}
           </Button>
+          {loading && (
+            <Button variant="secondary" onClick={cancel}>
+              Durdur
+            </Button>
+          )}
         </div>
       </Card>
 
@@ -204,14 +210,7 @@ function KayitFlow({ clientId }: { clientId: string }) {
         </div>
       )}
 
-      {genError && (
-        <div className="flex items-start gap-2.5 border border-danger/40 border-l-2 border-l-danger bg-danger-soft px-5 py-4 text-sm text-danger">
-          <Icon name="warning" className="mt-0.5 flex-shrink-0 text-[16px]" />
-          <span>
-            <strong className="font-medium">Üretim başarısız.</strong> {genError}
-          </span>
-        </div>
-      )}
+      {genError && <GenerationError message={genError} onRetry={retry} />}
 
       {warning && <GenerationWarning warning={warning} />}
 

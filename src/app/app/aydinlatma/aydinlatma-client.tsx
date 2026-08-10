@@ -24,7 +24,7 @@ import {
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
-import { StepBar } from "@/components/app/step-bar";
+import { GenerationError } from "@/components/app/generation-error";
 import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { OneriOnayi } from "./oneri-onayi";
 import type { SectionField } from "@/lib/section-classify";
@@ -141,7 +141,7 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
   const [sections, setSections] = useState<EnrichedSection[] | null>(null);
   const [edited, setEdited] = useState<AydinlatmaSection[]>([]);
 
-  const { loading, streaming, result, error: genError, quotaBlock, warning, generate, reset } =
+  const { loading, streaming, result, error: genError, quotaBlock, warning, generate, reset, cancel, retry } =
     useDocumentStream();
   const { downloading, download } = useDocumentDownload();
 
@@ -226,20 +226,6 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
 
   return (
     <div className="mt-5 space-y-5">
-      <StepBar
-        steps={[
-          { title: "Müvekkil" },
-          { title: "Kişi Grupları" },
-          { title: "Öneri Onayı" },
-          { title: "Üret" },
-        ]}
-        current={result ? 3 : sections ? 2 : 1}
-        reachable={[true, true, Boolean(sections), Boolean(result)]}
-        docColor="var(--doc-aydinlatma)"
-        onSelect={() => {}}
-        locked
-      />
-
       <Card title="Hedef kişi grupları" icon={<Icon name="grid" className="text-[18px]" />}>
         <Field label="Aydınlatma metninin kapsayacağı kişi grupları">
           <MultiSelect
@@ -288,6 +274,11 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
                 "Üret"
               )}
             </Button>
+            {loading && (
+              <Button variant="secondary" onClick={cancel}>
+                Durdur
+              </Button>
+            )}
           </div>
         </>
       )}
@@ -324,14 +315,7 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
         </div>
       )}
 
-      {genError && (
-        <div className="flex items-start gap-2.5 border border-danger/40 border-l-2 border-l-danger bg-danger-soft px-5 py-4 text-sm text-danger">
-          <Icon name="warning" className="mt-0.5 flex-shrink-0 text-[16px]" />
-          <span>
-            <strong className="font-medium">Üretim başarısız.</strong> {genError}
-          </span>
-        </div>
-      )}
+      {genError && <GenerationError message={genError} onRetry={retry} />}
 
       {warning && <GenerationWarning warning={warning} />}
 

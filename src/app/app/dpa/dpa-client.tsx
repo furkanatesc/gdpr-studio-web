@@ -24,6 +24,7 @@ import {
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
+import { GenerationError } from "@/components/app/generation-error";
 import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 
@@ -185,42 +186,34 @@ function DpaScope({
   client: Client | null;
   processor: Processor;
 }) {
-  const [preparing, setPreparing] = useState(true);
+  const [preparing, setPreparing] = useState(false);
   const [prepareError, setPrepareError] = useState<string | null>(null);
   const [prepareResult, setPrepareResult] = useState<DpaPrepareResult | null>(null);
 
-  const { loading, streaming, result, error: genError, quotaBlock, warning, generate } =
+  const { loading, streaming, result, error: genError, quotaBlock, warning, generate, cancel, retry } =
     useDocumentStream();
   const { downloading, download } = useDocumentDownload();
 
-  // DpaScope, seçili işleyene göre `key`'lenerek üstten yeniden monte edilir (bkz.
-  // DpaFlow) — bu yüzden başlangıç state'i (preparing=true, sonuç=null) her işleyen
-  // seçiminde zaten tazedir; effect yalnızca async çağrıyı başlatır.
-  useEffect(() => {
-    let cancelled = false;
+  // P2-4: kapsam artık otomatik değil — kullanıcı "Değerlendir" ile tetikler (DPIA/İhlal
+  // ile tutarlı; işleyen seçince istenmeyen otomatik API atışı olmaz). DpaScope işleyene
+  // göre key'lendiğinden işleyen değişince state zaten tazelenir.
+  function onEvaluate() {
+    setPreparing(true);
+    setPrepareError(null);
+    setPrepareResult(null);
     prepareDpa(clientId, processor.id)
-      .then((res) => {
-        if (!cancelled) setPrepareResult(res);
-      })
+      .then((res) => setPrepareResult(res))
       .catch((e) => {
-        if (!cancelled) {
-          const errMsg = e instanceof Error ? e.message : "Kapsam hesaplanamadı.";
-          // Check if this is an empty-scope error (422)
-          const isEmptyScopeError = errMsg.includes("422") || errMsg.toLowerCase().includes("empty");
-          if (isEmptyScopeError) {
-            setPrepareError("Bu işleyene aktarılan süreç yok; işleyenin aktarım eşlemesini kontrol edin.");
-          } else {
-            setPrepareError(errMsg);
-          }
-        }
+        const errMsg = e instanceof Error ? e.message : "Kapsam hesaplanamadı.";
+        const isEmptyScopeError = errMsg.includes("422") || errMsg.toLowerCase().includes("empty");
+        setPrepareError(
+          isEmptyScopeError
+            ? "Bu işleyene aktarılan süreç yok; işleyenin aktarım eşlemesini kontrol edin."
+            : errMsg,
+        );
       })
-      .finally(() => {
-        if (!cancelled) setPreparing(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [clientId, processor.id]);
+      .finally(() => setPreparing(false));
+  }
 
   function onGenerate() {
     if (!prepareResult) return Promise.resolve();
@@ -248,7 +241,12 @@ function DpaScope({
         {preparing ? (
           <p className="text-[13px] text-ink-muted">Kapsam hesaplanıyor…</p>
         ) : prepareError ? (
-          <p className="text-[13px] text-danger">{prepareError}</p>
+          <div>
+            <p className="text-[13px] text-danger">{prepareError}</p>
+            <Button variant="secondary" className="mt-3" onClick={onEvaluate}>
+              Tekrar değerlendir
+            </Button>
+          </div>
         ) : prepareResult ? (
           <>
             <StatusBadge tone="ok">
@@ -287,7 +285,7 @@ function DpaScope({
               </div>
             )}
 
-            <div className="mt-5">
+            <div className="mt-5 flex items-center gap-3">
               <Button onClick={onGenerate} disabled={loading}>
                 {loading ? (
                   <>
@@ -297,9 +295,23 @@ function DpaScope({
                   "Üret"
                 )}
               </Button>
+              {loading && (
+                <Button variant="secondary" onClick={cancel}>
+                  Durdur
+                </Button>
+              )}
             </div>
           </>
-        ) : null}
+        ) : (
+          <div>
+            <p className="text-[13px] text-ink-muted">
+              Bu işleyene aktarılan süreçlerin kapsamını değerlendirin.
+            </p>
+            <Button className="mt-4" onClick={onEvaluate}>
+              Değerlendir
+            </Button>
+          </div>
+        )}
       </Card>
 
       {quotaBlock && (
@@ -319,14 +331,7 @@ function DpaScope({
         </div>
       )}
 
-      {genError && (
-        <div className="flex items-start gap-2.5 border border-danger/40 border-l-2 border-l-danger bg-danger-soft px-5 py-4 text-sm text-danger">
-          <Icon name="warning" className="mt-0.5 flex-shrink-0 text-[16px]" />
-          <span>
-            <strong className="font-medium">Üretim başarısız.</strong> {genError}
-          </span>
-        </div>
-      )}
+      {genError && <GenerationError message={genError} onRetry={retry} />}
 
       {warning && <GenerationWarning warning={warning} />}
 

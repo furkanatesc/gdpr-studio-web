@@ -22,6 +22,7 @@ import {
   type DpiaPrepareResult,
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
+import { GenerationError } from "@/components/app/generation-error";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
@@ -134,7 +135,7 @@ function DpiaFlow({ clientId }: { clientId: string }) {
   const [prepareError, setPrepareError] = useState<string | null>(null);
   const [prepareResult, setPrepareResult] = useState<DpiaPrepareResult | null>(null);
 
-  const { loading, streaming, result, error: genError, quotaBlock, warning, generate, reset } =
+  const { loading, streaming, result, error: genError, quotaBlock, warning, generate, reset, cancel, retry } =
     useDocumentStream();
   const { downloading, download } = useDocumentDownload();
 
@@ -208,18 +209,30 @@ function DpiaFlow({ clientId }: { clientId: string }) {
         {prepareError && <p className="mt-3 text-[13px] text-danger">{prepareError}</p>}
 
         {prepareResult && (
-          <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-border pt-4">
-            <StatusBadge tone={prepareResult.otomatik.ozelNitelikliVar ? "warning" : "neutral"}>
-              Özel nitelikli veri: {prepareResult.otomatik.ozelNitelikliVar ? "Var" : "Yok"}
-            </StatusBadge>
-            <StatusBadge tone={prepareResult.otomatik.profillemeVar ? "warning" : "neutral"}>
-              Profilleme: {prepareResult.otomatik.profillemeVar ? "Var" : "Yok"}
-            </StatusBadge>
-            <StatusBadge tone={prepareResult.zorunlu ? "ok" : "neutral"}>
-              {prepareResult.zorunlu
-                ? `DPIA ZORUNLU — ${prepareResult.kriterSayisi}/6 kriter`
-                : "Zorunlu değil (yine de üretebilirsiniz)"}
-            </StatusBadge>
+          <div className="mt-5 border-t border-border pt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusBadge tone={prepareResult.otomatik.ozelNitelikliVar ? "warning" : "neutral"}>
+                Özel nitelikli veri: {prepareResult.otomatik.ozelNitelikliVar ? "Var" : "Yok"}
+              </StatusBadge>
+              <StatusBadge tone={prepareResult.otomatik.profillemeVar ? "warning" : "neutral"}>
+                Profilleme: {prepareResult.otomatik.profillemeVar ? "Var" : "Yok"}
+              </StatusBadge>
+              <StatusBadge tone={prepareResult.zorunlu ? "ok" : "neutral"}>
+                {prepareResult.zorunlu
+                  ? `DPIA ZORUNLU — ${prepareResult.kriterSayisi}/6 kriter`
+                  : "Zorunlu değil (yine de üretebilirsiniz)"}
+              </StatusBadge>
+            </div>
+            {prepareResult.tetiklenenler.length > 0 && (
+              <div className="mt-4">
+                <p className="eyebrow mb-2">DPIA&apos;yı gerektiren kriterler</p>
+                <ul className="list-inside list-disc text-[13px] text-ink-muted">
+                  {prepareResult.tetiklenenler.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </Card>
@@ -230,7 +243,7 @@ function DpiaFlow({ clientId }: { clientId: string }) {
             Müvekkilin tüm envanter kayıtlarından DPIA (veri koruma etki değerlendirmesi) taslağı
             üretilir.
           </p>
-          <div className="mt-4">
+          <div className="mt-4 flex items-center gap-3">
             <Button onClick={onGenerate} disabled={loading}>
               {loading ? (
                 <>
@@ -242,6 +255,11 @@ function DpiaFlow({ clientId }: { clientId: string }) {
                 "Yine de Üret"
               )}
             </Button>
+            {loading && (
+              <Button variant="secondary" onClick={cancel}>
+                Durdur
+              </Button>
+            )}
           </div>
         </Card>
       )}
@@ -263,14 +281,7 @@ function DpiaFlow({ clientId }: { clientId: string }) {
         </div>
       )}
 
-      {genError && (
-        <div className="flex items-start gap-2.5 border border-danger/40 border-l-2 border-l-danger bg-danger-soft px-5 py-4 text-sm text-danger">
-          <Icon name="warning" className="mt-0.5 flex-shrink-0 text-[16px]" />
-          <span>
-            <strong className="font-medium">Üretim başarısız.</strong> {genError}
-          </span>
-        </div>
-      )}
+      {genError && <GenerationError message={genError} onRetry={retry} />}
 
       {warning && <GenerationWarning warning={warning} />}
 

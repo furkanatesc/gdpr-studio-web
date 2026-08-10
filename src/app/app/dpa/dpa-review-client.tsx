@@ -116,6 +116,16 @@ function DpaReviewFlow({ clientId }: { clientId: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DpaReviewResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+
+  // Geçen süre sayacı — inceleme tek istekli ve uzun sözleşmede ~1 dk sürebilir;
+  // kullanıcı ilerleme sinyalsiz kalmasın (P2-6).
+  useEffect(() => {
+    if (!loading) return;
+    const id = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => clearInterval(id);
+  }, [loading]);
 
   useEffect(() => {
     getClient(clientId).then(setClient).catch(() => setClient(null));
@@ -136,13 +146,21 @@ function DpaReviewFlow({ clientId }: { clientId: string }) {
     if (!text.trim() && !file) return;
     setLoading(true);
     setResult(null);
+    setError(null);
+    setElapsed(0);
     reviewDpa(clientId, {
       text: text.trim() || undefined,
       file: file ?? undefined,
       processorId: processorId || undefined,
     })
       .then(setResult)
-      .catch((e) => toast(e instanceof Error ? e.message : "İnceleme başarısız."))
+      .catch((e) =>
+        setError(
+          e instanceof Error
+            ? e.message
+            : "İnceleme tamamlanamadı. Sözleşme uzunsa biraz zaman alabilir; tekrar deneyin.",
+        ),
+      )
       .finally(() => setLoading(false));
   }
 
@@ -219,7 +237,29 @@ function DpaReviewFlow({ clientId }: { clientId: string }) {
         </div>
       </Card>
 
-      {loading && <GenerationSkeleton label="Sözleşme KVKK m.12 kontrol listesine göre inceleniyor…" />}
+      {loading && (
+        <GenerationSkeleton
+          label={`Sözleşme KVKK m.12 kontrol listesine göre inceleniyor… (${elapsed} sn)`}
+        />
+      )}
+
+      {error && !loading && (
+        <div className="flex items-start justify-between gap-3 border border-danger/40 border-l-2 border-l-danger bg-danger-soft px-5 py-4 text-sm text-danger">
+          <span className="flex items-start gap-2.5">
+            <Icon name="warning" className="mt-0.5 flex-shrink-0 text-[16px]" />
+            <span>
+              <strong className="font-medium">İnceleme başarısız.</strong> {error}
+            </span>
+          </span>
+          <button
+            type="button"
+            onClick={onReview}
+            className="flex-shrink-0 self-center whitespace-nowrap text-[12px] font-medium text-danger underline-offset-2 transition-colors hover:underline"
+          >
+            Tekrar dene
+          </button>
+        </div>
+      )}
 
       {result && !loading && <ReviewReport result={result} client={client} onPrint={onPrint} />}
     </div>

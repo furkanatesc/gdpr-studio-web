@@ -25,6 +25,7 @@ import {
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
+import { GenerationError } from "@/components/app/generation-error";
 import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 
@@ -523,18 +524,25 @@ function GenerateSection({
   onPrint: () => void;
   canPrint: boolean;
 }) {
-  const { loading, streaming, result, error, quotaBlock, warning } = stream;
+  const { loading, streaming, result, error, quotaBlock, warning, cancel, retry } = stream;
   return (
     <Card title={title} icon={<Icon name={icon} className="text-[18px]" />}>
-      <Button variant={variant} onClick={onGenerate} disabled={loading}>
-        {loading ? (
-          <>
-            <Icon name="spinner" className="animate-spin text-[15px]" /> Üretiliyor…
-          </>
-        ) : (
-          buttonLabel
+      <div className="flex items-center gap-3">
+        <Button variant={variant} onClick={onGenerate} disabled={loading}>
+          {loading ? (
+            <>
+              <Icon name="spinner" className="animate-spin text-[15px]" /> Üretiliyor…
+            </>
+          ) : (
+            buttonLabel
+          )}
+        </Button>
+        {loading && (
+          <Button variant="secondary" onClick={cancel}>
+            Durdur
+          </Button>
         )}
-      </Button>
+      </div>
 
       {quotaBlock && (
         <div className="mt-4 flex items-start gap-2.5 border border-warning/40 border-l-2 border-l-warning bg-warning-soft px-5 py-4 text-sm">
@@ -554,11 +562,8 @@ function GenerateSection({
       )}
 
       {error && (
-        <div className="mt-4 flex items-start gap-2.5 border border-danger/40 border-l-2 border-l-danger bg-danger-soft px-5 py-4 text-sm text-danger">
-          <Icon name="warning" className="mt-0.5 flex-shrink-0 text-[16px]" />
-          <span>
-            <strong className="font-medium">Üretim başarısız.</strong> {error}
-          </span>
+        <div className="mt-4">
+          <GenerationError message={error} onRetry={retry} />
         </div>
       )}
 
