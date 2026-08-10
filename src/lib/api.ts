@@ -66,6 +66,16 @@ async function isDuplicateRequest(res: Response): Promise<boolean> {
   }
 }
 
+/** Hata + HTTP durum kodu — çağıran taraf "kesin 403 (kurum yok)" ile "geçici hata"yı ayırabilsin. */
+export class ApiError extends Error {
+  readonly status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 /** FastAPI hata gövdesi ({detail} | {error}) → okunur mesaj; JSON değilse HTTP kodu. */
 async function errorDetail(res: Response): Promise<string> {
   const fallback = `Sunucu hatası (HTTP ${res.status})`;
@@ -162,12 +172,12 @@ export async function getComplianceChecklist(): Promise<ComplianceChecklist> {
 
 export async function setComplianceStatus(
   key: string,
-  status: ComplianceStatusValue,
+  status: ComplianceStatusValue | null,
   note?: string | null,
 ): Promise<ChecklistItem> {
   return authedJson(`/api/compliance/status/${key}`, {
     method: "PUT",
-    body: JSON.stringify({ status, note: note ?? null }),
+    body: JSON.stringify({ status: status ?? null, note: note ?? null }),
   });
 }
 
@@ -892,7 +902,7 @@ export async function reviewDpa(
 
 async function authedJson(path: string, init: RequestInit) {
   const res = await apiFetch(path, init);
-  if (!res.ok) throw new Error(await errorDetail(res));
+  if (!res.ok) throw new ApiError(res.status, await errorDetail(res));
   return res.status === 204 ? undefined : res.json();
 }
 export const usingRealApi = Boolean(API_BASE);

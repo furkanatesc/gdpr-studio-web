@@ -162,7 +162,11 @@ export function KontrolClient() {
   const allItems = useMemo(() => groups?.flatMap((g) => g.items) ?? [], [groups]);
   const overallScore = useMemo(() => scoreOf(allItems), [allItems]);
 
-  async function applyStatus(key: string, status: ComplianceStatusValue, note?: string | null) {
+  async function applyStatus(
+    key: string,
+    status: ComplianceStatusValue | null,
+    note?: string | null,
+  ) {
     if (!groups) return;
     const prev = groups;
     const next = groups.map((g) => ({
@@ -191,8 +195,10 @@ export function KontrolClient() {
   }
 
   function handleSaveNote(key: string, note: string) {
+    // Not (kanıt/gerekçe) kaydetmek statüyü DEĞİŞTİRMEZ: mevcut statü ne ise onu korur;
+    // statüsüz kaleme not eklemek onu artık sessizce 'eksik'e çevirmez (null gönderilir).
     const item = allItems.find((i) => i.key === key);
-    void applyStatus(key, (item?.status as ComplianceStatusValue) ?? "eksik", note);
+    void applyStatus(key, (item?.status as ComplianceStatusValue | null) ?? null, note);
   }
 
   const header = (

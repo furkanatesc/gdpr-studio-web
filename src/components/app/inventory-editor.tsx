@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useState } from "react";
-import { Button, buttonClasses } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
 import { ComboCell } from "@/components/app/inventory-grid-cell";
 import { EksikleriDoldurPanel } from "@/components/app/eksikleri-doldur-panel";
@@ -9,11 +9,7 @@ import type { ListKey } from "@/components/app/inventory-fields";
 import {
   getClientInventory,
   getGroundingOptions,
-  importClientInventory,
-  importClientWorkbook,
-  inventoryTemplateUrl,
   replaceClientInventory,
-  workbookTemplateUrl,
   type GroundingOptions,
   type InventoryRow,
 } from "@/lib/api";
@@ -210,7 +206,15 @@ const GridRow = memo(function GridRow({
   );
 });
 
-export function InventoryEditor({ clientId }: { clientId: string }) {
+export function InventoryEditor({
+  clientId,
+  onSwitchToWizard,
+  onOpenImport,
+}: {
+  clientId: string;
+  onSwitchToWizard?: () => void;
+  onOpenImport?: () => void;
+}) {
   const toast = useToast();
   const [rows, setRows] = useState<EditableRow[] | null>(null);
   const [groundingOptions, setGroundingOptions] = useState<GroundingOptions>({
@@ -218,8 +222,18 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
     amaclar: [],
     ozelNitelikli: [],
   });
-  const [importing, setImporting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
 
   useEffect(() => {
     getClientInventory(clientId)
@@ -236,54 +250,24 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
       .catch((e) => toast(e instanceof Error ? e.message : "Envanter yenilenemedi."));
   }, [clientId, toast]);
 
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImporting(true);
-    importClientInventory(clientId, file)
-      .then((s) => {
-        toast(`${s.count} kayıt yüklendi.`);
-        return getClientInventory(clientId);
-      })
-      .then((d) => setRows(d.rows.map(withId)))
-      .catch((err) => toast(err instanceof Error ? err.message : "Yükleme başarısız."))
-      .finally(() => {
-        setImporting(false);
-        e.target.value = "";
-      });
-  }
-
-  function onWorkbookChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImporting(true);
-    importClientWorkbook(clientId, file)
-      .then((s) => {
-        toast(`${s.count} kayıt yüklendi.`);
-        return getClientInventory(clientId);
-      })
-      .then((d) => setRows(d.rows.map(withId)))
-      .catch((err) => toast(err instanceof Error ? err.message : "Yükleme başarısız."))
-      .finally(() => {
-        setImporting(false);
-        e.target.value = "";
-      });
-  }
-
   function addRow() {
     setRows((rs) => [...(rs ?? []), withId(emptyRow())]);
+    setDirty(true);
   }
 
   const removeRow = useCallback((id: string) => {
     setRows((rs) => rs?.filter((r) => r._id !== id) ?? rs);
+    setDirty(true);
   }, []);
 
   const patchIdentity = useCallback((id: string, key: IdentityKey, v: string) => {
     setRows((rs) => rs?.map((r) => (r._id === id ? { ...r, [key]: v } : r)) ?? rs);
+    setDirty(true);
   }, []);
 
   const patchList = useCallback((id: string, key: ListKey, v: string[]) => {
     setRows((rs) => rs?.map((r) => (r._id === id ? { ...r, [key]: v } : r)) ?? rs);
+    setDirty(true);
   }, []);
 
   function onSave() {
@@ -296,7 +280,10 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
     setSaving(true);
     const payload = rows.map(toInventoryRow);
     replaceClientInventory(clientId, payload)
-      .then((s) => toast(`Envanter kaydedildi (${s.count} kayıt).`))
+      .then((s) => {
+        toast(`Envanter kaydedildi (${s.count} kayıt).`);
+        setDirty(false);
+      })
       .catch((e) => toast(e instanceof Error ? e.message : "Kaydedilemedi."))
       .finally(() => setSaving(false));
   }
@@ -308,6 +295,7 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
     replaceClientInventory(clientId, [])
       .then(() => {
         setRows([]);
+        setDirty(false);
         toast("Envanter silindi.");
       })
       .catch((e) => toast(e instanceof Error ? e.message : "Silinemedi."))
@@ -316,45 +304,20 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
 
   return (
     <div className="mt-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className={cn(buttonClasses("secondary", "sm"), "cursor-pointer", importing && "pointer-events-none opacity-50")}>
-          Envanter dosyası yükle (.xlsx)
-          <input type="file" accept=".xlsx" className="hidden" onChange={onFileChange} disabled={importing} />
-        </label>
-        <a href={inventoryTemplateUrl()} className="text-[12.5px] text-accent-strong hover:underline">
-          Boş şablonu indir
-        </a>
-      </div>
-      <p className="mt-2 text-[12px] text-ink-subtle">
-        Dosya yükleme mevcut envanterin tamamının yerini alır; elle yaptığınız düzenlemelerin üzerine yazar.
-      </p>
-
-      <div className="mt-3 flex flex-wrap items-center gap-3">
-        <span className="text-[12px] text-ink-subtle">veya KVKK anket kitabından</span>
-        <label className={cn(buttonClasses("secondary", "sm"), "cursor-pointer", importing && "pointer-events-none opacity-50")}>
-          Anket kitabından yükle (.xlsx)
-          <input type="file" accept=".xlsx" className="hidden" onChange={onWorkbookChange} disabled={importing} />
-        </label>
-        <a href={workbookTemplateUrl()} className="text-[12.5px] text-accent-strong hover:underline">
-          Anket şablonu indir
-        </a>
-      </div>
-
-      <div className="mt-6 border-t border-border pt-5">
+      <div>
         <div className="flex items-center justify-between gap-3">
           <h3 className="font-display text-[15px] text-ink">
             Envanter kayıtları
             {rows !== null && <span className="ml-2 text-[12px] font-normal text-ink-subtle">({rows.length})</span>}
           </h3>
           <div className="flex items-center gap-3">
-            {importing && <span className="text-[12px] text-ink-subtle">İçe aktarılıyor…</span>}
-            <Button type="button" variant="secondary" size="sm" onClick={addRow} disabled={rows === null || importing}>
+            <Button type="button" variant="secondary" size="sm" onClick={addRow} disabled={rows === null}>
               Satır ekle
             </Button>
             <button
               type="button"
               onClick={onClearInventory}
-              disabled={!rows || rows.length === 0 || importing || saving}
+              disabled={!rows || rows.length === 0 || saving}
               className="text-[12.5px] text-danger transition-colors hover:underline disabled:opacity-40"
             >
               Envanteri sil
@@ -365,20 +328,36 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
         <EksikleriDoldurPanel
           clientId={clientId}
           onApplied={reloadRows}
-          disabled={!rows || rows.length === 0 || importing || saving}
+          disabled={!rows || rows.length === 0 || saving}
         />
 
         {rows === null ? (
           <p className="mt-4 text-[13px] text-ink-muted">Yükleniyor…</p>
         ) : rows.length === 0 ? (
-          <p className="mt-4 text-[13px] text-ink-muted">Henüz envanter kaydı yok.</p>
+          <div className="mt-4 border border-dashed border-border-strong bg-surface px-6 py-10 text-center">
+            <p className="text-[13.5px] text-ink-muted">Bu müvekkilin envanteri boş.</p>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+              {onSwitchToWizard && (
+                <Button type="button" size="sm" onClick={onSwitchToWizard}>
+                  Rehberli anketle doldur
+                </Button>
+              )}
+              <Button type="button" variant="secondary" size="sm" onClick={addRow}>
+                Tabloya elle gir
+              </Button>
+              {onOpenImport && (
+                <button
+                  type="button"
+                  onClick={onOpenImport}
+                  className="text-[12.5px] text-ink-subtle transition-colors hover:text-ink hover:underline"
+                >
+                  Excel ile topla
+                </button>
+              )}
+            </div>
+          </div>
         ) : (
-          <div
-            className={cn(
-              "mt-4 max-h-[65vh] overflow-auto border border-border-strong",
-              importing && "pointer-events-none opacity-50",
-            )}
-          >
+          <div className="mt-4 max-h-[65vh] overflow-auto border border-border-strong">
             <div style={{ display: "grid", gridTemplateColumns: GRID_TEMPLATE }}>
               <GridHeader />
               {rows.map((row, i) => (
@@ -401,7 +380,7 @@ export function InventoryEditor({ clientId }: { clientId: string }) {
           size="sm"
           className="mt-5"
           onClick={onSave}
-          disabled={saving || importing || rows === null}
+          disabled={saving || rows === null}
         >
           {saving ? "Kaydediliyor…" : "Envanteri kaydet"}
         </Button>

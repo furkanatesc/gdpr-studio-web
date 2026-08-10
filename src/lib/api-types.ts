@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Audit */
+        get: operations["list_audit_api_audit_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/bootstrap": {
         parameters: {
             query?: never;
@@ -463,6 +480,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/clients/{client_id}/dpa/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Review
+         * @description Yüklenen DPA metnini KVKK m.12 kontrol listesine göre analiz eder (kalıcı değil).
+         */
+        post: operations["review_api_clients__client_id__dpa_review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/clients/{client_id}/dpia/docx": {
         parameters: {
             query?: never;
@@ -511,6 +548,60 @@ export interface paths {
         put?: never;
         /** Prepare */
         post: operations["prepare_api_clients__client_id__dpia_prepare_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/ihlal/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Docx */
+        post: operations["docx_api_clients__client_id__ihlal_docx_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/ihlal/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate
+         * @description İhlal bildirimi (kurul | ilgili kişi) akışı (SSE). KALICILIK YOK.
+         */
+        post: operations["generate_api_clients__client_id__ihlal_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/clients/{client_id}/ihlal/prepare": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Prepare */
+        post: operations["prepare_api_clients__client_id__ihlal_prepare_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -966,6 +1057,42 @@ export interface components {
             /** Adlar */
             adlar: string[];
         };
+        /** AuditItem */
+        AuditItem: {
+            /** Action */
+            action: string;
+            /** Actoremail */
+            actorEmail: string;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Ip */
+            ip: string | null;
+            /** Meta */
+            meta: {
+                [key: string]: unknown;
+            } | null;
+            /** Requestid */
+            requestId: string | null;
+            /** Targetid */
+            targetId: string | null;
+            /** Targettype */
+            targetType: string | null;
+        };
+        /** AuditPage */
+        AuditPage: {
+            /** Items */
+            items: components["schemas"]["AuditItem"][];
+            /** Nextcursor */
+            nextCursor: string | null;
+        };
         /** BillingStatusOut */
         BillingStatusOut: {
             /** Canmanage */
@@ -989,6 +1116,15 @@ export interface components {
         Body_import_workbook_api_clients__client_id__inventory_import_workbook_post: {
             /** File */
             file: string;
+        };
+        /** Body_review_api_clients__client_id__dpa_review_post */
+        Body_review_api_clients__client_id__dpa_review_post: {
+            /** File */
+            file?: string | null;
+            /** Processorid */
+            processorId?: string | null;
+            /** Text */
+            text?: string | null;
         };
         /** BootstrapRequest */
         BootstrapRequest: {
@@ -1477,6 +1613,105 @@ export interface components {
             /** Userid */
             userId: string;
         };
+        /** IhlalGenerateIn */
+        IhlalGenerateIn: {
+            /** Bildirimturu */
+            bildirimTuru: string;
+            /**
+             * Etkilenenindeksler
+             * @default []
+             */
+            etkilenenIndeksler: number[];
+            /**
+             * Kimlikfinansal
+             * @default false
+             */
+            kimlikFinansal: boolean;
+            /**
+             * Kisisayisi
+             * @default 0
+             */
+            kisiSayisi: number;
+            /**
+             * Nasil
+             * @default
+             */
+            nasil: string;
+            /**
+             * Onlemler
+             * @default
+             */
+            onlemler: string;
+            /**
+             * Sifreli
+             * @default false
+             */
+            sifreli: boolean;
+            /**
+             * Tespit
+             * Format: date-time
+             */
+            tespit: string;
+            /** Tur */
+            tur: string;
+        };
+        /** IhlalPrepareIn */
+        IhlalPrepareIn: {
+            /**
+             * Etkilenenindeksler
+             * @default []
+             */
+            etkilenenIndeksler: number[];
+            /**
+             * Kimlikfinansal
+             * @default false
+             */
+            kimlikFinansal: boolean;
+            /**
+             * Kisisayisi
+             * @default 0
+             */
+            kisiSayisi: number;
+            /**
+             * Nasil
+             * @default
+             */
+            nasil: string;
+            /**
+             * Onlemler
+             * @default
+             */
+            onlemler: string;
+            /**
+             * Sifreli
+             * @default false
+             */
+            sifreli: boolean;
+            /**
+             * Tespit
+             * Format: date-time
+             */
+            tespit: string;
+            /** Tur */
+            tur: string;
+        };
+        /** IhlalPrepareOut */
+        IhlalPrepareOut: {
+            /** Ilgilikisigerekli */
+            ilgiliKisiGerekli: boolean;
+            /** Ilgilikisimuafiyet */
+            ilgiliKisiMuafiyet: boolean;
+            /** Ilgilikisisinyaller */
+            ilgiliKisiSinyaller: string[];
+            /** Kurulgerekli */
+            kurulGerekli: boolean;
+            /** Ozelniteliklivar */
+            ozelNitelikliVar: boolean;
+            /** Saatkalan */
+            saatKalan: number | null;
+            /** Sureasildi */
+            sureAsildi: boolean;
+        };
         /** InventoryReplace */
         InventoryReplace: {
             /** Rows */
@@ -1670,6 +1905,40 @@ export interface components {
             /** Note */
             note?: string | null;
         };
+        /** ReviewFindingOut */
+        ReviewFindingOut: {
+            /** Alinti */
+            alinti: string;
+            /** Baslik */
+            baslik: string;
+            /** Durum */
+            durum: string;
+            /** Gerekce */
+            gerekce: string;
+            /** Kirmizibayrak */
+            kirmiziBayrak: boolean;
+            /** Kvkkref */
+            kvkkRef: string;
+            /** Maddeid */
+            maddeId: string;
+            /** Oneri */
+            oneri: string;
+        };
+        /** ReviewResultOut */
+        ReviewResultOut: {
+            /** Bulgular */
+            bulgular: components["schemas"]["ReviewFindingOut"][];
+            /** Disclaimer */
+            disclaimer: string;
+            /** Eksik */
+            eksik: number;
+            /** Kirmizibayrak */
+            kirmiziBayrak: number;
+            /** Uygun */
+            uygun: number;
+            /** Yetersiz */
+            yetersiz: number;
+        };
         /** RoleUpdate */
         RoleUpdate: {
             /** Role */
@@ -1724,11 +1993,8 @@ export interface components {
         StatusUpdate: {
             /** Note */
             note?: string | null;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "yapildi" | "eksik" | "uygulanmaz";
+            /** Status */
+            status?: ("yapildi" | "eksik" | "uygulanmaz") | null;
         };
         /** UrlOut */
         UrlOut: {
@@ -1797,6 +2063,13 @@ export interface components {
             title?: string | null;
         };
         /** DocxIn */
+        app__modules__ihlal__DocxIn: {
+            /** Text */
+            text: string;
+            /** Title */
+            title?: string | null;
+        };
+        /** DocxIn */
         app__modules__kayit__DocxIn: {
             /** Text */
             text: string;
@@ -1830,6 +2103,39 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+        };
+    };
+    list_audit_api_audit_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                before?: string | null;
+                action?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2672,6 +2978,43 @@ export interface operations {
             };
         };
     };
+    review_api_clients__client_id__dpa_review_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Anthropic-Key"?: string | null;
+            };
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_review_api_clients__client_id__dpa_review_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewResultOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     docx_api_clients__client_id__dpia_docx_post: {
         parameters: {
             query?: never;
@@ -2767,6 +3110,114 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DpiaPrepareOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    docx_api_clients__client_id__ihlal_docx_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["app__modules__ihlal__DocxIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_api_clients__client_id__ihlal_generate_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Anthropic-Key"?: string | null;
+                "Idempotency-Key"?: string | null;
+            };
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IhlalGenerateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    prepare_api_clients__client_id__ihlal_prepare_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IhlalPrepareIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IhlalPrepareOut"];
                 };
             };
             /** @description Validation Error */
