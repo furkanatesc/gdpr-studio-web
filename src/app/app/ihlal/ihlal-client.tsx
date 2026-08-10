@@ -173,6 +173,20 @@ function IhlalFlow({ clientId }: { clientId: string }) {
       });
   }, [clientId, toast]);
 
+  // KALICILIK YOK: üretilen taslaklar Belge Geçmişi'ne yazılmaz. 72 saatlik süre baskısı
+  // altında sekme kapanması/yenilenmesi çıktıyı kaybeder → çıktı varken tarayıcı ayrılma
+  // uyarısı ver. (SPA içi navigasyonu kapsamaz; kalıcı görsel uyarı onu da hatırlatır.)
+  const hasOutput = Boolean(kurul.result || ilgiliKisi.result);
+  useEffect(() => {
+    if (!hasOutput) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasOutput]);
+
   // Olayı güncelleyen tek giriş noktası — "Değerlendir" sonrası form değişirse
   // geçit paneli (ve varsa üretilmiş çıktılar) artık üretim girdisiyle tutarsız
   // olur; bu yüzden her değişiklikte prepareResult geçersiz kılınır.
@@ -438,6 +452,17 @@ function IhlalFlow({ clientId }: { clientId: string }) {
             </span>
           </div>
         </Card>
+      )}
+
+      {prepareResult && (
+        <div className="flex items-start gap-2.5 border border-warning/40 border-l-2 border-l-warning bg-warning-soft px-4 py-3 text-[13px] text-ink">
+          <Icon name="shield-alert" className="mt-0.5 flex-shrink-0 text-[16px] text-warning" />
+          <span>
+            <strong className="font-medium">Bu taslaklar kaydedilmez.</strong> Sayfadan
+            ayrılırsanız veya yenilerseniz kaybolur — ürettiğiniz belgeleri{" "}
+            <strong className="font-medium">indirin veya yazdırın</strong>.
+          </span>
+        </div>
       )}
 
       {prepareResult && (

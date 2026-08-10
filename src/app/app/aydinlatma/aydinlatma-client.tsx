@@ -161,6 +161,9 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
 
   function updateField(i: number, field: SectionField, values: string[]) {
     setEdited((prev) => prev.map((s, idx) => (idx === i ? { ...s, [field]: values } : s)));
+    // Üretilmiş metin artık düzenlenen öneriyle tutarsız → bayat çıktıyı geçersizleştir,
+    // kullanıcı yanlışlıkla eski belgeyi indirip/yazdırıp yayınlamasın (P0-4).
+    if (result) reset();
   }
 
   async function onPrepare() {
@@ -242,7 +245,11 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
           <MultiSelect
             options={summary.kisiGruplari}
             value={targetGroups}
-            onChange={setTargetGroups}
+            onChange={(v) => {
+              setTargetGroups(v);
+              // Hedef gruplar değişti → mevcut üretim/sections girdisiyle tutarsız; bayat çıktıyı temizle (P0-4).
+              if (result) reset();
+            }}
             ariaLabel="Hedef kişi grupları"
             placeholder="Kişi grubu seçin…"
           />
