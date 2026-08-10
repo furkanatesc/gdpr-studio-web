@@ -26,6 +26,7 @@ import {
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationError } from "@/components/app/generation-error";
+import { QuotaBlock } from "@/components/app/generation-quota";
 import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 
@@ -545,19 +546,8 @@ function GenerateSection({
       </div>
 
       {quotaBlock && (
-        <div className="mt-4 flex items-start gap-2.5 border border-warning/40 border-l-2 border-l-warning bg-warning-soft px-5 py-4 text-sm">
-          <Icon name="shield-alert" className="mt-0.5 flex-shrink-0 text-[16px] text-warning" />
-          <div>
-            <strong className="font-medium text-ink">
-              Bu ayki ücretsiz doküman hakkınızı kullandınız ({quotaBlock.used}/{quotaBlock.quota}).
-            </strong>
-            <Link
-              href="/app/faturalama"
-              className="mt-3 inline-block bg-accent px-4 py-2 text-[13px] text-accent-contrast hover:bg-accent-strong"
-            >
-              Planı yükselt →
-            </Link>
-          </div>
+        <div className="mt-4">
+          <QuotaBlock used={quotaBlock.used} quota={quotaBlock.quota} />
         </div>
       )}
 

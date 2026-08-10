@@ -25,6 +25,7 @@ import {
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationError } from "@/components/app/generation-error";
+import { QuotaBlock } from "@/components/app/generation-quota";
 import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { OneriOnayi } from "./oneri-onayi";
 import type { SectionField } from "@/lib/section-classify";
@@ -34,7 +35,7 @@ import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
   Aydınlatma üretim akışı (m.10): müvekkil seç → hedef kişi grupları → Hazırla
   (backend envanterden bölüm çıkarır + boş alanlar için öneri sunar) → öneri
   onayı → Üret (stream) → .docx indir. envanter-client.tsx (müvekkil seçici) ve
-  doc-flow.tsx (stream state makinesi) desenlerini izler.
+  use-document-stream.ts (stream state makinesi) desenlerini izler.
 */
 
 function toApproved(s: EnrichedSection): AydinlatmaSection {
@@ -298,22 +299,7 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
         </div>
       )}
 
-      {quotaBlock && (
-        <div className="flex items-start gap-2.5 border border-warning/40 border-l-2 border-l-warning bg-warning-soft px-5 py-4 text-sm">
-          <Icon name="shield-alert" className="mt-0.5 flex-shrink-0 text-[16px] text-warning" />
-          <div>
-            <strong className="font-medium text-ink">
-              Bu ayki ücretsiz doküman hakkınızı kullandınız ({quotaBlock.used}/{quotaBlock.quota}).
-            </strong>
-            <Link
-              href="/app/faturalama"
-              className="mt-3 inline-block bg-accent px-4 py-2 text-[13px] text-accent-contrast hover:bg-accent-strong"
-            >
-              Planı yükselt →
-            </Link>
-          </div>
-        </div>
-      )}
+      {quotaBlock && <QuotaBlock used={quotaBlock.used} quota={quotaBlock.quota} />}
 
       {genError && <GenerationError message={genError} onRetry={retry} />}
 

@@ -9,7 +9,14 @@ import Link from "next/link";
   yüzde. score=null (seed yok / payda=0) → "—", uydurulmuş sayı gösterilmez.
   Tıklanınca /app/kontrol'e gider.
 */
-export function ScoreRing({ score }: { score: number | null }) {
+export function ScoreRing({
+  score,
+  href = "/app/kontrol",
+}: {
+  score: number | null;
+  // null → salt halka (iç içe <a> olmaması için; sarmalayan kart zaten link olabilir).
+  href?: string | null;
+}) {
   const size = 88;
   const stroke = 8;
   const r = (size - stroke) / 2;
@@ -17,12 +24,10 @@ export function ScoreRing({ score }: { score: number | null }) {
   const pct = score === null ? 0 : Math.round(score * 100);
   const offset = c * (1 - pct / 100);
 
-  return (
-    <Link
-      href="/app/kontrol"
-      aria-label="Uyum kontrol listesine git"
-      className="group relative inline-flex h-[88px] w-[88px] flex-shrink-0 items-center justify-center"
-    >
+  const cls =
+    "group relative inline-flex h-[88px] w-[88px] flex-shrink-0 items-center justify-center";
+  const inner = (
+    <>
       <svg width={size} height={size} className="-rotate-90">
         <circle
           cx={size / 2}
@@ -50,6 +55,13 @@ export function ScoreRing({ score }: { score: number | null }) {
       <span className="absolute font-display text-lg font-light text-ink transition-colors group-hover:text-accent">
         {score === null ? "—" : `%${pct}`}
       </span>
+    </>
+  );
+
+  if (href === null) return <div className={cls}>{inner}</div>;
+  return (
+    <Link href={href} aria-label="Uyum kontrol listesine git" className={cls}>
+      {inner}
     </Link>
   );
 }
