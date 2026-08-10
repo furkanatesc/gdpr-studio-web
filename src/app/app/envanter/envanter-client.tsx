@@ -2,25 +2,34 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/app/page-header";
 import { InventoryEditor } from "@/components/app/inventory-editor";
+import { InventoryWizard } from "@/components/app/inventory-wizard";
+import { InventoryImportMenu } from "@/components/app/inventory-import-menu";
 import { Field, Select } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
 import { listClients, SECTOR_LABELS, usingRealApi, type Client } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 /*
-  Envanter merkezi ekranı — müvekkil seç, envanterini elle düzenle/yükle.
-  Düzenleme mantığı InventoryEditor'da (müvekkil sayfasıyla paylaşılır).
-  ?client=<id> ile müvekkil sayfasından gelen bağlam taşınır; geçersiz/yoksa
-  listedeki ilk müvekkile düşülür.
+  Envanter Çalışma Alanı — müvekkil seç, envanteri gir. İki mod tek yerde:
+  Tablo (VERBİS grid) ve Rehberli Anket (sihirbaz). Excel içe/dışa aktarma ikincil
+  bir menüde. Mod URL'de (?mode=rehberli) — /app/anket-sihirbazi buraya redirect eder.
 */
+
+type Mode = "tablo" | "rehberli";
+
 export function EnvanterClient() {
   const toast = useToast();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const clientParam = searchParams.get("client");
+  const mode: Mode = searchParams.get("mode") === "rehberli" ? "rehberli" : "tablo";
   const [clients, setClients] = useState<Client[] | null>(null);
   const [selectedId, setSelectedId] = useState<string>("");
+  const [importOpen, setImportOpen] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!usingRealApi) return;
@@ -36,7 +45,30 @@ export function EnvanterClient() {
       .catch((e) => toast(e instanceof Error ? e.message : "Müvekkiller yüklenemedi."));
   }, [toast, clientParam]);
 
-  const header = <PageHeader eyebrow="Araçlar / Envanter" title="Envanter Yönetimi" />;
+  function setMode(m: Mode) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (m === "rehberli") params.set("mode", "rehberli");
+    else params.delete("mode");
+    const qs = params.toString();
+    router.replace(`/app/envanter${qs ? `?${qs}` : ""}`);
+  }
+
+  const header = (
+    <PageHeader
+      eyebrow="Araçlar / Envanter"
+      title="Envanter Yönetimi"
+      action={
+        selectedId ? (
+          <InventoryImportMenu
+            clientId={selectedId}
+            open={importOpen}
+            onOpenChange={setImportOpen}
+            onImported={() => setReloadKey((k) => k + 1)}
+          />
+        ) : undefined
+      }
+    />
+  );
 
   if (!usingRealApi)
     return (
@@ -82,10 +114,37 @@ export function EnvanterClient() {
           </section>
 
           {selectedId && (
-            <section className="mt-5 border border-border bg-surface p-6">
-              <h2 className="font-display text-[17px] text-ink">Veri envanteri</h2>
-              <InventoryEditor key={selectedId} clientId={selectedId} />
-            </section>
+            <>
+              <div className="mt-5 flex gap-1 border-b border-border">
+                {([["tablo", "Tablo"], ["rehberli", "Rehberli Anket"]] as const).map(([k, label]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setMode(k)}
+                    className={cn(
+                      "px-4 py-2 text-[12.5px] font-medium uppercase tracking-[0.06em] transition-colors",
+                      mode === k ? "border-b-2 border-accent text-ink" : "text-ink-muted hover:text-ink",
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {mode === "tablo" ? (
+                <section className="mt-5 border border-border bg-surface p-6">
+                  <h2 className="font-display text-[17px] text-ink">Veri envanteri</h2>
+                  <InventoryEditor
+                    key={`${selectedId}-${reloadKey}`}
+                    clientId={selectedId}
+                    onSwitchToWizard={() => setMode("rehberli")}
+                    onOpenImport={() => setImportOpen(true)}
+                  />
+                </section>
+              ) : (
+                <InventoryWizard key={selectedId} clientId={selectedId} />
+              )}
+            </>
           )}
         </div>
       )}
