@@ -128,7 +128,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     // Kabuk koyusu: lacivertin derin tonu #0C192C (bantlar #123055) — iki ton kuralı
     <aside className="theme-band flex h-full w-[264px] flex-shrink-0 flex-col bg-[#0c192c] text-ink">
-      <Link href="/" onClick={onNavigate} className="block px-6 pb-4 pt-6">
+      <Link href="/app" onClick={onNavigate} className="block px-6 pb-4 pt-6">
         <div className="font-display text-[19px] leading-tight text-ink">
           KVKK <span className="text-accent-strong">Yönetim</span>
         </div>

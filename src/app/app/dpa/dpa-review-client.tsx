@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ChangeEvent } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/app/page-header";
 import { Field, Select, Button, Card, Textarea, buttonClasses } from "@/components/ui";
 import { Icon } from "@/components/ui/icon";
@@ -36,6 +37,9 @@ const LABEL: Record<ReviewFinding["durum"], string> = {
 
 export function DpaReviewClient() {
   const toast = useToast();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const clientParam = searchParams.get("client");
   const [clients, setClients] = useState<Client[] | null>(null);
   const [selectedId, setSelectedId] = useState<string>("");
 
@@ -44,10 +48,23 @@ export function DpaReviewClient() {
     listClients()
       .then((cs) => {
         setClients(cs);
-        setSelectedId((id) => id || cs[0]?.id || "");
+        setSelectedId((id) => {
+          if (id) return id;
+          if (clientParam && cs.some((c) => c.id === clientParam)) return clientParam;
+          return cs[0]?.id ?? "";
+        });
       })
       .catch((e) => toast(e instanceof Error ? e.message : "Müvekkiller yüklenemedi."));
-  }, [toast]);
+  }, [toast, clientParam]);
+
+  // Seçili müvekkili URL'e yaz → Üret sekmesiyle bağlam paylaşılır (P3-1).
+  function selectClient(id: string) {
+    setSelectedId(id);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("client", id);
+    params.set("tab", "incele");
+    router.replace(`/app/dpa?${params.toString()}`);
+  }
 
   const header = (
     <PageHeader
@@ -89,7 +106,7 @@ export function DpaReviewClient() {
         <div className="mt-8">
           <section className="border border-border bg-surface p-6">
             <Field label="Müvekkil">
-              <Select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
+              <Select value={selectedId} onChange={(e) => selectClient(e.target.value)}>
                 {clients.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
