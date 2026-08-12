@@ -9,7 +9,11 @@ export function GenerationSkeleton({
   label?: string;
 }) {
   return (
-    <div className=" border border-border bg-surface p-6 shadow-[var(--shadow-card)]">
+    <div
+      role="status"
+      aria-live="polite"
+      className=" border border-border bg-surface p-6 shadow-[var(--shadow-card)]"
+    >
       <div className="flex items-center gap-2 text-[13px] font-medium text-ink-muted">
         <Icon name="spinner" className="animate-spin text-[15px]" /> {label}
       </div>

@@ -12,7 +12,10 @@ export function GenerationError({
   onRetry?: () => void;
 }) {
   return (
-    <div className="flex items-start justify-between gap-3 border border-danger/40 border-l-2 border-l-danger bg-danger-soft px-5 py-4 text-sm text-danger">
+    <div
+      role="alert"
+      className="flex items-start justify-between gap-3 border border-danger/40 border-l-2 border-l-danger bg-danger-soft px-5 py-4 text-sm text-danger"
+    >
       <span className="flex items-start gap-2.5">
         <Icon name="warning" className="mt-0.5 flex-shrink-0 text-[16px]" />
         <span>

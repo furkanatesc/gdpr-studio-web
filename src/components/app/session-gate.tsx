@@ -13,7 +13,11 @@ export function SessionGate({ children }: { children: React.ReactNode }) {
     if (!loading && !session && usingAuth) router.replace("/login");
   }, [loading, session, router]);
 
-  if (loading) return <div className="p-8">Yükleniyor…</div>;
+  if (loading) return <div role="status" className="p-8">Yükleniyor…</div>;
+
+  // Redirect useEffect tetiklendi ama henüz tamamlanmadı: korunan içeriği render ETME
+  // (aksi halde /app içeriği bir an flash eder).
+  if (!session && usingAuth) return null;
 
   return <>{children}</>;
 }
