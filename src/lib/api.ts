@@ -26,13 +26,31 @@ async function authHeaders(): Promise<HeadersInit> {
 }
 
 /*
+  401 → re-auth: token geçersiz/süresi dolmuş (Supabase yenileyememiş) → oturumu temizle
+  ve login'e yönlendir. Yalnız gerçek auth varken (supabase set) ve zaten /login'de değilken.
+  Refresh-retry EKLENMEZ: Supabase token'ı zaten otomatik yeniliyor; 401 = gerçekten geçersiz.
+*/
+let unauthorizedHandled = false;
+async function handleUnauthorized(): Promise<void> {
+  if (!supabase) return; // mock/authsız mod
+  if (unauthorizedHandled) return; // eşzamanlı çağrılarda tek yönlendirme
+  if (typeof window !== "undefined" && window.location.pathname.startsWith("/login")) return;
+  unauthorizedHandled = true;
+  try {
+    await supabase.auth.signOut();
+  } finally {
+    if (typeof window !== "undefined") window.location.assign("/login");
+  }
+}
+
+/*
   Tek istek çekirdeği (interceptor): auth header + Content-Type burada eklenir,
   hata gövdesi tek yerden okunur. authedJson / generateDoc / generateDocStream
   kendi kopyalarını tutmaz.
 */
 async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {
   if (!API_BASE) throw new Error("API yapılandırılmamış.");
-  return fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
       "Content-Type": "application/json",
@@ -40,6 +58,8 @@ async function apiFetch(path: string, init: RequestInit = {}): Promise<Response>
       ...(init.headers || {}),
     },
   });
+  if (res.status === 401) await handleUnauthorized();
+  return res;
 }
 
 /*
@@ -223,6 +243,7 @@ export async function importClientInventory(id: string, file: File): Promise<Inv
     headers: await authHeaders(),
     body: fd,
   });
+  if (res.status === 401) await handleUnauthorized();
   if (!res.ok) throw new Error(await errorDetail(res));
   return res.json();
 }
@@ -234,6 +255,7 @@ export async function importClientWorkbook(id: string, file: File): Promise<Inve
     headers: await authHeaders(),
     body: fd,
   });
+  if (res.status === 401) await handleUnauthorized();
   if (!res.ok) throw new Error(await errorDetail(res));
   return res.json();
 }
@@ -896,6 +918,7 @@ export async function reviewDpa(
     headers: await authHeaders(),
     body: fd,
   });
+  if (res.status === 401) await handleUnauthorized();
   if (!res.ok) throw new Error(await errorDetail(res));
   return res.json();
 }

@@ -66,6 +66,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           return (
             <div
               key={t.id}
+              role={t.variant === "error" ? "alert" : "status"}
+              aria-live={t.variant === "error" ? "assertive" : "polite"}
               className={cn(
                 "pointer-events-auto flex items-center gap-2.5 border border-border border-l-2 bg-surface px-4 py-3 text-[13px] shadow-[var(--shadow-card-lift)]",
                 v.accent,
