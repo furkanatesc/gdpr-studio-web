@@ -1377,6 +1377,20 @@
         "title": "EnrichedSectionOut",
         "type": "object"
       },
+      "EraseRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "confirm": {
+            "title": "Confirm",
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirm"
+        ],
+        "title": "EraseRequest",
+        "type": "object"
+      },
       "GenerateIn": {
         "additionalProperties": false,
         "properties": {
@@ -1401,22 +1415,27 @@
           "amaclar": {
             "default": [],
             "items": {
+              "maxLength": 500,
               "type": "string"
             },
+            "maxItems": 200,
             "title": "Amaclar",
             "type": "array"
           },
           "fields": {
             "additionalProperties": {
+              "maxLength": 5000,
               "type": "string"
             },
             "default": {},
+            "maxProperties": 50,
             "title": "Fields",
             "type": "object"
           },
           "kisiGrubu": {
             "anyOf": [
               {
+                "maxLength": 500,
                 "type": "string"
               },
               {
@@ -1431,8 +1450,10 @@
           "veriler": {
             "default": [],
             "items": {
+              "maxLength": 500,
               "type": "string"
             },
+            "maxItems": 200,
             "title": "Veriler",
             "type": "array"
           }
@@ -2001,18 +2022,13 @@
           "status": {
             "title": "Status",
             "type": "string"
-          },
-          "token": {
-            "title": "Token",
-            "type": "string"
           }
         },
         "required": [
           "id",
           "email",
           "role",
-          "status",
-          "token"
+          "status"
         ],
         "title": "InviteOut",
         "type": "object"
@@ -5400,6 +5416,68 @@
         ]
       }
     },
+    "/api/dsar/erase": {
+      "post": {
+        "operationId": "erase_account_api_dsar_erase_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EraseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Erase Account Api Dsar Erase Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Erase Account",
+        "tags": [
+          "dsar"
+        ]
+      }
+    },
+    "/api/dsar/export": {
+      "get": {
+        "operationId": "export_account_api_dsar_export_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Export Account",
+        "tags": [
+          "dsar"
+        ]
+      }
+    },
     "/api/generate": {
       "post": {
         "operationId": "generate_api_generate_post",
@@ -5569,6 +5647,119 @@
         "summary": "Options",
         "tags": [
           "inventory"
+        ]
+      }
+    },
+    "/api/internal/orgs/{org_id}/reactivate": {
+      "post": {
+        "operationId": "reactivate_org_api_internal_orgs__org_id__reactivate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Reactivate Org Api Internal Orgs  Org Id  Reactivate Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reactivate Org",
+        "tags": [
+          "internal"
+        ]
+      }
+    },
+    "/api/internal/orgs/{org_id}/suspend": {
+      "post": {
+        "operationId": "suspend_org_api_internal_orgs__org_id__suspend_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "org_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Org Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Suspend Org Api Internal Orgs  Org Id  Suspend Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Suspend Org",
+        "tags": [
+          "internal"
+        ]
+      }
+    },
+    "/api/internal/purge": {
+      "post": {
+        "operationId": "run_sweep_api_internal_purge_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Run Sweep Api Internal Purge Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Run Sweep",
+        "tags": [
+          "internal"
         ]
       }
     },
