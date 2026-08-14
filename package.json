@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
     "sync:openapi": "node -e \"require('fs').copyFileSync('../backend/openapi.json','openapi.json')\"",
     "gen:api-types": "openapi-typescript ./openapi.json -o ./src/lib/api-types.ts"
   },
@@ -28,6 +29,7 @@
     "eslint-config-next": "16.2.9",
     "openapi-typescript": "^7.13.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }
