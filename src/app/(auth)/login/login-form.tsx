@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Arrow } from "@/components/ui/icon";
 import { AuthShell, AuthError, AuthInfo } from "@/components/auth/auth-shell";
 import { supabase, usingAuth } from "@/lib/supabase";
+import { safeNext } from "@/lib/gate-decision";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -28,7 +29,8 @@ export default function LoginForm() {
       setError("Giriş başarısız: e-posta veya parola hatalı.");
       return;
     }
-    router.push("/app");
+    const next = new URLSearchParams(window.location.search).get("next");
+    router.push(next ? safeNext(next) : "/app");
   }
 
   return (
