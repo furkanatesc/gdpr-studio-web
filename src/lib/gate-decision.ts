@@ -17,7 +17,7 @@ export function decideGate(
   authEnabled: boolean,
 ): GateDecision {
   if (!authEnabled) return null; // mock/dev: gating devre dışı
-  if (path.startsWith(PROTECTED_PREFIX) && !hasSession) {
+  if ((path === PROTECTED_PREFIX || path.startsWith(PROTECTED_PREFIX + "/")) && !hasSession) {
     return { pathname: "/login", next: safeNext(path) };
   }
   if (hasSession && AUTH_ROUTES.includes(path)) {

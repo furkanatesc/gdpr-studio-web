@@ -41,4 +41,13 @@ describe("decideGate", () => {
   it("auth kapalı (env yok) → her zaman null", () => {
     expect(decideGate("/app/envanter", false, false)).toBeNull();
   });
+  it("ilgisiz /appstore → null (yanlış-pozitif prefix eşleşmesi yok)", () => {
+    expect(decideGate("/appstore", false, true)).toBeNull();
+  });
+  it("tam /app + session yok → /login?next=/app", () => {
+    expect(decideGate("/app", false, true)).toEqual({
+      pathname: "/login",
+      next: "/app",
+    });
+  });
 });
