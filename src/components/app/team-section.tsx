@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Button, Input, Select } from "@/components/ui";
+import { Button, Input, Select, useConfirm } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
 import {
   createInvitation,
@@ -26,6 +26,7 @@ const ROLE_LABEL: Record<string, string> = { yonetici: "Yönetici", avukat: "Avu
 
 export function TeamSection({ selfRole }: { selfRole: string | undefined }) {
   const toast = useToast();
+  const { confirm, dialog } = useConfirm();
   const isAdmin = selfRole === "yonetici";
 
   const [members, setMembers] = useState<MemberOut[] | null>(null);
@@ -70,7 +71,15 @@ export function TeamSection({ selfRole }: { selfRole: string | undefined }) {
   }
 
   async function onRemove(userId: string, memberEmail: string) {
-    if (!confirm(`${memberEmail} kurumdan çıkarılsın mı? Erişimi kaldırılır.`)) return;
+    if (
+      !(await confirm({
+        title: "Üyeyi çıkar",
+        message: `${memberEmail} kurumdan çıkarılsın mı? Erişimi kaldırılır.`,
+        confirmLabel: "Çıkar",
+        danger: true,
+      }))
+    )
+      return;
     setBusy(true);
     try {
       await removeMember(userId);
@@ -114,6 +123,7 @@ export function TeamSection({ selfRole }: { selfRole: string | undefined }) {
   }
 
   return (
+    <>
     <section className="border border-border bg-surface p-6 lg:col-span-2">
       <h2 className="font-display text-[17px] text-ink">Ekip</h2>
 
@@ -222,5 +232,7 @@ export function TeamSection({ selfRole }: { selfRole: string | undefined }) {
         </div>
       )}
     </section>
+    {dialog}
+    </>
   );
 }

@@ -19,6 +19,7 @@ import {
   type Client,
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
+import { buildDocFilename } from "@/lib/filename";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationError } from "@/components/app/generation-error";
 import { QuotaBlock } from "@/components/app/generation-quota";
@@ -152,7 +153,7 @@ function CerezForm({ clientId }: { clientId: string }) {
     if (!result) return Promise.resolve();
     return download(
       () => cerezDocx(clientId, result.text, "Çerez Politikası", site),
-      "cerez-politikasi.docx",
+      buildDocFilename({ docLabel: "Çerez Politikası", subject: client?.name }),
     );
   }
 
@@ -235,10 +236,11 @@ function CerezForm({ clientId }: { clientId: string }) {
       {loading && !result && <GenerationSkeleton />}
 
       {result && (
-        <>
-          <DocumentOutput result={result} streaming={streaming} />
-          {!streaming && (
-            <div className="flex items-center gap-3">
+        <DocumentOutput
+          result={result}
+          streaming={streaming}
+          actions={
+            <>
               <Button variant="secondary" onClick={onDownload} disabled={downloading}>
                 {downloading ? (
                   <>
@@ -253,9 +255,9 @@ function CerezForm({ clientId }: { clientId: string }) {
               <Button variant="secondary" onClick={onPrint} disabled={!client}>
                 <Icon name="file" className="text-[15px]" /> PDF / Yazdır
               </Button>
-            </div>
-          )}
-        </>
+            </>
+          }
+        />
       )}
     </div>
   );

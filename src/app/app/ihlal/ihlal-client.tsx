@@ -24,6 +24,7 @@ import {
   type IhlalPrepareResult,
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
+import { buildDocFilename } from "@/lib/filename";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationError } from "@/components/app/generation-error";
 import { QuotaBlock } from "@/components/app/generation-quota";
@@ -244,14 +245,14 @@ function IhlalFlow({ clientId }: { clientId: string }) {
     if (!kurul.result) return Promise.resolve();
     return kurulDownload.download(
       () => ihlalDocx(clientId, kurul.result!.text, "Kurul Bildirim Formu"),
-      "ihlal-kurul-bildirimi.docx",
+      buildDocFilename({ docLabel: "İhlal Kurul Bildirimi", subject: client?.name }),
     );
   }
   function onDownloadIlgiliKisi() {
     if (!ilgiliKisi.result) return Promise.resolve();
     return ilgiliKisiDownload.download(
       () => ihlalDocx(clientId, ilgiliKisi.result!.text, "İlgili Kişiye Bildirim Metni"),
-      "ihlal-ilgili-kisi-bildirimi.docx",
+      buildDocFilename({ docLabel: "İhlal İlgili Kişi Bildirimi", subject: client?.name }),
     );
   }
 
@@ -570,29 +571,30 @@ function GenerateSection({
       )}
 
       {result && (
-        <>
-          <div className="mt-4">
-            <DocumentOutput result={result} streaming={streaming} />
-          </div>
-          {!streaming && (
-            <div className="mt-3 flex items-center gap-3">
-              <Button variant="secondary" onClick={onDownload} disabled={downloading}>
-                {downloading ? (
-                  <>
-                    <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
-                  </>
-                ) : (
-                  <>
-                    <Icon name="file" className="text-[15px]" /> .docx indir
-                  </>
-                )}
-              </Button>
-              <Button variant="secondary" onClick={onPrint} disabled={!canPrint}>
-                <Icon name="file" className="text-[15px]" /> PDF / Yazdır
-              </Button>
-            </div>
-          )}
-        </>
+        <div className="mt-4">
+          <DocumentOutput
+            result={result}
+            streaming={streaming}
+            actions={
+              <>
+                <Button variant="secondary" onClick={onDownload} disabled={downloading}>
+                  {downloading ? (
+                    <>
+                      <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="file" className="text-[15px]" /> .docx indir
+                    </>
+                  )}
+                </Button>
+                <Button variant="secondary" onClick={onPrint} disabled={!canPrint}>
+                  <Icon name="file" className="text-[15px]" /> PDF / Yazdır
+                </Button>
+              </>
+            }
+          />
+        </div>
       )}
     </Card>
   );

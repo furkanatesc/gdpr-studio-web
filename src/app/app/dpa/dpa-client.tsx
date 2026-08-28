@@ -23,6 +23,7 @@ import {
   type DpaPrepareResult,
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
+import { buildDocFilename } from "@/lib/filename";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationError } from "@/components/app/generation-error";
 import { QuotaBlock } from "@/components/app/generation-quota";
@@ -232,7 +233,10 @@ function DpaScope({
 
   function onDownload() {
     if (!result) return Promise.resolve();
-    return download(() => dpaDocx(clientId, result.text, processor.id), "dpa.docx");
+    return download(
+      () => dpaDocx(clientId, result.text, processor.id),
+      buildDocFilename({ docLabel: "Veri İşleyen Sözleşmesi", subject: client?.name }),
+    );
   }
 
   function onPrint() {
@@ -341,10 +345,11 @@ function DpaScope({
       {loading && !result && <GenerationSkeleton />}
 
       {result && (
-        <>
-          <DocumentOutput result={result} streaming={streaming} />
-          {!streaming && (
-            <div className="flex items-center gap-3">
+        <DocumentOutput
+          result={result}
+          streaming={streaming}
+          actions={
+            <>
               <Button variant="secondary" onClick={onDownload} disabled={downloading}>
                 {downloading ? (
                   <>
@@ -359,9 +364,9 @@ function DpaScope({
               <Button variant="secondary" onClick={onPrint} disabled={!client}>
                 <Icon name="file" className="text-[15px]" /> PDF / Yazdır
               </Button>
-            </div>
-          )}
-        </>
+            </>
+          }
+        />
       )}
     </>
   );
