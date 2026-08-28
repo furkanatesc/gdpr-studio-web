@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/app/page-header";
 import { useWorkspaceInfo } from "@/components/app/use-workspace-info";
 import { Button, Field, Input, Select } from "@/components/ui";
@@ -152,10 +153,13 @@ function ProfileForm({
   );
 }
 
-export default function MuvekkillerPage() {
+function MuvekkillerInner() {
   const { identity } = useWorkspaceInfo();
   const toast = useToast();
   const isAdmin = identity?.role === "yonetici";
+  // Derin bağlantı: /app/muvekkiller?client=<id> → o müvekkil otomatik seçilir
+  // (liste ilk kaydına düşmeden). Geçersiz/eksik id ise ilk kayda düşer.
+  const clientParam = useSearchParams().get("client");
 
   const [clients, setClients] = useState<Client[] | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -164,10 +168,11 @@ export default function MuvekkillerPage() {
     return listClients()
       .then((cs) => {
         setClients(cs);
-        setSelectedId((id) => id ?? cs[0]?.id ?? null);
+        const deepLink = clientParam && cs.some((c) => c.id === clientParam) ? clientParam : null;
+        setSelectedId((id) => id ?? deepLink ?? cs[0]?.id ?? null);
       })
       .catch((e) => toast(e instanceof Error ? e.message : "Müvekkiller yüklenemedi."));
-  }, [toast]);
+  }, [toast, clientParam]);
 
   useEffect(() => {
     if (usingRealApi) void refresh();
@@ -272,5 +277,14 @@ export default function MuvekkillerPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// useSearchParams() page-level Suspense sarmalayıcı ister (yoksa build hatası — CSR bailout).
+export default function MuvekkillerPage() {
+  return (
+    <Suspense fallback={<div className="mt-6 text-[14px] text-ink-muted">Yükleniyor…</div>}>
+      <MuvekkillerInner />
+    </Suspense>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
@@ -9,9 +10,13 @@ import type { GenerateResponse } from "@/lib/types";
 export function DocumentOutput({
   result,
   streaming = false,
+  actions,
 }: {
   result: GenerateResponse;
   streaming?: boolean;
+  /** İndir/Yazdır gibi birincil aksiyonlar — belgesinden kopmasın diye kart İÇİNDE
+      render edilir (UX P4-2). Yalnız akış bittiğinde gösterilir. */
+  actions?: ReactNode;
 }) {
   const toast = useToast();
 
@@ -69,6 +74,12 @@ export function DocumentOutput({
             className="mt-0.5 flex-shrink-0 text-[15px] text-danger"
           />
           <span>{result.disclaimer}</span>
+        </div>
+      )}
+
+      {!streaming && actions && (
+        <div className="flex flex-wrap items-center gap-3 border-t border-border px-5 py-4">
+          {actions}
         </div>
       )}
 

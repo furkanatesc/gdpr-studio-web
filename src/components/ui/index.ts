@@ -1,4 +1,5 @@
 export { Button, buttonClasses } from "./button";
+export { useConfirm, type ConfirmOptions } from "./confirm-dialog";
 export { ButtonLink } from "./button-link";
 export { Icon, Arrow, type IconName } from "./icon";
 export { Input } from "./input";

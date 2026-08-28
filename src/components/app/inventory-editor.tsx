@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui";
+import { Button, useConfirm } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
 import { ComboCell } from "@/components/app/inventory-grid-cell";
 import { EksikleriDoldurPanel } from "@/components/app/eksikleri-doldur-panel";
@@ -216,6 +216,7 @@ export function InventoryEditor({
   onOpenImport?: () => void;
 }) {
   const toast = useToast();
+  const { confirm, dialog } = useConfirm();
   const [rows, setRows] = useState<EditableRow[] | null>(null);
   const [groundingOptions, setGroundingOptions] = useState<GroundingOptions>({
     kategoriler: [],
@@ -288,9 +289,17 @@ export function InventoryEditor({
       .finally(() => setSaving(false));
   }
 
-  function onClearInventory() {
+  async function onClearInventory() {
     if (!rows || rows.length === 0) return;
-    if (!window.confirm("Bu müvekkilin tüm envanter kayıtları silinecek. Emin misiniz?")) return;
+    if (
+      !(await confirm({
+        title: "Envanteri sil",
+        message: "Bu müvekkilin tüm envanter kayıtları silinecek. Bu işlem geri alınamaz.",
+        confirmLabel: "Sil",
+        danger: true,
+      }))
+    )
+      return;
     setSaving(true);
     replaceClientInventory(clientId, [])
       .then(() => {
@@ -385,6 +394,7 @@ export function InventoryEditor({
           {saving ? "Kaydediliyor…" : "Envanteri kaydet"}
         </Button>
       </div>
+      {dialog}
     </div>
   );
 }

@@ -20,6 +20,7 @@ import {
   type InventorySummary,
 } from "@/lib/api";
 import { useDocumentStream, useDocumentDownload } from "@/components/app/use-document-stream";
+import { buildDocFilename } from "@/lib/filename";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationError } from "@/components/app/generation-error";
 import { QuotaBlock } from "@/components/app/generation-quota";
@@ -141,7 +142,10 @@ function KayitFlow({ clientId }: { clientId: string }) {
 
   function onDownload() {
     if (!result) return Promise.resolve();
-    return download(() => kayitDocx(clientId, result.text, "İşleme Kaydı"), "isleme-kaydi.docx");
+    return download(
+      () => kayitDocx(clientId, result.text, "İşleme Kaydı"),
+      buildDocFilename({ docLabel: "İşleme Kaydı", subject: client?.name }),
+    );
   }
 
   function onPrint() {
@@ -203,10 +207,11 @@ function KayitFlow({ clientId }: { clientId: string }) {
       {loading && !result && <GenerationSkeleton />}
 
       {result && (
-        <>
-          <DocumentOutput result={result} streaming={streaming} />
-          {!streaming && (
-            <div className="flex items-center gap-3">
+        <DocumentOutput
+          result={result}
+          streaming={streaming}
+          actions={
+            <>
               <Button variant="secondary" onClick={onDownload} disabled={downloading}>
                 {downloading ? (
                   <>
@@ -221,9 +226,9 @@ function KayitFlow({ clientId }: { clientId: string }) {
               <Button variant="secondary" onClick={onPrint} disabled={!client}>
                 <Icon name="file" className="text-[15px]" /> PDF / Yazdır
               </Button>
-            </div>
-          )}
-        </>
+            </>
+          }
+        />
       )}
     </div>
   );

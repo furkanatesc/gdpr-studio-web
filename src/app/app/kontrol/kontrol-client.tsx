@@ -7,6 +7,7 @@ import {
   useComplianceChecklist,
 } from "@/components/app/use-compliance-checklist";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
 import { setComplianceStatus } from "@/lib/api";
 import type { ChecklistGroup, ChecklistItem, ComplianceStatusValue } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -149,6 +150,7 @@ function RequirementRow({
 }
 
 export function KontrolClient() {
+  const toast = useToast();
   const { checklist, ready, error: loadError } = useComplianceChecklist();
   const [groups, setGroups] = useState<ChecklistGroup[] | null>(null);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
@@ -166,6 +168,7 @@ export function KontrolClient() {
     key: string,
     status: ComplianceStatusValue | null,
     note?: string | null,
+    successMsg?: string,
   ) {
     if (!groups) return;
     const prev = groups;
@@ -181,6 +184,7 @@ export function KontrolClient() {
     try {
       await setComplianceStatus(key, status, note ?? undefined);
       refreshComplianceChecklist();
+      if (successMsg) toast(successMsg);
     } catch (e) {
       setGroups(prev);
       setRowErrors((errs) => ({ ...errs, [key]: (e as Error).message }));
@@ -190,15 +194,28 @@ export function KontrolClient() {
   }
 
   function handleSetStatus(key: string, status: ComplianceStatusValue) {
+    // Aktif durum butonuna tekrar tıklamak işareti KALDIRIR (toggle-off → null).
+    // Durum seçimi renkle zaten görünür; kaldırma daha az belirgin olduğu için toast ile teyit edilir.
     const item = allItems.find((i) => i.key === key);
-    void applyStatus(key, status, item?.note ?? null);
+    const toggleOff = item?.status === status;
+    void applyStatus(
+      key,
+      toggleOff ? null : status,
+      item?.note ?? null,
+      toggleOff ? "İşaret kaldırıldı." : undefined,
+    );
   }
 
   function handleSaveNote(key: string, note: string) {
     // Not (kanıt/gerekçe) kaydetmek statüyü DEĞİŞTİRMEZ: mevcut statü ne ise onu korur;
     // statüsüz kaleme not eklemek onu artık sessizce 'eksik'e çevirmez (null gönderilir).
     const item = allItems.find((i) => i.key === key);
-    void applyStatus(key, (item?.status as ComplianceStatusValue | null) ?? null, note);
+    void applyStatus(
+      key,
+      (item?.status as ComplianceStatusValue | null) ?? null,
+      note,
+      note.trim() ? "Not kaydedildi." : "Not silindi.",
+    );
   }
 
   const header = (
