@@ -1,18 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClientForProxy } from "@/lib/supabase-server";
 import { decideGate } from "@/lib/gate-decision";
+import { verifySession } from "@/lib/proxy-auth";
+
+const authEnabled = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+);
 
 export default async function proxy(req: NextRequest): Promise<NextResponse> {
-  const { supabase, response } = createServerClientForProxy(req);
+  // Oturumu cookie'deki access-token'ın ES256 imzasını getClaims(token) ile YEREL doğrulayarak
+  // belirle — ağ refresh'i / token rotation YOK (getSession() bunları yapıp seri gezinmede
+  // eşzamanlı isteklerde çakışarak kullanıcıyı /login'e atıyordu).
+  const hasSession = authEnabled ? await verifySession(req.cookies.getAll()) : false;
 
-  // Optimistic: cookie'yi YERELDE decode et (ağ yok). getUser() ağ çağrısıdır — kullanılmaz.
-  let hasSession = false;
-  if (supabase) {
-    const { data } = await supabase.auth.getSession();
-    hasSession = Boolean(data.session);
-  }
-
-  const decision = decideGate(req.nextUrl.pathname, hasSession, Boolean(supabase));
+  const decision = decideGate(req.nextUrl.pathname, hasSession, authEnabled);
   if (decision) {
     const url = req.nextUrl.clone();
     url.pathname = decision.pathname;
@@ -20,7 +20,7 @@ export default async function proxy(req: NextRequest): Promise<NextResponse> {
     if (decision.next) url.searchParams.set("next", decision.next);
     return NextResponse.redirect(url);
   }
-  return response; // güncellenmiş auth cookie header'larını taşır
+  return NextResponse.next();
 }
 
 // api, _next statikleri ve uzantılı dosyalar hariç her yol. /app/* ve /login,/kayit dahil.
