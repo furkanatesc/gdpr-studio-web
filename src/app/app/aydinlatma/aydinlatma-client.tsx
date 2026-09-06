@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/app/page-header";
-import { DocumentOutput } from "@/components/app/document-output";
+import { AydinlatmaPreviewPanel } from "@/components/app/aydinlatma-preview-panel";
+import { buildAydinlatmaPreview } from "@/lib/aydinlatma-preview";
 import { Field, Select, Button, Card, MultiSelect } from "@/components/ui";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
@@ -258,33 +259,6 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
 
       {preparing && <GenerationSkeleton label="Envanterden bölümler çıkarılıyor…" />}
 
-      {sections && sections.length > 0 && (
-        <>
-          <OneriOnayi
-            sections={sections}
-            edited={edited}
-            clientId={clientId}
-            onChange={updateField}
-          />
-          <div className="flex items-center gap-3">
-            <Button onClick={onGenerate} disabled={loading}>
-              {loading ? (
-                <>
-                  <Icon name="spinner" className="animate-spin text-[15px]" /> Üretiliyor…
-                </>
-              ) : (
-                "Üret"
-              )}
-            </Button>
-            {loading && (
-              <Button variant="secondary" onClick={cancel}>
-                Durdur
-              </Button>
-            )}
-          </div>
-        </>
-      )}
-
       {sections && sections.length === 0 && (
         <div className="border border-dashed border-border-strong bg-surface px-8 py-12 text-center">
           <p className="text-[13.5px] text-ink-muted">
@@ -300,37 +274,65 @@ function AydinlatmaFlow({ clientId }: { clientId: string }) {
         </div>
       )}
 
-      {quotaBlock && <QuotaBlock used={quotaBlock.used} quota={quotaBlock.quota} />}
-
-      {genError && <GenerationError message={genError} onRetry={retry} />}
-
-      {warning && <GenerationWarning warning={warning} />}
-
-      {loading && !result && <GenerationSkeleton />}
-
-      {result && (
-        <DocumentOutput
-          result={result}
-          streaming={streaming}
-          actions={
-            <>
-              <Button variant="secondary" onClick={onDownload} disabled={downloading}>
-                {downloading ? (
+      {sections && sections.length > 0 && (
+        <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
+          {/* Sol — editör + üretim */}
+          <div className="space-y-4">
+            <OneriOnayi
+              sections={sections}
+              edited={edited}
+              clientId={clientId}
+              onChange={updateField}
+            />
+            <div className="flex items-center gap-3">
+              <Button onClick={onGenerate} disabled={loading}>
+                {loading ? (
                   <>
-                    <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
+                    <Icon name="spinner" className="animate-spin text-[15px]" /> Üretiliyor…
                   </>
                 ) : (
-                  <>
-                    <Icon name="file" className="text-[15px]" /> .docx indir
-                  </>
+                  "Üret"
                 )}
               </Button>
-              <Button variant="secondary" onClick={onPrint} disabled={!client}>
-                <Icon name="file" className="text-[15px]" /> PDF / Yazdır
-              </Button>
-            </>
-          }
-        />
+              {loading && (
+                <Button variant="secondary" onClick={cancel}>
+                  Durdur
+                </Button>
+              )}
+            </div>
+            {quotaBlock && <QuotaBlock used={quotaBlock.used} quota={quotaBlock.quota} />}
+            {genError && <GenerationError message={genError} onRetry={retry} />}
+            {warning && <GenerationWarning warning={warning} />}
+          </div>
+
+          {/* Sağ — canlı önizleme (iskelet ↔ üretilmiş metin) */}
+          <div className="lg:sticky lg:top-4">
+            <AydinlatmaPreviewPanel
+              preview={buildAydinlatmaPreview(edited, client)}
+              result={result}
+              streaming={streaming}
+              loading={loading}
+              actions={
+                <>
+                  <Button variant="secondary" onClick={onDownload} disabled={downloading}>
+                    {downloading ? (
+                      <>
+                        <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="file" className="text-[15px]" /> .docx indir
+                      </>
+                    )}
+                  </Button>
+                  <Button variant="secondary" onClick={onPrint} disabled={!client}>
+                    <Icon name="file" className="text-[15px]" /> PDF / Yazdır
+                  </Button>
+                </>
+              }
+            />
+          </div>
+        </div>
       )}
     </div>
   );
