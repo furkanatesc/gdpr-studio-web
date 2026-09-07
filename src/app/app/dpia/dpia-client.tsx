@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/app/page-header";
-import { DocumentOutput } from "@/components/app/document-output";
+import { OutlinePreviewPanel, type OutlineSection } from "@/components/app/outline-preview-panel";
 import { Field, Select, Button, Card, Tag } from "@/components/ui";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
@@ -26,7 +26,6 @@ import { buildDocFilename } from "@/lib/filename";
 import { GenerationError } from "@/components/app/generation-error";
 import { QuotaBlock } from "@/components/app/generation-quota";
 import { GenerationWarning } from "@/components/app/generation-warning";
-import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 
 /*
@@ -188,8 +187,51 @@ function DpiaFlow({ clientId }: { clientId: string }) {
     openPrintView({ docType: "dpia", content: result.text, cover });
   }
 
+  const dpiaSections: OutlineSection[] = prepareResult
+    ? [
+        {
+          no: "1",
+          title: "Kapsam ve Metodoloji",
+          body: "Müvekkilin tüm envanter kayıtları üzerinden işleme faaliyetlerinin niteliği, kapsamı, bağlamı ve amaçları değerlendirilir.",
+        },
+        {
+          no: "2",
+          title: "Zorunluluk Testi Sonucu",
+          body: prepareResult.zorunlu
+            ? `DPIA zorunludur — ${prepareResult.kriterSayisi}/6 kriter karşılandı.`
+            : "Zorunluluk kriterleri karşılanmadı; yine de değerlendirme üretilebilir.",
+        },
+        {
+          no: "3",
+          title: "Özel Nitelikli Veri ve Profilleme",
+          body: `Özel nitelikli veri: ${prepareResult.otomatik.ozelNitelikliVar ? "var" : "yok"}; profilleme: ${prepareResult.otomatik.profillemeVar ? "var" : "yok"} (envanterden otomatik tespit).`,
+        },
+        {
+          no: "4",
+          title: "DPIA'yı Gerektiren Kriterler",
+          body:
+            prepareResult.tetiklenenler.length > 0
+              ? prepareResult.tetiklenenler.join("; ")
+              : "Tetiklenen özel kriter bulunmadı.",
+        },
+        {
+          no: "5",
+          title: "Risk Değerlendirmesi",
+          body: "Her işleme faaliyeti için ilgili kişi hak ve özgürlüklerine yönelik olasılık ve etki temelinde risk seviyesi belirlenir.",
+        },
+        {
+          no: "6",
+          title: "Alınacak Tedbirler ve Öneriler",
+          body: "Tespit edilen risklere karşı teknik ve idari tedbirler ile azaltıcı öneriler sunulur.",
+        },
+        { no: "7", title: "Sonuç ve Kanaat", body: "Değerlendirmenin genel sonucu ve artık risk düzeyi özetlenir." },
+      ]
+    : [];
+
   return (
-    <div className="mt-5 space-y-5">
+    <div className="mt-5">
+      <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
+        <div className="space-y-5">
       <Card title="Zorunluluk Testi" icon={<Icon name="shield-alert" className="text-[18px]" />}>
         <p className="text-[13px] text-ink-muted">
           Aşağıdaki soruları yanıtlayın; özel nitelikli veri ve profilleme varlığı envanterden
@@ -270,37 +312,39 @@ function DpiaFlow({ clientId }: { clientId: string }) {
       )}
 
       {quotaBlock && <QuotaBlock used={quotaBlock.used} quota={quotaBlock.quota} />}
-
       {genError && <GenerationError message={genError} onRetry={retry} />}
-
       {warning && <GenerationWarning warning={warning} />}
+        </div>
 
-      {loading && !result && <GenerationSkeleton />}
-
-      {result && (
-        <DocumentOutput
-          result={result}
-          streaming={streaming}
-          actions={
-            <>
-              <Button variant="secondary" onClick={onDownload} disabled={downloading}>
-                {downloading ? (
-                  <>
-                    <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
-                  </>
-                ) : (
-                  <>
-                    <Icon name="file" className="text-[15px]" /> .docx indir
-                  </>
-                )}
-              </Button>
-              <Button variant="secondary" onClick={onPrint} disabled={!client}>
-                <Icon name="file" className="text-[15px]" /> PDF / Yazdır
-              </Button>
-            </>
-          }
-        />
-      )}
+        <div className="lg:sticky lg:top-4">
+          <OutlinePreviewPanel
+            ready={!!prepareResult}
+            notReadyHint="Yapı önizlemesi için önce “Değerlendir”e basın."
+            sections={dpiaSections}
+            result={result}
+            streaming={streaming}
+            loading={loading}
+            actions={
+              <>
+                <Button variant="secondary" onClick={onDownload} disabled={downloading}>
+                  {downloading ? (
+                    <>
+                      <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="file" className="text-[15px]" /> .docx indir
+                    </>
+                  )}
+                </Button>
+                <Button variant="secondary" onClick={onPrint} disabled={!client}>
+                  <Icon name="file" className="text-[15px]" /> PDF / Yazdır
+                </Button>
+              </>
+            }
+          />
+        </div>
+      </div>
     </div>
   );
 }
