@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/app/page-header";
-import { DocumentOutput } from "@/components/app/document-output";
+import { OutlinePreviewPanel, type OutlineSection } from "@/components/app/outline-preview-panel";
 import { Field, Select, Button, Card } from "@/components/ui";
 import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
@@ -27,7 +27,6 @@ import { buildDocFilename } from "@/lib/filename";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationError } from "@/components/app/generation-error";
 import { QuotaBlock } from "@/components/app/generation-quota";
-import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 
 /*
@@ -249,8 +248,60 @@ function DpaScope({
     openPrintView({ docType: "dpa", content: result.text, cover });
   }
 
+  const dpaSections: OutlineSection[] = prepareResult
+    ? [
+        {
+          no: "1",
+          title: "Taraflar",
+          body: `Veri sorumlusu ${client?.legal_name || client?.name || "[veri sorumlusu]"} ile veri işleyen ${processor.unvan} arasında.`,
+        },
+        {
+          no: "2",
+          title: "Konu ve Kapsam",
+          body: `Bu işleyene aktarılan ${prepareResult.eslesenSurecSayisi} işleme faaliyeti kapsanır.`,
+        },
+        {
+          no: "3",
+          title: "İşlenen Veri Kategorileri",
+          body: prepareResult.kategoriler.length ? prepareResult.kategoriler.join(", ") : "Envanterden türetilir.",
+        },
+        {
+          no: "4",
+          title: "İşleme Amaçları",
+          body: prepareResult.amaclar.length ? prepareResult.amaclar.join(", ") : "Envanterden türetilir.",
+        },
+        {
+          no: "5",
+          title: "Teknik ve İdari Tedbirler",
+          body:
+            [...prepareResult.teknikTedbirler, ...prepareResult.idariTedbirler].join(", ") ||
+            "KVKK m.12 uyarınca uygun güvenlik tedbirleri.",
+        },
+        {
+          no: "6",
+          title: "Saklama ve İmha",
+          body: prepareResult.saklamaSureleri.length
+            ? prepareResult.saklamaSureleri.join(", ")
+            : "İşleme amacı sona erdiğinde imha/anonimleştirme.",
+        },
+        {
+          no: "7",
+          title: "İşleyenin Yükümlülükleri",
+          body: "Gizlilik, talimatla işleme, güvenlik, ihlal bildirimi ve denetime izin (KVKK m.12).",
+        },
+        {
+          no: "8",
+          title: "Alt İşleyen ve Aktarım",
+          body: processor.altIsleyenVar
+            ? "Alt işleyen kullanımı veri sorumlusunun yazılı iznine tabidir."
+            : "Alt işleyen bildirilmemiştir.",
+        },
+      ]
+    : [];
+
   return (
-    <>
+    <div className="mt-5 grid gap-5 lg:grid-cols-2 lg:items-start">
+        <div className="space-y-5">
       <Card title="Kapsam Özeti" icon={<Icon name="clipboard" className="text-[18px]" />}>
         {preparing ? (
           <p className="text-[13px] text-ink-muted">Kapsam hesaplanıyor…</p>
@@ -337,37 +388,38 @@ function DpaScope({
       </Card>
 
       {quotaBlock && <QuotaBlock used={quotaBlock.used} quota={quotaBlock.quota} />}
-
       {genError && <GenerationError message={genError} onRetry={retry} />}
-
       {warning && <GenerationWarning warning={warning} />}
+        </div>
 
-      {loading && !result && <GenerationSkeleton />}
-
-      {result && (
-        <DocumentOutput
-          result={result}
-          streaming={streaming}
-          actions={
-            <>
-              <Button variant="secondary" onClick={onDownload} disabled={downloading}>
-                {downloading ? (
-                  <>
-                    <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
-                  </>
-                ) : (
-                  <>
-                    <Icon name="file" className="text-[15px]" /> .docx indir
-                  </>
-                )}
-              </Button>
-              <Button variant="secondary" onClick={onPrint} disabled={!client}>
-                <Icon name="file" className="text-[15px]" /> PDF / Yazdır
-              </Button>
-            </>
-          }
-        />
-      )}
-    </>
+        <div className="lg:sticky lg:top-4">
+          <OutlinePreviewPanel
+            ready={!!prepareResult}
+            notReadyHint="Yapı önizlemesi için önce “Değerlendir”e basın."
+            sections={dpaSections}
+            result={result}
+            streaming={streaming}
+            loading={loading}
+            actions={
+              <>
+                <Button variant="secondary" onClick={onDownload} disabled={downloading}>
+                  {downloading ? (
+                    <>
+                      <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="file" className="text-[15px]" /> .docx indir
+                    </>
+                  )}
+                </Button>
+                <Button variant="secondary" onClick={onPrint} disabled={!client}>
+                  <Icon name="file" className="text-[15px]" /> PDF / Yazdır
+                </Button>
+              </>
+            }
+          />
+        </div>
+    </div>
   );
 }

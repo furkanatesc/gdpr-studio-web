@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/app/page-header";
-import { DocumentOutput } from "@/components/app/document-output";
+import { IhlalPreviewPanel } from "@/components/app/ihlal-preview-panel";
+import { buildIhlalPreview } from "@/lib/ihlal-preview";
 import { Field, Select, Input, Textarea, Button, Card } from "@/components/ui";
-import { Icon, type IconName } from "@/components/ui/icon";
+import { Icon } from "@/components/ui/icon";
 import { useToast } from "@/components/ui/toast";
 import { StatusBadge } from "@/components/app/status-badge";
 import {
@@ -28,7 +29,6 @@ import { buildDocFilename } from "@/lib/filename";
 import { GenerationWarning } from "@/components/app/generation-warning";
 import { GenerationError } from "@/components/app/generation-error";
 import { QuotaBlock } from "@/components/app/generation-quota";
-import { GenerationSkeleton } from "@/components/app/generation-skeleton";
 import { openPrintView, buildCover, formatTrDate } from "@/lib/print";
 
 /*
@@ -285,7 +285,9 @@ function IhlalFlow({ clientId }: { clientId: string }) {
   })();
 
   return (
-    <div className="mt-5 space-y-5">
+    <div className="mt-5">
+      <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
+        <div className="space-y-5">
       <Card title="Olay Bilgileri" icon={<Icon name="shield-alert" className="text-[18px]" />}>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Tespit tarihi ve saati" required>
@@ -469,66 +471,103 @@ function IhlalFlow({ clientId }: { clientId: string }) {
       )}
 
       {prepareResult && (
-        <GenerateSection
-          title="Kurul Bildirim Formu"
-          icon="clipboard"
-          buttonLabel="Kurul Bildirim Formu Üret"
-          variant="primary"
-          stream={kurul}
-          onGenerate={onGenerateKurul}
-          onDownload={onDownloadKurul}
-          downloading={kurulDownload.downloading}
-          onPrint={onPrintKurul}
-          canPrint={!!client}
-        />
+        <Card title="Bildirim Üretimi" icon={<Icon name="clipboard" className="text-[18px]" />}>
+          <div className="space-y-4">
+            <GenControl
+              label="Kurul Bildirim Formu Üret"
+              variant="primary"
+              stream={kurul}
+              onGenerate={onGenerateKurul}
+            />
+            <GenControl
+              label={
+                prepareResult.ilgiliKisiGerekli
+                  ? "İlgili Kişi Metni Üret"
+                  : "Yine de İlgili Kişi Metni Üret"
+              }
+              variant={prepareResult.ilgiliKisiGerekli ? "primary" : "secondary"}
+              stream={ilgiliKisi}
+              onGenerate={onGenerateIlgiliKisi}
+            />
+          </div>
+        </Card>
       )}
+        </div>
 
-      {prepareResult && (
-        <GenerateSection
-          title="İlgili Kişiye Bildirim Metni"
-          icon="check-circle"
-          buttonLabel={
-            prepareResult.ilgiliKisiGerekli ? "İlgili Kişi Metni Üret" : "Yine de İlgili Kişi Metni Üret"
-          }
-          variant={prepareResult.ilgiliKisiGerekli ? "primary" : "secondary"}
-          stream={ilgiliKisi}
-          onGenerate={onGenerateIlgiliKisi}
-          onDownload={onDownloadIlgiliKisi}
-          downloading={ilgiliKisiDownload.downloading}
-          onPrint={onPrintIlgiliKisi}
-          canPrint={!!client}
-        />
-      )}
+        <div className="lg:sticky lg:top-4">
+          <IhlalPreviewPanel
+            preview={buildIhlalPreview(olay, rows, client)}
+            kurul={{
+              result: kurul.result,
+              streaming: kurul.streaming,
+              loading: kurul.loading,
+              actions: (
+                <>
+                  <Button variant="secondary" onClick={onDownloadKurul} disabled={kurulDownload.downloading}>
+                    {kurulDownload.downloading ? (
+                      <>
+                        <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="file" className="text-[15px]" /> .docx indir
+                      </>
+                    )}
+                  </Button>
+                  <Button variant="secondary" onClick={onPrintKurul} disabled={!client}>
+                    <Icon name="file" className="text-[15px]" /> PDF / Yazdır
+                  </Button>
+                </>
+              ),
+            }}
+            ilgili={{
+              result: ilgiliKisi.result,
+              streaming: ilgiliKisi.streaming,
+              loading: ilgiliKisi.loading,
+              actions: (
+                <>
+                  <Button
+                    variant="secondary"
+                    onClick={onDownloadIlgiliKisi}
+                    disabled={ilgiliKisiDownload.downloading}
+                  >
+                    {ilgiliKisiDownload.downloading ? (
+                      <>
+                        <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="file" className="text-[15px]" /> .docx indir
+                      </>
+                    )}
+                  </Button>
+                  <Button variant="secondary" onClick={onPrintIlgiliKisi} disabled={!client}>
+                    <Icon name="file" className="text-[15px]" /> PDF / Yazdır
+                  </Button>
+                </>
+              ),
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
 
-function GenerateSection({
-  title,
-  icon,
-  buttonLabel,
+function GenControl({
+  label,
   variant,
   stream,
   onGenerate,
-  onDownload,
-  downloading,
-  onPrint,
-  canPrint,
 }: {
-  title: string;
-  icon: IconName;
-  buttonLabel: string;
+  label: string;
   variant: "primary" | "secondary";
   stream: ReturnType<typeof useDocumentStream>;
   onGenerate: () => Promise<void>;
-  onDownload: () => Promise<void>;
-  downloading: boolean;
-  onPrint: () => void;
-  canPrint: boolean;
 }) {
-  const { loading, streaming, result, error, quotaBlock, warning, cancel, retry } = stream;
+  const { loading, error, quotaBlock, warning, cancel, retry } = stream;
   return (
-    <Card title={title} icon={<Icon name={icon} className="text-[18px]" />}>
+    <div>
       <div className="flex items-center gap-3">
         <Button variant={variant} onClick={onGenerate} disabled={loading}>
           {loading ? (
@@ -536,7 +575,7 @@ function GenerateSection({
               <Icon name="spinner" className="animate-spin text-[15px]" /> Üretiliyor…
             </>
           ) : (
-            buttonLabel
+            label
           )}
         </Button>
         {loading && (
@@ -545,57 +584,21 @@ function GenerateSection({
           </Button>
         )}
       </div>
-
       {quotaBlock && (
-        <div className="mt-4">
+        <div className="mt-3">
           <QuotaBlock used={quotaBlock.used} quota={quotaBlock.quota} />
         </div>
       )}
-
       {error && (
-        <div className="mt-4">
+        <div className="mt-3">
           <GenerationError message={error} onRetry={retry} />
         </div>
       )}
-
       {warning && (
-        <div className="mt-4">
+        <div className="mt-3">
           <GenerationWarning warning={warning} />
         </div>
       )}
-
-      {loading && !result && (
-        <div className="mt-4">
-          <GenerationSkeleton />
-        </div>
-      )}
-
-      {result && (
-        <div className="mt-4">
-          <DocumentOutput
-            result={result}
-            streaming={streaming}
-            actions={
-              <>
-                <Button variant="secondary" onClick={onDownload} disabled={downloading}>
-                  {downloading ? (
-                    <>
-                      <Icon name="spinner" className="animate-spin text-[15px]" /> İndiriliyor…
-                    </>
-                  ) : (
-                    <>
-                      <Icon name="file" className="text-[15px]" /> .docx indir
-                    </>
-                  )}
-                </Button>
-                <Button variant="secondary" onClick={onPrint} disabled={!canPrint}>
-                  <Icon name="file" className="text-[15px]" /> PDF / Yazdır
-                </Button>
-              </>
-            }
-          />
-        </div>
-      )}
-    </Card>
+    </div>
   );
 }
