@@ -1,7 +1,8 @@
 "use client";
 
 import { memo, useCallback, useEffect, useState } from "react";
-import { Button, useConfirm } from "@/components/ui";
+import { createPortal } from "react-dom";
+import { Button, Field, Input, useConfirm } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
 import { ComboCell } from "@/components/app/inventory-grid-cell";
 import { EksikleriDoldurPanel } from "@/components/app/eksikleri-doldur-panel";
@@ -52,7 +53,7 @@ const LIST_COLUMNS: { key: ListKey; label: string; width: number; groundingKey?:
   { key: "toplama", label: "Toplama", width: 190 },
 ];
 
-const ACTION_WIDTH = 40;
+const ACTION_WIDTH = 64;
 // Sabit (frozen) sol kolonlar: aksiyon + 4 kimlik kolonu. Her birinin sticky left ofseti
 // kendinden önceki tüm frozen kolonların toplam genişliği.
 const FROZEN_WIDTHS = [ACTION_WIDTH, ...IDENTITY_COLUMNS.map((c) => c.width)];
@@ -148,6 +149,7 @@ const GridRow = memo(function GridRow({
   onPatchIdentity,
   onPatchList,
   onRemove,
+  onOpen,
 }: {
   row: EditableRow;
   idx: number;
@@ -155,20 +157,32 @@ const GridRow = memo(function GridRow({
   onPatchIdentity: (id: string, key: IdentityKey, v: string) => void;
   onPatchList: (id: string, key: ListKey, v: string[]) => void;
   onRemove: (id: string) => void;
+  onOpen: (id: string) => void;
 }) {
   const zebra = idx % 2 === 1;
 
   return (
     <>
       <div className={bodyCellClass(true, zebra, false)} style={{ left: FROZEN_OFFSETS[0] }}>
-        <button
-          type="button"
-          onClick={() => onRemove(row._id)}
-          aria-label={`Kayıt ${idx + 1} satırını sil`}
-          className="mx-auto flex h-7 w-7 flex-shrink-0 items-center justify-center text-[15px] text-ink-subtle transition-colors hover:text-warning"
-        >
-          ×
-        </button>
+        <div className="mx-auto flex items-center gap-0.5">
+          <button
+            type="button"
+            onClick={() => onOpen(row._id)}
+            aria-label={`Kayıt ${idx + 1} — detaylı düzenle`}
+            title="Detaylı düzenle"
+            className="flex h-7 w-7 flex-shrink-0 items-center justify-center text-[14px] text-ink-subtle transition-colors hover:text-accent-strong"
+          >
+            ⤢
+          </button>
+          <button
+            type="button"
+            onClick={() => onRemove(row._id)}
+            aria-label={`Kayıt ${idx + 1} satırını sil`}
+            className="flex h-7 w-7 flex-shrink-0 items-center justify-center text-[15px] text-ink-subtle transition-colors hover:text-warning"
+          >
+            ×
+          </button>
+        </div>
       </div>
 
       {IDENTITY_COLUMNS.map((col, i) => {
@@ -206,6 +220,119 @@ const GridRow = memo(function GridRow({
   );
 });
 
+/*
+  Satır-detay drawer'ı — geniş grid'de yatay kaymadan tek bir sürecin 17 alanını
+  odaklı düzenlemek için sağdan açılan panel. Kendi kalıcılığı YOKTUR: aynı `rows`
+  state'ini patchIdentity/patchList ile mutasyona uğratır; "Envanteri kaydet" tek PUT
+  drawer düzenlemelerini de kapsar. confirm-dialog'un portal + overlay + Escape +
+  scroll-lock desenini izler.
+*/
+function InventoryRowDrawer({
+  row,
+  groundingOptions,
+  onPatchIdentity,
+  onPatchList,
+  onRemove,
+  onClose,
+}: {
+  row: EditableRow;
+  groundingOptions: GroundingOptions;
+  onPatchIdentity: (id: string, key: IdentityKey, v: string) => void;
+  onPatchList: (id: string, key: ListKey, v: string[]) => void;
+  onRemove: (id: string) => void;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
+
+  const baslik =
+    [row.departman, row.is_sureci, row.alt_surec].filter(Boolean).join(" / ") || "Yeni kayıt";
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[200] flex justify-end bg-[#0c192c]/45 animate-toast-in"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Envanter kaydı detayı"
+        className="flex h-full w-full max-w-md flex-col border-l border-border bg-surface shadow-[var(--shadow-card-lift)]"
+      >
+        <header className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
+          <div className="min-w-0">
+            <p className="eyebrow text-accent-strong">Kayıt detayı</p>
+            <h2 className="mt-1 truncate font-display text-[16px] text-ink">{baslik}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Kapat"
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center text-[18px] text-ink-subtle transition-colors hover:text-ink"
+          >
+            ×
+          </button>
+        </header>
+
+        <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+          {IDENTITY_COLUMNS.map((col) => (
+            <Field key={col.key} label={col.label} required={col.required}>
+              <Input
+                value={row[col.key]}
+                onChange={(e) => onPatchIdentity(row._id, col.key, e.target.value)}
+              />
+            </Field>
+          ))}
+          {LIST_COLUMNS.map((col) => (
+            <div key={col.key}>
+              <p className="mb-1.5 text-[12.5px] font-medium text-ink-muted">{col.label}</p>
+              <ComboCell
+                value={row[col.key]}
+                onChange={(v) => onPatchList(row._id, col.key, v)}
+                mode={col.groundingKey ? "options" : "free"}
+                options={col.groundingKey ? groundingOptions[col.groundingKey] : undefined}
+                isSensitive={
+                  col.groundingKey ? (o) => groundingOptions.ozelNitelikli.includes(o) : undefined
+                }
+                ariaLabel={col.label}
+              />
+            </div>
+          ))}
+        </div>
+
+        <footer className="flex items-center justify-between gap-3 border-t border-border px-5 py-4">
+          <button
+            type="button"
+            onClick={() => onRemove(row._id)}
+            className="text-[12.5px] text-danger transition-colors hover:underline"
+          >
+            Kaydı sil
+          </button>
+          <Button type="button" size="sm" variant="secondary" onClick={onClose}>
+            Kapat
+          </Button>
+        </footer>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 export function InventoryEditor({
   clientId,
   onSwitchToWizard,
@@ -225,6 +352,7 @@ export function InventoryEditor({
   });
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!dirty) return;
@@ -311,6 +439,8 @@ export function InventoryEditor({
       .finally(() => setSaving(false));
   }
 
+  const selectedRow = rows?.find((r) => r._id === selectedRowId) ?? null;
+
   return (
     <div className="mt-4">
       <div>
@@ -378,6 +508,7 @@ export function InventoryEditor({
                   onPatchIdentity={patchIdentity}
                   onPatchList={patchList}
                   onRemove={removeRow}
+                  onOpen={setSelectedRowId}
                 />
               ))}
             </div>
@@ -394,6 +525,16 @@ export function InventoryEditor({
           {saving ? "Kaydediliyor…" : "Envanteri kaydet"}
         </Button>
       </div>
+      {selectedRow && (
+        <InventoryRowDrawer
+          row={selectedRow}
+          groundingOptions={groundingOptions}
+          onPatchIdentity={patchIdentity}
+          onPatchList={patchList}
+          onRemove={removeRow}
+          onClose={() => setSelectedRowId(null)}
+        />
+      )}
       {dialog}
     </div>
   );
